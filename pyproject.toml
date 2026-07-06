@@ -236,6 +236,7 @@ pages = [
 use-autoapi = false
 exclude-patterns = [
     "RECURRENCE_SPEC.md",
+    "REVIEW.md",
     "target/**",
     "js/**",
     "rust/**",

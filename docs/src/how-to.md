@@ -163,6 +163,39 @@ Two edge cases are resolved automatically (see
 in a spring-forward gap moves to the first valid instant after the gap; a local
 time that occurs twice at an autumn fall-back uses the earlier instant.
 
+## Build a schedule from typed objects instead of JSON
+
+Use the `dateme.model` builders for a typed, autocomplete-friendly spec that is
+validated as you build it. Pass the result straight to `Schedule`:
+
+```python
+from dateme import Schedule, model as m
+from dateme import Weekly, Overlay, Makeup, CalendarId, OverlayRule, Weekday
+
+spec = m.Schedule(
+    freq=Weekly([Weekday.MON], "17:30"),
+    timezone="America/New_York",
+    overlays=[Overlay(CalendarId.NYSE_HOLIDAY, OverlayRule.EXCLUDE)],
+    makeup=Makeup.AFTER,
+)
+schedule = Schedule(spec)             # or Schedule(spec.to_dict())
+```
+
+In JavaScript/TypeScript the spec object is typed by `ScheduleSpec`, with runtime
+enums for the string values:
+
+```ts
+import init, { Schedule, Weekday, CalendarId, OverlayRule, Makeup } from "dateme";
+
+await init();
+const schedule = new Schedule({
+  freq: { type: "weekly", days: [Weekday.Mon], time: "17:30" },
+  timezone: "America/New_York",
+  overlays: [{ calendar: CalendarId.NyseHoliday, rule: OverlayRule.Exclude }],
+  makeup: Makeup.After,
+});
+```
+
 ## Store and reload a schedule
 
 `to_json` round-trips the schedule, so you can persist it (for example in a JSONB
@@ -172,3 +205,7 @@ column) and rebuild it later:
 blob = schedule.to_json()             # store this string
 again = Schedule.from_json(blob)      # rebuild identically
 ```
+
+The same schedule is also available as a dict via `to_dict()` /
+`Schedule.from_dict(...)` (Python) or `toObject()` / `new Schedule(obj)`
+(JavaScript).
