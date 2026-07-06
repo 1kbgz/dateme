@@ -20,6 +20,12 @@ await it before constructing any `Schedule`.
 
 ## Constructing a schedule
 
+The constructor accepts either a native spec object or a JSON string; an object
+is serialized for you. It validates the schedule and throws on malformed input,
+an unknown timezone/enum value, or a structurally invalid schedule — so a
+`Schedule` you hold is always well-formed. `validate()` re-runs the check on
+demand.
+
 ```js
 const schedule = new Schedule({
   freq: { type: "weekly", days: ["mon"], time: "17:30" },
@@ -29,9 +35,27 @@ const schedule = new Schedule({
 });
 ```
 
-The constructor accepts either a JSON string or an object; an object is
-`JSON.stringify`ed for you. It throws on malformed input or an unknown
-timezone/enum value.
+## Typed model
+
+The package exports TypeScript types mirroring the [Schedule model](schedule-model.md)
+— `ScheduleSpec`, `Frequency`, `MonthDay`, `NthWeekday`, `Overlay` — so the spec
+object is checked at compile time. It also exports runtime enum objects
+(`Weekday`, `Nth`, `Makeup`, `OverlayRule`, `CalendarId`) for plain JavaScript:
+
+```ts
+import init, { Schedule, Weekday, CalendarId, OverlayRule, Makeup } from "dateme";
+import type { ScheduleSpec } from "dateme";
+
+const spec: ScheduleSpec = {
+  freq: { type: "weekly", days: [Weekday.Mon], time: "17:30" },
+  timezone: "America/New_York",
+  overlays: [{ calendar: CalendarId.NyseHoliday, rule: OverlayRule.Exclude }],
+  makeup: Makeup.After,
+};
+
+await init();
+const schedule = new Schedule(spec);
+```
 
 ## Methods
 
@@ -43,7 +67,8 @@ timezone/enum value.
 | `since(after, before = new Date())` | `Date[]`                 | descending |
 | `upcoming(n, after = new Date())`   | `Date[]`                 | ascending  |
 | `validate()`                        | `void` (throws on error) | —          |
-| `toJSON()`                          | `unknown` (plain object) | —          |
+| `toObject()`                        | `ScheduleSpec`           | —          |
+| `toJSON()`                          | `ScheduleSpec`           | —          |
 
 - Every optional reference instant defaults to `new Date()`.
 - `until(end)[0]` equals `next()`; `since(start)[0]` equals `previous()`.

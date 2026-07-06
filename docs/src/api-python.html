@@ -243,13 +243,39 @@
         <article role="main" id="furo-main-content">
           <section class="tex2jax_ignore mathjax_ignore" id="python-api">
 <h1>Python API<a class="headerlink" href="#python-api" title="Link to this heading">¶</a></h1>
-<p>The Python package exposes a single class, <code class="docutils literal notranslate"><span class="pre">dateme.Schedule</span></code>. Build it from the
-JSON <a class="reference internal" href="schedule-model.html"><span class="std std-doc">Schedule model</span></a>; every method takes and returns
-timezone-aware <code class="docutils literal notranslate"><span class="pre">datetime</span></code> objects (UTC). Where a reference instant is optional it
-defaults to the current time.</p>
+<p>The Python package exposes the <code class="docutils literal notranslate"><span class="pre">dateme.Schedule</span></code> engine plus a typed
+<a class="reference internal" href="#typed-model"><code class="docutils literal notranslate"><span class="pre">dateme.model</span></code></a> builder layer. Every query method takes and
+returns timezone-aware <code class="docutils literal notranslate"><span class="pre">datetime</span></code> objects (UTC); where a reference instant is
+optional it defaults to the current time.</p>
+<section id="constructing-a-schedule">
+<h2>Constructing a schedule<a class="headerlink" href="#constructing-a-schedule" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Schedule(spec)</span></code> accepts any of three forms, so you can construct from a native
+object as well as JSON:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span><span class="p">,</span> <span class="n">model</span> <span class="k">as</span> <span class="n">m</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Weekly</span><span class="p">,</span> <span class="n">Overlay</span><span class="p">,</span> <span class="n">Makeup</span><span class="p">,</span> <span class="n">CalendarId</span><span class="p">,</span> <span class="n">OverlayRule</span><span class="p">,</span> <span class="n">Weekday</span>
+
+<span class="c1"># 1. Typed builder (validated as you build it)</span>
+<span class="n">spec</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">Schedule</span><span class="p">(</span>
+    <span class="n">freq</span><span class="o">=</span><span class="n">Weekly</span><span class="p">([</span><span class="n">Weekday</span><span class="o">.</span><span class="n">MON</span><span class="p">],</span> <span class="s2">&quot;17:30&quot;</span><span class="p">),</span>
+    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
+    <span class="n">overlays</span><span class="o">=</span><span class="p">[</span><span class="n">Overlay</span><span class="p">(</span><span class="n">CalendarId</span><span class="o">.</span><span class="n">NYSE_HOLIDAY</span><span class="p">,</span> <span class="n">OverlayRule</span><span class="o">.</span><span class="n">EXCLUDE</span><span class="p">)],</span>
+    <span class="n">makeup</span><span class="o">=</span><span class="n">Makeup</span><span class="o">.</span><span class="n">AFTER</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+
+<span class="c1"># 2. A plain dict</span>
+<span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+
+<span class="c1"># 3. A JSON string</span>
+<span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Any object with a <code class="docutils literal notranslate"><span class="pre">to_dict()</span></code> method is accepted, which is what makes the typed
+builders work directly. <code class="docutils literal notranslate"><span class="pre">Schedule.from_json(str)</span></code> and <code class="docutils literal notranslate"><span class="pre">Schedule.from_dict(obj)</span></code>
+are explicit alternatives to the constructor.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="dateme.Schedule">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.</span></span><span class="sig-name descname"><span class="pre">Schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dateme.Schedule" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.</span></span><span class="sig-name descname"><span class="pre">Schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dateme.Schedule" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A recurrence schedule built from its JSON representation.</p>
 <p>A schedule is a frequency in an IANA timezone, plus optional calendar
@@ -257,9 +283,15 @@ overlays, a makeup strategy, and start/end bounds. Its methods compute the
 instants the schedule fires. Reference instants are timezone-aware
 <code class="docutils literal notranslate"><span class="pre">datetime</span></code> objects; when omitted they default to the current time (UTC).</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="dateme.Schedule.from_dict">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dateme.Schedule.from_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Build a schedule from a <code class="docutils literal notranslate"><span class="pre">dict</span></code> or typed <code class="docutils literal notranslate"><span class="pre">dateme.model</span></code> builder.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="dateme.Schedule.from_json">
 <em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dateme.Schedule.from_json" title="Link to this definition">¶</a></dt>
-<dd><p>Build a schedule from its JSON representation (alias for the constructor).</p>
+<dd><p>Build a schedule from its JSON representation.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -281,9 +313,15 @@ instants the schedule fires. Reference instants are timezone-aware
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="dateme.Schedule.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dateme.Schedule.to_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Serialize back to a <code class="docutils literal notranslate"><span class="pre">dict</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="dateme.Schedule.to_json">
 <span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dateme.Schedule.to_json" title="Link to this definition">¶</a></dt>
-<dd><p>Serialize back to JSON.</p>
+<dd><p>Serialize back to a JSON string.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -306,6 +344,7 @@ instants the schedule fires. Reference instants are timezone-aware
 
 </dd></dl>
 
+</section>
 <section id="datetime-handling">
 <h2>Datetime handling<a class="headerlink" href="#datetime-handling" title="Link to this heading">¶</a></h2>
 <ul class="simple">
@@ -318,9 +357,12 @@ and the near bound of <code class="docutils literal notranslate"><span class="pr
 </section>
 <section id="errors">
 <h2>Errors<a class="headerlink" href="#errors" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">from_json</span></code> raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> for malformed JSON or an unknown timezone/enum
-value. <code class="docutils literal notranslate"><span class="pre">validate</span></code> raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> for a structurally invalid schedule (see
-<a class="reference internal" href="schedule-model.html#validation"><span class="std std-ref">Validation</span></a>).</p>
+<p>The constructor validates the schedule and raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> for malformed
+JSON/dict input, an unknown timezone/enum value, or a structurally invalid
+schedule (see <a class="reference internal" href="schedule-model.html#validation"><span class="std std-ref">Validation</span></a>) — so a <code class="docutils literal notranslate"><span class="pre">Schedule</span></code> you hold is always
+well-formed. <code class="docutils literal notranslate"><span class="pre">validate()</span></code> re-runs the same check on demand. The typed builders
+additionally raise <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> at build time for out-of-range values (see
+below).</p>
 </section>
 <section id="method-summary">
 <h2>Method summary<a class="headerlink" href="#method-summary" title="Link to this heading">¶</a></h2>
@@ -361,7 +403,15 @@ value. <code class="docutils literal notranslate"><span class="pre">validate</sp
 <td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
 <td><p>—</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">from_json(json)</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">to_dict()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">dict</span></code></p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">from_json(json)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Schedule</span></code> (static)</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">from_dict(obj)</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Schedule</span></code> (static)</p></td>
 <td><p>—</p></td>
 </tr>
@@ -370,6 +420,130 @@ value. <code class="docutils literal notranslate"><span class="pre">validate</sp
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">until(end)[0]</span></code> equals <code class="docutils literal notranslate"><span class="pre">next()</span></code>; <code class="docutils literal notranslate"><span class="pre">since(start)[0]</span></code> equals <code class="docutils literal notranslate"><span class="pre">previous()</span></code>. All
 results are strictly between the two bounds and deduplicated by instant.</p>
+</section>
+<section id="typed-model">
+<span id="id1"></span><h2>Typed model<a class="headerlink" href="#typed-model" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">dateme.model</span></code> mirrors the <a class="reference internal" href="schedule-model.html"><span class="std std-doc">Schedule model</span></a> as dataclasses and
+enums. Build a structure from them and pass it to <code class="docutils literal notranslate"><span class="pre">Schedule</span></code> (or call <code class="docutils literal notranslate"><span class="pre">to_dict()</span></code>
+/ <code class="docutils literal notranslate"><span class="pre">to_json()</span></code>). Construction performs light validation — an out-of-range minute,
+an empty weekday list, or a month day outside 1–31 raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>
+immediately. The enums (<code class="docutils literal notranslate"><span class="pre">Makeup</span></code>, <code class="docutils literal notranslate"><span class="pre">OverlayRule</span></code>, <code class="docutils literal notranslate"><span class="pre">CalendarId</span></code>, <code class="docutils literal notranslate"><span class="pre">Nth</span></code>, <code class="docutils literal notranslate"><span class="pre">Weekday</span></code>)
+and the frequency/<code class="docutils literal notranslate"><span class="pre">MonthDay</span></code>/<code class="docutils literal notranslate"><span class="pre">NthWeekday</span></code>/<code class="docutils literal notranslate"><span class="pre">Overlay</span></code> builders are re-exported at
+the package top level for convenience.</p>
+<p id="module-dateme.model">Typed builders for the dateme schedule model.</p>
+<p>These dataclasses and enums mirror the JSON schedule model. Build a structure
+from them and pass it to <a class="reference internal" href="#dateme.Schedule" title="dateme.Schedule"><code class="xref py py-class docutils literal notranslate"><span class="pre">dateme.Schedule</span></code></a> (or call <code class="docutils literal notranslate"><span class="pre">to_dict()</span></code> /
+<code class="docutils literal notranslate"><span class="pre">to_json()</span></code>). Construction performs light validation; the authoritative
+structural check remains <a class="reference internal" href="#dateme.Schedule.validate" title="dateme.Schedule.validate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dateme.Schedule.validate()</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="dateme.model.Weekday">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.model.</span></span><span class="sig-name descname"><span class="pre">Weekday</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/dateme/model.html#Weekday"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dateme.model.Weekday" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dateme.model.Nth">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.model.</span></span><span class="sig-name descname"><span class="pre">Nth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/dateme/model.html#Nth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dateme.model.Nth" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dateme.model.Makeup">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.model.</span></span><span class="sig-name descname"><span class="pre">Makeup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/dateme/model.html#Makeup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dateme.model.Makeup" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dateme.model.OverlayRule">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.model.</span></span><span class="sig-name descname"><span class="pre">OverlayRule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/dateme/model.html#OverlayRule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dateme.model.OverlayRule" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dateme.model.CalendarId">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.model.</span></span><span class="sig-name descname"><span class="pre">CalendarId</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/dateme/model.html#CalendarId"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dateme.model.CalendarId" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dateme.model.MonthDay">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.model.</span></span><span class="sig-name descname"><span class="pre">MonthDay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/dateme/model.html#MonthDay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dateme.model.MonthDay" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A day within a month: a fixed <code class="docutils literal notranslate"><span class="pre">value</span></code> (1-31), or the last day when <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dateme.model.NthWeekday">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.model.</span></span><span class="sig-name descname"><span class="pre">NthWeekday</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#dateme.model.Nth" title="dateme.model.Nth"><span class="pre">Nth</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">weekday</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#dateme.model.Weekday" title="dateme.model.Weekday"><span class="pre">Weekday</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/dateme/model.html#NthWeekday"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dateme.model.NthWeekday" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>An ordinal weekday within a month, e.g. the third Tuesday.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dateme.model.Overlay">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.model.</span></span><span class="sig-name descname"><span class="pre">Overlay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calendar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#dateme.model.CalendarId" title="dateme.model.CalendarId"><span class="pre">CalendarId</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#dateme.model.OverlayRule" title="dateme.model.OverlayRule"><span class="pre">OverlayRule</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/dateme/model.html#Overlay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dateme.model.Overlay" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A calendar filter applied to occurrences.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dateme.model.Frequency">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.model.</span></span><span class="sig-name descname"><span class="pre">Frequency</span></span><a class="reference internal" href="../../_modules/dateme/model.html#Frequency"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dateme.model.Frequency" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class for the recurrence frequencies.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dateme.model.Hourly">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.model.</span></span><span class="sig-name descname"><span class="pre">Hourly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minute</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/dateme/model.html#Hourly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dateme.model.Hourly" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dateme.model.Frequency" title="dateme.model.Frequency"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frequency</span></code></a></p>
+<p>Every hour, at <code class="docutils literal notranslate"><span class="pre">minute</span></code> past the hour.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dateme.model.Daily">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.model.</span></span><span class="sig-name descname"><span class="pre">Daily</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/dateme/model.html#Daily"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dateme.model.Daily" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dateme.model.Frequency" title="dateme.model.Frequency"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frequency</span></code></a></p>
+<p>Every day at <code class="docutils literal notranslate"><span class="pre">time</span></code>.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dateme.model.Weekly">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.model.</span></span><span class="sig-name descname"><span class="pre">Weekly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#dateme.model.Weekday" title="dateme.model.Weekday"><span class="pre">Weekday</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/dateme/model.html#Weekly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dateme.model.Weekly" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dateme.model.Frequency" title="dateme.model.Frequency"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frequency</span></code></a></p>
+<p>Every selected weekday at <code class="docutils literal notranslate"><span class="pre">time</span></code>.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dateme.model.MonthlyByDay">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.model.</span></span><span class="sig-name descname"><span class="pre">MonthlyByDay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#dateme.model.MonthDay" title="dateme.model.MonthDay"><span class="pre">MonthDay</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/dateme/model.html#MonthlyByDay"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dateme.model.MonthlyByDay" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dateme.model.Frequency" title="dateme.model.Frequency"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frequency</span></code></a></p>
+<p>Selected days-of-month at <code class="docutils literal notranslate"><span class="pre">time</span></code>.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dateme.model.MonthlyByWeekday">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.model.</span></span><span class="sig-name descname"><span class="pre">MonthlyByWeekday</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weekdays</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#dateme.model.NthWeekday" title="dateme.model.NthWeekday"><span class="pre">NthWeekday</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/dateme/model.html#MonthlyByWeekday"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dateme.model.MonthlyByWeekday" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dateme.model.Frequency" title="dateme.model.Frequency"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frequency</span></code></a></p>
+<p>Selected nth-weekdays at <code class="docutils literal notranslate"><span class="pre">time</span></code>.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dateme.model.Yearly">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.model.</span></span><span class="sig-name descname"><span class="pre">Yearly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">month</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">day</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#dateme.model.MonthDay" title="dateme.model.MonthDay"><span class="pre">MonthDay</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/dateme/model.html#Yearly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dateme.model.Yearly" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dateme.model.Frequency" title="dateme.model.Frequency"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frequency</span></code></a></p>
+<p>Once a year in <code class="docutils literal notranslate"><span class="pre">month</span></code> on <code class="docutils literal notranslate"><span class="pre">day</span></code> at <code class="docutils literal notranslate"><span class="pre">time</span></code>.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="dateme.model.Schedule">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.model.</span></span><span class="sig-name descname"><span class="pre">Schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq:</span> <span class="pre">~dateme.model.Frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timezone:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlays:</span> <span class="pre">list[~dateme.model.Overlay]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">makeup:</span> <span class="pre">~dateme.model.Makeup</span> <span class="pre">=</span> <span class="pre">Makeup.NONE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~datetime.datetime</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~datetime.datetime</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/dateme/model.html#Schedule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dateme.model.Schedule" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A complete schedule spec.</p>
+<p>Pass an instance to <a class="reference internal" href="#dateme.Schedule" title="dateme.Schedule"><code class="xref py py-class docutils literal notranslate"><span class="pre">dateme.Schedule</span></code></a> to compute occurrences, or call
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code> / <code class="xref py py-meth docutils literal notranslate"><span class="pre">to_json()</span></code> for the storable form.</p>
+</dd></dl>
+
 </section>
 </section>
 
@@ -429,20 +603,44 @@ results are strictly between the two bounds and deduplicated by instant.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Python API</a><ul>
+<li><a class="reference internal" href="#constructing-a-schedule">Constructing a schedule</a><ul>
 <li><a class="reference internal" href="#dateme.Schedule"><code class="docutils literal notranslate"><span class="pre">Schedule</span></code></a><ul>
+<li><a class="reference internal" href="#dateme.Schedule.from_dict"><code class="docutils literal notranslate"><span class="pre">Schedule.from_dict()</span></code></a></li>
 <li><a class="reference internal" href="#dateme.Schedule.from_json"><code class="docutils literal notranslate"><span class="pre">Schedule.from_json()</span></code></a></li>
 <li><a class="reference internal" href="#dateme.Schedule.next"><code class="docutils literal notranslate"><span class="pre">Schedule.next()</span></code></a></li>
 <li><a class="reference internal" href="#dateme.Schedule.previous"><code class="docutils literal notranslate"><span class="pre">Schedule.previous()</span></code></a></li>
 <li><a class="reference internal" href="#dateme.Schedule.since"><code class="docutils literal notranslate"><span class="pre">Schedule.since()</span></code></a></li>
+<li><a class="reference internal" href="#dateme.Schedule.to_dict"><code class="docutils literal notranslate"><span class="pre">Schedule.to_dict()</span></code></a></li>
 <li><a class="reference internal" href="#dateme.Schedule.to_json"><code class="docutils literal notranslate"><span class="pre">Schedule.to_json()</span></code></a></li>
 <li><a class="reference internal" href="#dateme.Schedule.until"><code class="docutils literal notranslate"><span class="pre">Schedule.until()</span></code></a></li>
 <li><a class="reference internal" href="#dateme.Schedule.upcoming"><code class="docutils literal notranslate"><span class="pre">Schedule.upcoming()</span></code></a></li>
 <li><a class="reference internal" href="#dateme.Schedule.validate"><code class="docutils literal notranslate"><span class="pre">Schedule.validate()</span></code></a></li>
 </ul>
 </li>
+</ul>
+</li>
 <li><a class="reference internal" href="#datetime-handling">Datetime handling</a></li>
 <li><a class="reference internal" href="#errors">Errors</a></li>
 <li><a class="reference internal" href="#method-summary">Method summary</a></li>
+<li><a class="reference internal" href="#typed-model">Typed model</a><ul>
+<li><a class="reference internal" href="#dateme.model.Weekday"><code class="docutils literal notranslate"><span class="pre">Weekday</span></code></a></li>
+<li><a class="reference internal" href="#dateme.model.Nth"><code class="docutils literal notranslate"><span class="pre">Nth</span></code></a></li>
+<li><a class="reference internal" href="#dateme.model.Makeup"><code class="docutils literal notranslate"><span class="pre">Makeup</span></code></a></li>
+<li><a class="reference internal" href="#dateme.model.OverlayRule"><code class="docutils literal notranslate"><span class="pre">OverlayRule</span></code></a></li>
+<li><a class="reference internal" href="#dateme.model.CalendarId"><code class="docutils literal notranslate"><span class="pre">CalendarId</span></code></a></li>
+<li><a class="reference internal" href="#dateme.model.MonthDay"><code class="docutils literal notranslate"><span class="pre">MonthDay</span></code></a></li>
+<li><a class="reference internal" href="#dateme.model.NthWeekday"><code class="docutils literal notranslate"><span class="pre">NthWeekday</span></code></a></li>
+<li><a class="reference internal" href="#dateme.model.Overlay"><code class="docutils literal notranslate"><span class="pre">Overlay</span></code></a></li>
+<li><a class="reference internal" href="#dateme.model.Frequency"><code class="docutils literal notranslate"><span class="pre">Frequency</span></code></a></li>
+<li><a class="reference internal" href="#dateme.model.Hourly"><code class="docutils literal notranslate"><span class="pre">Hourly</span></code></a></li>
+<li><a class="reference internal" href="#dateme.model.Daily"><code class="docutils literal notranslate"><span class="pre">Daily</span></code></a></li>
+<li><a class="reference internal" href="#dateme.model.Weekly"><code class="docutils literal notranslate"><span class="pre">Weekly</span></code></a></li>
+<li><a class="reference internal" href="#dateme.model.MonthlyByDay"><code class="docutils literal notranslate"><span class="pre">MonthlyByDay</span></code></a></li>
+<li><a class="reference internal" href="#dateme.model.MonthlyByWeekday"><code class="docutils literal notranslate"><span class="pre">MonthlyByWeekday</span></code></a></li>
+<li><a class="reference internal" href="#dateme.model.Yearly"><code class="docutils literal notranslate"><span class="pre">Yearly</span></code></a></li>
+<li><a class="reference internal" href="#dateme.model.Schedule"><code class="docutils literal notranslate"><span class="pre">Schedule</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

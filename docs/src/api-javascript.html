@@ -260,6 +260,11 @@ await it before constructing any <code class="docutils literal notranslate"><spa
 </section>
 <section id="constructing-a-schedule">
 <h2>Constructing a schedule<a class="headerlink" href="#constructing-a-schedule" title="Link to this heading">¶</a></h2>
+<p>The constructor accepts either a native spec object or a JSON string; an object
+is serialized for you. It validates the schedule and throws on malformed input,
+an unknown timezone/enum value, or a structurally invalid schedule — so a
+<code class="docutils literal notranslate"><span class="pre">Schedule</span></code> you hold is always well-formed. <code class="docutils literal notranslate"><span class="pre">validate()</span></code> re-runs the check on
+demand.</p>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">schedule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">({</span>
 <span class="w">  </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;weekly&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">days</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">],</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;17:30&quot;</span><span class="w"> </span><span class="p">},</span>
 <span class="w">  </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
@@ -268,9 +273,27 @@ await it before constructing any <code class="docutils literal notranslate"><spa
 <span class="p">});</span>
 </pre></div>
 </div>
-<p>The constructor accepts either a JSON string or an object; an object is
-<code class="docutils literal notranslate"><span class="pre">JSON.stringify</span></code>ed for you. It throws on malformed input or an unknown
-timezone/enum value.</p>
+</section>
+<section id="typed-model">
+<h2>Typed model<a class="headerlink" href="#typed-model" title="Link to this heading">¶</a></h2>
+<p>The package exports TypeScript types mirroring the <a class="reference internal" href="schedule-model.html"><span class="std std-doc">Schedule model</span></a>
+— <code class="docutils literal notranslate"><span class="pre">ScheduleSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">Frequency</span></code>, <code class="docutils literal notranslate"><span class="pre">MonthDay</span></code>, <code class="docutils literal notranslate"><span class="pre">NthWeekday</span></code>, <code class="docutils literal notranslate"><span class="pre">Overlay</span></code> — so the spec
+object is checked at compile time. It also exports runtime enum objects
+(<code class="docutils literal notranslate"><span class="pre">Weekday</span></code>, <code class="docutils literal notranslate"><span class="pre">Nth</span></code>, <code class="docutils literal notranslate"><span class="pre">Makeup</span></code>, <code class="docutils literal notranslate"><span class="pre">OverlayRule</span></code>, <code class="docutils literal notranslate"><span class="pre">CalendarId</span></code>) for plain JavaScript:</p>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="nx">init</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">,</span><span class="w"> </span><span class="nx">Weekday</span><span class="p">,</span><span class="w"> </span><span class="nx">CalendarId</span><span class="p">,</span><span class="w"> </span><span class="nx">OverlayRule</span><span class="p">,</span><span class="w"> </span><span class="nx">Makeup</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;dateme&quot;</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ScheduleSpec</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;dateme&quot;</span><span class="p">;</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">spec</span><span class="o">:</span><span class="w"> </span><span class="kt">ScheduleSpec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;weekly&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">days</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">Weekday</span><span class="p">.</span><span class="nx">Mon</span><span class="p">],</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;17:30&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">overlays</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">calendar</span><span class="o">:</span><span class="w"> </span><span class="kt">CalendarId.NyseHoliday</span><span class="p">,</span><span class="w"> </span><span class="nx">rule</span><span class="o">:</span><span class="w"> </span><span class="kt">OverlayRule.Exclude</span><span class="w"> </span><span class="p">}],</span>
+<span class="w">  </span><span class="nx">makeup</span><span class="o">:</span><span class="w"> </span><span class="kt">Makeup.After</span><span class="p">,</span>
+<span class="p">};</span>
+
+<span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">();</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">schedule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">(</span><span class="nx">spec</span><span class="p">);</span>
+</pre></div>
+</div>
 </section>
 <section id="methods">
 <h2>Methods<a class="headerlink" href="#methods" title="Link to this heading">¶</a></h2>
@@ -307,8 +330,12 @@ timezone/enum value.</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">void</span></code> (throws on error)</p></td>
 <td><p>—</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">toJSON()</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">unknown</span></code> (plain object)</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">toObject()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ScheduleSpec</span></code></p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">toJSON()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ScheduleSpec</span></code></p></td>
 <td><p>—</p></td>
 </tr>
 </tbody>
@@ -411,6 +438,7 @@ overlays work in the browser without any additional data.</p></li>
 <li><a class="reference internal" href="#">JavaScript API</a><ul>
 <li><a class="reference internal" href="#initialization">Initialization</a></li>
 <li><a class="reference internal" href="#constructing-a-schedule">Constructing a schedule</a></li>
+<li><a class="reference internal" href="#typed-model">Typed model</a></li>
 <li><a class="reference internal" href="#methods">Methods</a></li>
 <li><a class="reference internal" href="#example">Example</a></li>
 <li><a class="reference internal" href="#notes">Notes</a></li>

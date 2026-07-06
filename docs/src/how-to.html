@@ -388,6 +388,36 @@ by an hour across the spring and autumn transitions — you do not manage that:<
 in a spring-forward gap moves to the first valid instant after the gap; a local
 time that occurs twice at an autumn fall-back uses the earlier instant.</p>
 </section>
+<section id="build-a-schedule-from-typed-objects-instead-of-json">
+<h2>Build a schedule from typed objects instead of JSON<a class="headerlink" href="#build-a-schedule-from-typed-objects-instead-of-json" title="Link to this heading">¶</a></h2>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">dateme.model</span></code> builders for a typed, autocomplete-friendly spec that is
+validated as you build it. Pass the result straight to <code class="docutils literal notranslate"><span class="pre">Schedule</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span><span class="p">,</span> <span class="n">model</span> <span class="k">as</span> <span class="n">m</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Weekly</span><span class="p">,</span> <span class="n">Overlay</span><span class="p">,</span> <span class="n">Makeup</span><span class="p">,</span> <span class="n">CalendarId</span><span class="p">,</span> <span class="n">OverlayRule</span><span class="p">,</span> <span class="n">Weekday</span>
+
+<span class="n">spec</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">Schedule</span><span class="p">(</span>
+    <span class="n">freq</span><span class="o">=</span><span class="n">Weekly</span><span class="p">([</span><span class="n">Weekday</span><span class="o">.</span><span class="n">MON</span><span class="p">],</span> <span class="s2">&quot;17:30&quot;</span><span class="p">),</span>
+    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
+    <span class="n">overlays</span><span class="o">=</span><span class="p">[</span><span class="n">Overlay</span><span class="p">(</span><span class="n">CalendarId</span><span class="o">.</span><span class="n">NYSE_HOLIDAY</span><span class="p">,</span> <span class="n">OverlayRule</span><span class="o">.</span><span class="n">EXCLUDE</span><span class="p">)],</span>
+    <span class="n">makeup</span><span class="o">=</span><span class="n">Makeup</span><span class="o">.</span><span class="n">AFTER</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>             <span class="c1"># or Schedule(spec.to_dict())</span>
+</pre></div>
+</div>
+<p>In JavaScript/TypeScript the spec object is typed by <code class="docutils literal notranslate"><span class="pre">ScheduleSpec</span></code>, with runtime
+enums for the string values:</p>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="nx">init</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">,</span><span class="w"> </span><span class="nx">Weekday</span><span class="p">,</span><span class="w"> </span><span class="nx">CalendarId</span><span class="p">,</span><span class="w"> </span><span class="nx">OverlayRule</span><span class="p">,</span><span class="w"> </span><span class="nx">Makeup</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;dateme&quot;</span><span class="p">;</span>
+
+<span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">();</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">schedule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;weekly&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">days</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">Weekday</span><span class="p">.</span><span class="nx">Mon</span><span class="p">],</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;17:30&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">overlays</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">calendar</span><span class="o">:</span><span class="w"> </span><span class="kt">CalendarId.NyseHoliday</span><span class="p">,</span><span class="w"> </span><span class="nx">rule</span><span class="o">:</span><span class="w"> </span><span class="kt">OverlayRule.Exclude</span><span class="w"> </span><span class="p">}],</span>
+<span class="w">  </span><span class="nx">makeup</span><span class="o">:</span><span class="w"> </span><span class="kt">Makeup.After</span><span class="p">,</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</section>
 <section id="store-and-reload-a-schedule">
 <h2>Store and reload a schedule<a class="headerlink" href="#store-and-reload-a-schedule" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">to_json</span></code> round-trips the schedule, so you can persist it (for example in a JSONB
@@ -396,6 +426,9 @@ column) and rebuild it later:</p>
 <span class="n">again</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span>      <span class="c1"># rebuild identically</span>
 </pre></div>
 </div>
+<p>The same schedule is also available as a dict via <code class="docutils literal notranslate"><span class="pre">to_dict()</span></code> /
+<code class="docutils literal notranslate"><span class="pre">Schedule.from_dict(...)</span></code> (Python) or <code class="docutils literal notranslate"><span class="pre">toObject()</span></code> / <code class="docutils literal notranslate"><span class="pre">new</span> <span class="pre">Schedule(obj)</span></code>
+(JavaScript).</p>
 </section>
 </section>
 
@@ -464,6 +497,7 @@ column) and rebuild it later:</p>
 <li><a class="reference internal" href="#project-the-next-n-cycles-for-a-ui">Project the next N cycles for a UI</a></li>
 <li><a class="reference internal" href="#show-recent-cycles-most-recent-first">Show recent cycles, most-recent first</a></li>
 <li><a class="reference internal" href="#handle-daylight-saving-time-safely">Handle daylight-saving time safely</a></li>
+<li><a class="reference internal" href="#build-a-schedule-from-typed-objects-instead-of-json">Build a schedule from typed objects instead of JSON</a></li>
 <li><a class="reference internal" href="#store-and-reload-a-schedule">Store and reload a schedule</a></li>
 </ul>
 </li>

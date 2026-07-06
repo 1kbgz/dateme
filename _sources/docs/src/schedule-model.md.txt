@@ -5,6 +5,11 @@ construction format accepted by every binding. All times are wall-clock in the
 schedule's `timezone` unless stated otherwise; seconds and nanoseconds are always
 zero.
 
+The same model is also available as typed builders — `dateme.model` dataclasses
+in [Python](api-python.md) and `ScheduleSpec` types in
+[JavaScript/TypeScript](api-javascript.md) — so you can construct a schedule from
+native objects instead of hand-writing JSON.
+
 ## Schedule object
 
 | Field      | Type                          | Required | Default  | Description                                                       |

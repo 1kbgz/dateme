@@ -63,10 +63,24 @@ Every binding exposes the same five queries over a `Schedule`:
 from datetime import datetime, timezone
 from dateme import Schedule
 
-s = Schedule.from_json(spec_json)   # or Schedule(spec_json)
+s = Schedule(spec_json)             # JSON string, dict, or a typed model object
 s.validate()
 s.next(datetime(2026, 1, 13, tzinfo=timezone.utc))   # -> aware datetime | None
 s.upcoming(3)                                        # defaults to now
+```
+
+Or build the schedule from typed objects instead of JSON:
+
+```python
+from dateme import Schedule, model as m
+from dateme import Weekly, Overlay, Makeup, CalendarId, OverlayRule, Weekday
+
+s = Schedule(m.Schedule(
+    freq=Weekly([Weekday.MON], "17:30"),
+    timezone="America/New_York",
+    overlays=[Overlay(CalendarId.NYSE_HOLIDAY, OverlayRule.EXCLUDE)],
+    makeup=Makeup.AFTER,
+))
 ```
 
 ### JavaScript
