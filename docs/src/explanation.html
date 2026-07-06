@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="prev" title="JavaScript API" href="api-javascript.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>test_all - dateme v0.1.0</title>
+        <title>How the engine works - dateme v0.1.0</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -196,7 +196,15 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to.html">How-to guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schedule-model.html">Schedule model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-python.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-javascript.html">JavaScript API</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">How the engine works</a></li>
+</ul>
+
 </div>
 </div>
 
@@ -215,7 +223,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../../_sources/autoapi/test_all/index.rst.txt" title="View this page">
+  <a class="muted-link" href="../../_sources/docs/src/explanation.md.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -233,27 +241,131 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="module-test_all">
-<span id="test-all"></span><h1>test_all<a class="headerlink" href="#module-test_all" title="Link to this heading">¶</a></h1>
-<section id="functions">
-<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
-<div class="table-wrapper autosummary longtable docutils container">
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#test_all.test_all" title="test_all.test_all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">test_all</span></code></a>()</p></td>
-<td><p></p></td>
-</tr>
-</tbody>
-</table>
-</div>
+          <section class="tex2jax_ignore mathjax_ignore" id="how-the-engine-works">
+<h1>How the engine works<a class="headerlink" href="#how-the-engine-works" title="Link to this heading">¶</a></h1>
+<p>This page explains how <code class="docutils literal notranslate"><span class="pre">dateme</span></code> turns a schedule into concrete instants, and why
+it is built the way it is. It is background reading — you do not need any of it to
+use the library, but it clarifies the corner cases and the guarantees the API
+makes.</p>
+<section id="occurrences-and-the-series-model">
+<h2>Occurrences and the series model<a class="headerlink" href="#occurrences-and-the-series-model" title="Link to this heading">¶</a></h2>
+<p>A schedule does not store a list of dates. It is a <em>rule</em>, and an <strong>occurrence</strong>
+is one instant that rule produces — the wall-clock moment the recurring event
+fires. A recurring event is therefore an open-ended series of occurrences, most
+of which do not “exist” anywhere until you ask for them.</p>
+<p>Every query is a question about that series relative to a reference instant:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">next</span></code> / <code class="docutils literal notranslate"><span class="pre">previous</span></code> — the single occurrence immediately after / before it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">until</span></code> / <code class="docutils literal notranslate"><span class="pre">since</span></code> — the whole series in a window, ascending / descending.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">upcoming</span></code> — a fixed count going forward.</p></li>
+</ul>
+<p>All queries are <strong>strict</strong>: an occurrence exactly at a bound is excluded. This is
+what makes the series composable — <code class="docutils literal notranslate"><span class="pre">next(t)</span></code> never returns <code class="docutils literal notranslate"><span class="pre">t</span></code> itself, so
+repeatedly calling <code class="docutils literal notranslate"><span class="pre">next</span></code> walks the series without repeating. It is also why
+<code class="docutils literal notranslate"><span class="pre">until(end)[0]</span></code> is exactly <code class="docutils literal notranslate"><span class="pre">next()</span></code> and <code class="docutils literal notranslate"><span class="pre">since(start)[0]</span></code> is exactly <code class="docutils literal notranslate"><span class="pre">previous()</span></code>:
+the count-free series and the single-step queries are the same computation viewed
+at different resolutions.</p>
 </section>
-<section id="module-contents">
-<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
-<dl class="py function">
-<dt class="sig sig-object py" id="test_all.test_all">
-<span class="sig-prename descclassname"><span class="pre">test_all.</span></span><span class="sig-name descname"><span class="pre">test_all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#test_all.test_all" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<section id="generation-then-transformation">
+<h2>Generation, then transformation<a class="headerlink" href="#generation-then-transformation" title="Link to this heading">¶</a></h2>
+<p>Occurrences are produced in two stages. First the <strong>base occurrences</strong> come
+purely from the frequency and timezone — every Monday, every 1st and 15th, every
+hour, and so on. Then each base occurrence is <strong>transformed</strong> by the overlays and
+makeup rule: kept, dropped, or moved to a nearby day.</p>
+<p>Keeping these stages separate is what lets the calendar rules stay simple. The
+frequency knows nothing about holidays; the overlays know nothing about
+weekdays-versus-month-days. They compose.</p>
+</section>
+<section id="timezones-and-dst">
+<span id="id1"></span><h2>Timezones and DST<a class="headerlink" href="#timezones-and-dst" title="Link to this heading">¶</a></h2>
+<p>Occurrences are generated in the schedule’s IANA timezone and then converted to
+UTC. This is deliberate: “17:30 every weekday” should mean 17:30 <em>local</em> all year,
+so the underlying UTC instant must shift when daylight-saving time changes. Anchor
+the schedule to UTC directly (<code class="docutils literal notranslate"><span class="pre">&quot;timezone&quot;:</span> <span class="pre">&quot;UTC&quot;</span></code>) if you want a fixed offset.</p>
+<p>Two moments each year have no clean local-to-UTC mapping, and the engine resolves
+them consistently:</p>
+<ul class="simple">
+<li><p><strong>Spring-forward gap.</strong> Clocks jump forward, so a local time like 02:30 may not
+exist on that date. The occurrence moves to the first valid instant at or after
+the gap (03:00 local). The cycle still happens; it is nudged past the missing
+hour.</p></li>
+<li><p><strong>Autumn fall-back overlap.</strong> Clocks repeat an hour, so a local time like 01:30
+happens twice. The engine uses the <strong>earlier</strong> of the two instants.</p></li>
+</ul>
+<p>Hourly schedules are the one exception to the gap rule: the missing hour is simply
+absent rather than nudged, because “every hour” already implies one occurrence per
+real hour.</p>
+</section>
+<section id="overlays-and-makeup">
+<span id="id2"></span><h2>Overlays and makeup<a class="headerlink" href="#overlays-and-makeup" title="Link to this heading">¶</a></h2>
+<p>An overlay tests an occurrence’s <strong>local date</strong> against a calendar and either
+keeps or drops it. The local date matters: a 23:30 New York occurrence is judged
+on its New York calendar day, which can differ from its UTC day. Multiple overlays
+are ANDed, which lets two independent senses compose — “skip holidays” and “only
+on trading days” are just two overlays that must both pass.</p>
+<p>When an overlay drops a base occurrence, the <strong>makeup</strong> rule decides what happens:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">none</span></code> drops the cycle.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">before</span></code> / <code class="docutils literal notranslate"><span class="pre">after</span></code> search outward day by day — up to 14 days — for the nearest
+day that passes <em>all</em> overlays, and move the occurrence there at the same
+time-of-day.</p></li>
+</ul>
+<p>The 14-day bound is a safety valve. A pathological overlay set could in principle
+remove every nearby day; rather than search forever, the engine gives up and drops
+the occurrence. In practice no real market closes for anything close to 14
+consecutive sessions, so the bound never bites.</p>
+<section id="why-makeup-needs-care">
+<h3>Why makeup needs care<a class="headerlink" href="#why-makeup-needs-care" title="Link to this heading">¶</a></h3>
+<p>Makeup can move an occurrence <strong>earlier</strong>, which breaks the naive assumption that
+base occurrences come out already in order — a later base occurrence can make up
+to a date ahead of an earlier one. The engine therefore generates a window of base
+occurrences, transforms them all, and <em>then</em> sorts, rather than emitting them one
+at a time. The output is always ascending regardless of how makeup reshuffled
+things.</p>
+<p>Makeup also raises the possibility of duplicates. Consider a daily schedule that
+excludes a Friday holiday and makes up <em>before</em>: it would land on Thursday — but
+Thursday is already a daily occurrence. Emitting both would double-count the
+cycle. The engine deduplicates by exact UTC instant, so a made-up occurrence that
+collides with an existing one is simply dropped. A weekly-Monday schedule making
+up a Monday holiday to Tuesday keeps it, because Tuesday was not otherwise
+scheduled.</p>
+</section>
+</section>
+<section id="bounds-and-termination">
+<h2>Bounds and termination<a class="headerlink" href="#bounds-and-termination" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code> clip the series to a half-open interval: no occurrence before
+<code class="docutils literal notranslate"><span class="pre">start</span></code>, none at or after <code class="docutils literal notranslate"><span class="pre">end</span></code>. Because the comparison is on the final,
+post-makeup instant, a made-up occurrence that lands outside the interval is
+dropped just like a base one.</p>
+<p><code class="docutils literal notranslate"><span class="pre">end</span></code> also gives the series a definite tail: once the next occurrence would reach
+it, <code class="docutils literal notranslate"><span class="pre">next</span></code> returns nothing. For unbounded schedules the engine expands its search
+window outward until it either finds enough occurrences or reaches a large
+absolute horizon (about 50 years), after which it reports what it found. This is
+what guarantees that even a schedule which can <em>never</em> fire — say, “only on NYSE
+trading days” applied to a Sunday-only weekly rule — terminates and returns an
+empty result instead of looping.</p>
+</section>
+<section id="the-window-in-brief">
+<h2>The window, in brief<a class="headerlink" href="#the-window-in-brief" title="Link to this heading">¶</a></h2>
+<p>For a bounded query the engine widens the requested window by the makeup limit on
+each side, generates every base occurrence whose local date falls in the widened
+range, transforms and sorts them, then keeps those whose final instant lands in
+the original window. Widening by the makeup limit is what makes each window
+<em>complete</em>: any base occurrence whose makeup could reach into the window has
+already been generated, so nothing is missed at the edges. Unbounded queries
+(<code class="docutils literal notranslate"><span class="pre">next</span></code>, <code class="docutils literal notranslate"><span class="pre">previous</span></code>, <code class="docutils literal notranslate"><span class="pre">upcoming</span></code>) apply the same machinery inside an
+expanding window.</p>
+</section>
+<section id="why-calendars-are-pluggable">
+<h2>Why calendars are pluggable<a class="headerlink" href="#why-calendars-are-pluggable" title="Link to this heading">¶</a></h2>
+<p>The engine is generic over a calendar abstraction — “is this date in the set?” —
+rather than hard-coding holiday tables. The built-in US-federal and NYSE calendars
+are one implementation of that abstraction, supplied by the
+<a class="reference external" href="https://crates.io/crates/finance-dates"><code class="docutils literal notranslate"><span class="pre">finance-dates</span></code></a> dataset. Keeping the
+seam there means the scheduling logic is tested against small, hand-built fake
+calendars for determinism, and the real holiday data is swapped in behind the same
+interface — including in the WebAssembly build, where the same dataset compiles
+and ships to the browser.</p>
 </section>
 </section>
 
@@ -263,7 +375,17 @@
         
         <div class="related-pages">
           
-          
+          <a class="prev-page" href="api-javascript.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">JavaScript API</div>
+                
+              </div>
+            </a>
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -294,12 +416,17 @@
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">test_all</a><ul>
-<li><a class="reference internal" href="#functions">Functions</a></li>
-<li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
-<li><a class="reference internal" href="#test_all.test_all"><code class="docutils literal notranslate"><span class="pre">test_all()</span></code></a></li>
+<li><a class="reference internal" href="#">How the engine works</a><ul>
+<li><a class="reference internal" href="#occurrences-and-the-series-model">Occurrences and the series model</a></li>
+<li><a class="reference internal" href="#generation-then-transformation">Generation, then transformation</a></li>
+<li><a class="reference internal" href="#timezones-and-dst">Timezones and DST</a></li>
+<li><a class="reference internal" href="#overlays-and-makeup">Overlays and makeup</a><ul>
+<li><a class="reference internal" href="#why-makeup-needs-care">Why makeup needs care</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#bounds-and-termination">Bounds and termination</a></li>
+<li><a class="reference internal" href="#the-window-in-brief">The window, in brief</a></li>
+<li><a class="reference internal" href="#why-calendars-are-pluggable">Why calendars are pluggable</a></li>
 </ul>
 </li>
 </ul>

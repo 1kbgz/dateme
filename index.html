@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Getting started" href="docs/src/tutorial.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
         <title>dateme v0.1.0</title>
@@ -196,7 +196,15 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="docs/src/tutorial.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docs/src/how-to.html">How-to guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docs/src/schedule-model.html">Schedule model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docs/src/api-python.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docs/src/api-javascript.html">JavaScript API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docs/src/explanation.html">How the engine works</a></li>
+</ul>
+
 </div>
 </div>
 
@@ -244,10 +252,62 @@
 <a class="reference external" href="https://pypi.python.org/pypi/dateme"><img alt="PyPI" src="https://img.shields.io/pypi/v/dateme.svg" /></a></p>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>A recurrence / scheduling engine: pure datetime math that, given a <strong>schedule</strong>
+(a frequency in an IANA timezone, plus optional calendar overlays, a makeup
+strategy, and start/end bounds), computes when a recurring event fires. Written
+in Rust with bindings for Python (pyo3) and JavaScript (WebAssembly).</p>
+<p>A schedule is described as JSON:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;freq&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;weekly&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;days&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;17:30&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;timezone&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;overlays&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">&quot;calendar&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nyse_holiday&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;rule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;exclude&quot;</span><span class="w"> </span><span class="p">}],</span>
+<span class="w">  </span><span class="nt">&quot;makeup&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;after&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;end&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Every binding exposes the same five queries over a <code class="docutils literal notranslate"><span class="pre">Schedule</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">next(after=now)</span></code> / <code class="docutils literal notranslate"><span class="pre">previous(before=now)</span></code> — the single next/previous occurrence.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">until(before,</span> <span class="pre">after=now)</span></code> — the ascending series in <code class="docutils literal notranslate"><span class="pre">(after,</span> <span class="pre">before)</span></code>; <code class="docutils literal notranslate"><span class="pre">until(end)[0]</span> <span class="pre">==</span> <span class="pre">next()</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">since(after,</span> <span class="pre">before=now)</span></code> — the descending series in <code class="docutils literal notranslate"><span class="pre">(after,</span> <span class="pre">before)</span></code>; <code class="docutils literal notranslate"><span class="pre">since(start)[0]</span> <span class="pre">==</span> <span class="pre">previous()</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">upcoming(n,</span> <span class="pre">after=now)</span></code> — the next <code class="docutils literal notranslate"><span class="pre">n</span></code> occurrences.</p></li>
+</ul>
+<section id="python">
+<h3>Python<a class="headerlink" href="#python" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span>
+
+<span class="n">s</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">spec_json</span><span class="p">)</span>   <span class="c1"># or Schedule(spec_json)</span>
+<span class="n">s</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+<span class="n">s</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">))</span>   <span class="c1"># -&gt; aware datetime | None</span>
+<span class="n">s</span><span class="o">.</span><span class="n">upcoming</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>                                        <span class="c1"># defaults to now</span>
+</pre></div>
+</div>
+</section>
+<section id="javascript">
+<h3>JavaScript<a class="headerlink" href="#javascript" title="Link to this heading">¶</a></h3>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="nx">init</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Schedule</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;dateme&quot;</span><span class="p">;</span>
+
+<span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">();</span><span class="w"> </span><span class="c1">// load the wasm module once</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">(</span><span class="nx">spec</span><span class="p">);</span><span class="w">              </span><span class="c1">// string or object</span>
+<span class="nx">s</span><span class="p">.</span><span class="nx">next</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">&quot;2026-01-13T00:00:00Z&quot;</span><span class="p">));</span><span class="w">  </span><span class="c1">// -&gt; Date | null</span>
+<span class="nx">s</span><span class="p">.</span><span class="nx">upcoming</span><span class="p">(</span><span class="mf">3</span><span class="p">);</span><span class="w">                             </span><span class="c1">// defaults to now</span>
+</pre></div>
+</div>
+<p>Supported frequencies: <code class="docutils literal notranslate"><span class="pre">hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">weekly</span></code>, <code class="docutils literal notranslate"><span class="pre">monthly_by_day</span></code> (fixed day
+or <code class="docutils literal notranslate"><span class="pre">last</span></code>), <code class="docutils literal notranslate"><span class="pre">monthly_by_weekday</span></code> (nth / last weekday), and <code class="docutils literal notranslate"><span class="pre">yearly</span></code>. Overlays
+filter occurrences against built-in calendars (<code class="docutils literal notranslate"><span class="pre">us_federal_holiday</span></code>,
+<code class="docutils literal notranslate"><span class="pre">us_business_day</span></code>, <code class="docutils literal notranslate"><span class="pre">nyse_holiday</span></code>, <code class="docutils literal notranslate"><span class="pre">nyse_trading_day</span></code>, backed by
+<a class="reference external" href="https://crates.io/crates/finance-dates"><code class="docutils literal notranslate"><span class="pre">finance-dates</span></code></a>); <code class="docutils literal notranslate"><span class="pre">makeup</span></code> shifts a
+dropped occurrence to the nearest surviving day (<code class="docutils literal notranslate"><span class="pre">before</span></code> / <code class="docutils literal notranslate"><span class="pre">after</span></code>), or drops
+it (<code class="docutils literal notranslate"><span class="pre">none</span></code>). DST gaps and overlaps are resolved on conversion to UTC.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This library was generated using <a class="reference external" href="https://copier.readthedocs.io/en/stable/">copier</a> from the <a class="reference external" href="https://github.com/python-project-templates/base">Base Python Project Template repository</a>.</p>
 </div>
+</section>
 </section>
 </section>
 
@@ -256,7 +316,15 @@
       <footer>
         
         <div class="related-pages">
-          
+          <a class="next-page" href="docs/src/tutorial.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Getting started</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
           
         </div>
         <div class="bottom-of-page">

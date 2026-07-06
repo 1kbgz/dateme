@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="How-to guides" href="how-to.html"><link rel="prev" title="dateme" href="../../index.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>dateme - dateme v0.1.0</title>
+        <title>Getting started - dateme v0.1.0</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -196,7 +196,15 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  
+  <ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to.html">How-to guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="schedule-model.html">Schedule model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-python.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-javascript.html">JavaScript API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="explanation.html">How the engine works</a></li>
+</ul>
+
 </div>
 </div>
 
@@ -215,7 +223,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../../_sources/autoapi/dateme/index.rst.txt" title="View this page">
+  <a class="muted-link" href="../../_sources/docs/src/tutorial.md.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -233,27 +241,131 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="module-dateme">
-<span id="dateme"></span><h1>dateme<a class="headerlink" href="#module-dateme" title="Link to this heading">¶</a></h1>
-<section id="attributes">
-<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">¶</a></h2>
-<div class="table-wrapper autosummary longtable docutils container">
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#dateme.__version__" title="dateme.__version__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__version__</span></code></a></p></td>
-<td><p></p></td>
-</tr>
-</tbody>
-</table>
+          <section class="tex2jax_ignore mathjax_ignore" id="getting-started">
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading">¶</a></h1>
+<p>This tutorial walks you through your first schedule with <code class="docutils literal notranslate"><span class="pre">dateme</span></code>. By the end
+you will have described a recurring event, asked when it next fires, and
+projected a series of upcoming occurrences. You do not need to know anything
+about the library yet — follow along and each step will produce the result
+shown.</p>
+<p>We will build one schedule: <strong>“every Monday at 17:30 New York time, but skip
+weeks when the New York Stock Exchange is closed on that Monday, moving those to
+the next open day.”</strong></p>
+<section id="before-you-start">
+<h2>Before you start<a class="headerlink" href="#before-you-start" title="Link to this heading">¶</a></h2>
+<p>Install the package:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>dateme
+</pre></div>
+</div>
+<p>Open a Python session and import the one class you need:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span>
+</pre></div>
 </div>
 </section>
-<section id="package-contents">
-<h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading">¶</a></h2>
-<dl class="py data">
-<dt class="sig sig-object py" id="dateme.__version__">
-<span class="sig-prename descclassname"><span class="pre">dateme.</span></span><span class="sig-name descname"><span class="pre">__version__</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.1.0'</span></em><a class="headerlink" href="#dateme.__version__" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<section id="step-1-describe-the-schedule">
+<h2>Step 1 — Describe the schedule<a class="headerlink" href="#step-1-describe-the-schedule" title="Link to this heading">¶</a></h2>
+<p>A schedule is written as JSON. Paste this in:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">spec</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">{</span>
+<span class="s2">  &quot;freq&quot;: { &quot;type&quot;: &quot;weekly&quot;, &quot;days&quot;: [&quot;mon&quot;], &quot;time&quot;: &quot;17:30&quot; },</span>
+<span class="s2">  &quot;timezone&quot;: &quot;America/New_York&quot;,</span>
+<span class="s2">  &quot;overlays&quot;: [ { &quot;calendar&quot;: &quot;nyse_holiday&quot;, &quot;rule&quot;: &quot;exclude&quot; } ],</span>
+<span class="s2">  &quot;makeup&quot;: &quot;after&quot;,</span>
+<span class="s2">  &quot;start&quot;: null,</span>
+<span class="s2">  &quot;end&quot;: null</span>
+<span class="s2">}</span>
+<span class="s2">&quot;&quot;&quot;</span>
 
+<span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Read it back to yourself: fire <strong>weekly</strong> on <strong>Monday</strong> at <strong>17:30</strong>, in the
+<strong>America/New_York</strong> timezone; <strong>exclude</strong> any date that is an <strong>NYSE holiday</strong>;
+and when a Monday is dropped, <strong>make it up after</strong> — move to the next surviving
+day.</p>
+</section>
+<section id="step-2-check-it-is-valid">
+<h2>Step 2 — Check it is valid<a class="headerlink" href="#step-2-check-it-is-valid" title="Link to this heading">¶</a></h2>
+<p>Ask the schedule to validate itself. Nothing happens if it is well-formed — that
+is success:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="step-3-ask-when-it-next-fires">
+<h2>Step 3 — Ask when it next fires<a class="headerlink" href="#step-3-ask-when-it-next-fires" title="Link to this heading">¶</a></h2>
+<p>Pick a reference instant and ask for the next occurrence after it. We use a
+fixed date so your output matches this page exactly:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">after</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+<span class="n">schedule</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">after</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You should see:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>datetime.datetime(2026, 1, 20, 22, 30, tzinfo=datetime.timezone.utc)
+</pre></div>
+</div>
+<p>Look closely at what happened. The next Monday after January 13 is January 19,
+2026 — but that is Martin Luther King Jr. Day and the NYSE is closed. The
+<code class="docutils literal notranslate"><span class="pre">exclude</span></code> overlay dropped it, and <code class="docutils literal notranslate"><span class="pre">makeup:</span> <span class="pre">after</span></code> moved it to <strong>Tuesday
+January 20 at 17:30 New York time</strong>, which is <code class="docutils literal notranslate"><span class="pre">22:30Z</span></code> (New York is five hours
+behind UTC in January). The library did the calendar and timezone work for you.</p>
+</section>
+<section id="step-4-project-several-occurrences">
+<h2>Step 4 — Project several occurrences<a class="headerlink" href="#step-4-project-several-occurrences" title="Link to this heading">¶</a></h2>
+<p>For a “next instances” list, ask for the next few at once:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">upcoming</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">after</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[datetime.datetime(2026, 1, 20, 22, 30, tzinfo=datetime.timezone.utc),
+ datetime.datetime(2026, 1, 26, 22, 30, tzinfo=datetime.timezone.utc),
+ datetime.datetime(2026, 2, 2, 22, 30, tzinfo=datetime.timezone.utc)]
+</pre></div>
+</div>
+<p>The first is the made-up Tuesday; the rest are ordinary Mondays.</p>
+</section>
+<section id="step-5-look-backward-too">
+<h2>Step 5 — Look backward too<a class="headerlink" href="#step-5-look-backward-too" title="Link to this heading">¶</a></h2>
+<p>Every forward query has a backward twin. Ask what fired most recently before your
+reference instant:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">previous</span><span class="p">(</span><span class="n">after</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>datetime.datetime(2026, 1, 12, 22, 30, tzinfo=datetime.timezone.utc)
+</pre></div>
+</div>
+<p>Monday January 12 — a normal week.</p>
+</section>
+<section id="step-6-get-a-whole-series">
+<h2>Step 6 — Get a whole series<a class="headerlink" href="#step-6-get-a-whole-series" title="Link to this heading">¶</a></h2>
+<p>To list every occurrence between two instants, use <code class="docutils literal notranslate"><span class="pre">until</span></code> (ascending) or <code class="docutils literal notranslate"><span class="pre">since</span></code>
+(descending):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">end</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">occurrence</span> <span class="ow">in</span> <span class="n">schedule</span><span class="o">.</span><span class="n">until</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">after</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">occurrence</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>2026-01-20 22:30:00+00:00
+2026-01-26 22:30:00+00:00
+2026-02-02 22:30:00+00:00
+2026-02-09 22:30:00+00:00
+</pre></div>
+</div>
+</section>
+<section id="what-you-have-learned">
+<h2>What you have learned<a class="headerlink" href="#what-you-have-learned" title="Link to this heading">¶</a></h2>
+<p>You described a recurring event as JSON, validated it, and asked five kinds of
+question about it: <code class="docutils literal notranslate"><span class="pre">next</span></code>, <code class="docutils literal notranslate"><span class="pre">previous</span></code>, <code class="docutils literal notranslate"><span class="pre">upcoming</span></code>, <code class="docutils literal notranslate"><span class="pre">until</span></code>, and <code class="docutils literal notranslate"><span class="pre">since</span></code>. You saw
+the engine apply a real market-holiday calendar and a makeup rule, and convert
+local wall-clock times to UTC across a timezone offset — all without any manual
+date arithmetic.</p>
+<p>From here:</p>
+<ul class="simple">
+<li><p>To accomplish a specific real-world task, see the <a class="reference internal" href="how-to.html"><span class="std std-doc">How-to guides</span></a>.</p></li>
+<li><p>For every field you can put in a schedule, see the <a class="reference internal" href="schedule-model.html"><span class="std std-doc">Schedule model</span></a>.</p></li>
+<li><p>To understand <em>how</em> occurrences are computed, read <a class="reference internal" href="explanation.html"><span class="std std-doc">How the engine works</span></a>.</p></li>
+<li><p>The same schedule works in the browser — see the <a class="reference internal" href="api-javascript.html"><span class="std std-doc">JavaScript API</span></a>.</p></li>
+</ul>
 </section>
 </section>
 
@@ -262,8 +374,26 @@
       <footer>
         
         <div class="related-pages">
-          
-          
+          <a class="next-page" href="how-to.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">How-to guides</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../../index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Home</div>
+                
+              </div>
+            </a>
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -294,12 +424,15 @@
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">dateme</a><ul>
-<li><a class="reference internal" href="#attributes">Attributes</a></li>
-<li><a class="reference internal" href="#package-contents">Package Contents</a><ul>
-<li><a class="reference internal" href="#dateme.__version__"><code class="docutils literal notranslate"><span class="pre">__version__</span></code></a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#">Getting started</a><ul>
+<li><a class="reference internal" href="#before-you-start">Before you start</a></li>
+<li><a class="reference internal" href="#step-1-describe-the-schedule">Step 1 — Describe the schedule</a></li>
+<li><a class="reference internal" href="#step-2-check-it-is-valid">Step 2 — Check it is valid</a></li>
+<li><a class="reference internal" href="#step-3-ask-when-it-next-fires">Step 3 — Ask when it next fires</a></li>
+<li><a class="reference internal" href="#step-4-project-several-occurrences">Step 4 — Project several occurrences</a></li>
+<li><a class="reference internal" href="#step-5-look-backward-too">Step 5 — Look backward too</a></li>
+<li><a class="reference internal" href="#step-6-get-a-whole-series">Step 6 — Get a whole series</a></li>
+<li><a class="reference internal" href="#what-you-have-learned">What you have learned</a></li>
 </ul>
 </li>
 </ul>
