@@ -221,3 +221,24 @@ section-order = [
     "F401",
     "F403",
 ]
+
+[tool.yardang]
+title = "dateme"
+root = "README.md"
+pages = [
+    "docs/src/tutorial.md",
+    "docs/src/how-to.md",
+    "docs/src/schedule-model.md",
+    "docs/src/api-python.md",
+    "docs/src/api-javascript.md",
+    "docs/src/explanation.md",
+]
+use-autoapi = false
+exclude-patterns = [
+    "RECURRENCE_SPEC.md",
+    "target/**",
+    "js/**",
+    "rust/**",
+    "dateme/extension/**",
+]
+

@@ -13,5 +13,18 @@ name = "dateme"
 path = "src/lib.rs"
 crate-type = ["rlib"]
 
+[features]
+default = ["calendars"]
+# Concrete US-federal / NYSE calendars backed by the finance-dates crate.
+# Disable for targets (e.g. wasm) where finance-dates cannot build; the engine
+# still works with caller-supplied calendars via the CalendarProvider trait.
+calendars = ["dep:finance-dates"]
+
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
+chrono = { version = "0.4", features = ["serde"] }
+chrono-tz = { version = "0.10", features = ["serde"] }
+finance-dates = { version = "0.3", optional = true }
+
+[dev-dependencies]
+serde_json = "1.0"

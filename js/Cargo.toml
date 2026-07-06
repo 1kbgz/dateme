@@ -12,5 +12,7 @@ path = "src/rust/lib.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-dateme = { path = "../rust", version = "*" }
+dateme = { path = "../rust", version = "*", features = ["calendars"] }
 wasm-bindgen = "=0.2.126"
+chrono = { version = "0.4", default-features = false }
+serde_json = "1.0"
