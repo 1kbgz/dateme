@@ -1,9 +1,38 @@
 # Python API
 
-The Python package exposes a single class, `dateme.Schedule`. Build it from the
-JSON [Schedule model](schedule-model.md); every method takes and returns
-timezone-aware `datetime` objects (UTC). Where a reference instant is optional it
-defaults to the current time.
+The Python package exposes the `dateme.Schedule` engine plus a typed
+[`dateme.model`](#typed-model) builder layer. Every query method takes and
+returns timezone-aware `datetime` objects (UTC); where a reference instant is
+optional it defaults to the current time.
+
+## Constructing a schedule
+
+`Schedule(spec)` accepts any of three forms, so you can construct from a native
+object as well as JSON:
+
+```python
+from dateme import Schedule, model as m
+from dateme import Weekly, Overlay, Makeup, CalendarId, OverlayRule, Weekday
+
+# 1. Typed builder (validated as you build it)
+spec = m.Schedule(
+    freq=Weekly([Weekday.MON], "17:30"),
+    timezone="America/New_York",
+    overlays=[Overlay(CalendarId.NYSE_HOLIDAY, OverlayRule.EXCLUDE)],
+    makeup=Makeup.AFTER,
+)
+schedule = Schedule(spec)
+
+# 2. A plain dict
+schedule = Schedule(spec.to_dict())
+
+# 3. A JSON string
+schedule = Schedule(spec.to_json())
+```
+
+Any object with a `to_dict()` method is accepted, which is what makes the typed
+builders work directly. `Schedule.from_json(str)` and `Schedule.from_dict(obj)`
+are explicit alternatives to the constructor.
 
 ```{eval-rst}
 .. autoclass:: dateme.Schedule
@@ -22,9 +51,12 @@ defaults to the current time.
 
 ## Errors
 
-`from_json` raises `ValueError` for malformed JSON or an unknown timezone/enum
-value. `validate` raises `ValueError` for a structurally invalid schedule (see
-[Validation](#validation)).
+The constructor validates the schedule and raises `ValueError` for malformed
+JSON/dict input, an unknown timezone/enum value, or a structurally invalid
+schedule (see [Validation](#validation)) — so a `Schedule` you hold is always
+well-formed. `validate()` re-runs the same check on demand. The typed builders
+additionally raise `ValueError` at build time for out-of-range values (see
+below).
 
 ## Method summary
 
@@ -37,7 +69,27 @@ value. `validate` raises `ValueError` for a structurally invalid schedule (see
 | `upcoming(n, after=now)`   | `list[datetime]`         | ascending  |
 | `validate()`               | `None` (raises on error) | —          |
 | `to_json()`                | `str`                    | —          |
+| `to_dict()`                | `dict`                   | —          |
 | `from_json(json)`          | `Schedule` (static)      | —          |
+| `from_dict(obj)`           | `Schedule` (static)      | —          |
 
 `until(end)[0]` equals `next()`; `since(start)[0]` equals `previous()`. All
 results are strictly between the two bounds and deduplicated by instant.
+
+(typed-model)=
+
+## Typed model
+
+`dateme.model` mirrors the [Schedule model](schedule-model.md) as dataclasses and
+enums. Build a structure from them and pass it to `Schedule` (or call `to_dict()`
+/ `to_json()`). Construction performs light validation — an out-of-range minute,
+an empty weekday list, or a month day outside 1–31 raises `ValueError`
+immediately. The enums (`Makeup`, `OverlayRule`, `CalendarId`, `Nth`, `Weekday`)
+and the frequency/`MonthDay`/`NthWeekday`/`Overlay` builders are re-exported at
+the package top level for convenience.
+
+```{eval-rst}
+.. automodule:: dateme.model
+   :members:
+   :member-order: bysource
+```

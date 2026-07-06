@@ -212,6 +212,92 @@ fn dst_fall_back() {
     );
 }
 
+// ---- DST: off-grid spring-forward lands exactly on the gap edge ----
+
+#[test]
+fn dst_spring_forward_off_grid_minutes() {
+    // Every local time in the 02:00–03:00 gap resolves to the gap edge (03:00 ET
+    // = 07:00Z) regardless of its minute — no overshoot.
+    for (h, m) in [(2, 0), (2, 20), (2, 30), (2, 59)] {
+        let s = Schedule {
+            freq: Frequency::Daily { time: hm(h, m) },
+            timezone: ny(),
+            overlays: vec![],
+            makeup: Makeup::None,
+            start: None,
+            end: None,
+        };
+        assert_eq!(
+            s.next(utc("2026-03-08T00:00:00Z"), &NoCalendars),
+            Some(utc("2026-03-08T07:00:00Z")),
+            "gap time {h:02}:{m:02} should resolve to 03:00 ET"
+        );
+    }
+}
+
+// ---- DST: hourly emits 23 hours on spring-forward, 24 on fall-back ----
+
+#[test]
+fn dst_hourly_counts() {
+    let s = Schedule {
+        freq: Frequency::Hourly { minute: 30 },
+        timezone: ny(),
+        overlays: vec![],
+        makeup: Makeup::None,
+        start: None,
+        end: None,
+    };
+
+    // Spring-forward day: the 02:30 slot is missing ⇒ 23 occurrences.
+    let spring = s.until(
+        utc("2026-03-09T04:00:00Z"), // 2026-03-09 00:00 ET (EDT, UTC-4)
+        utc("2026-03-08T05:00:00Z"), // 2026-03-08 00:00 ET (EST, UTC-5)
+        &NoCalendars,
+    );
+    assert_eq!(spring.len(), 23);
+
+    // Fall-back day: the repeated 01:30 appears once ⇒ 24 occurrences.
+    let fall = s.until(
+        utc("2026-11-02T05:00:00Z"), // 2026-11-02 00:00 ET
+        utc("2026-11-01T04:00:00Z"), // 2026-11-01 00:00 ET
+        &NoCalendars,
+    );
+    assert_eq!(fall.len(), 24);
+    // The repeated hour is present exactly once, at its earliest instant (05:30Z).
+    assert_eq!(
+        fall.iter()
+            .filter(|t| **t == utc("2026-11-01T05:30:00Z"))
+            .count(),
+        1
+    );
+}
+
+// ---- DST: sub-hour transition zone (Lord Howe, 30-min shift) ----
+
+#[test]
+fn dst_sub_hour_zone() {
+    // Lord Howe Island springs forward 30 min (02:00 -> 02:30) on 2026-10-04.
+    let tz: Tz = "Australia/Lord_Howe".parse().unwrap();
+    let s = Schedule {
+        freq: Frequency::Daily { time: hm(2, 15) },
+        timezone: tz,
+        overlays: vec![],
+        makeup: Makeup::None,
+        start: None,
+        end: None,
+    };
+    // 02:15 is inside the 30-min gap ⇒ resolves to the edge 02:30 local, and the
+    // engine returns a valid instant (not skipped).
+    let got = s.next(utc("2026-10-03T00:00:00Z"), &NoCalendars);
+    assert!(got.is_some());
+    // Reconverting to local yields 02:30 on the transition date.
+    let local = got.unwrap().with_timezone(&tz);
+    assert_eq!(
+        local.format("%Y-%m-%d %H:%M").to_string(),
+        "2026-10-04 02:30"
+    );
+}
+
 // ---- Test vector 8: end bound ----
 
 #[test]
@@ -270,6 +356,30 @@ fn weekly_multi_day() {
             utc("2026-01-09T17:00:00Z"),
         ]
     );
+}
+
+// ---- Robustness: an out-of-range month must not panic ----
+
+#[test]
+fn invalid_yearly_month_does_not_panic() {
+    // An unvalidated Yearly with month 13 must produce no occurrence rather than
+    // panicking inside the calendar math.
+    let s = Schedule {
+        freq: Frequency::Yearly {
+            month: 13,
+            day: MonthDay::Day { value: 1 },
+            time: hm(12, 0),
+        },
+        timezone: Tz::UTC,
+        overlays: vec![],
+        makeup: Makeup::None,
+        start: None,
+        end: None,
+    };
+    assert_eq!(s.next(utc("2026-01-01T00:00:00Z"), &NoCalendars), None);
+    assert!(s
+        .upcoming(3, utc("2026-01-01T00:00:00Z"), &NoCalendars)
+        .is_empty());
 }
 
 // ---- Backward direction: previous / since ----

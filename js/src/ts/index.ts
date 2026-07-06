@@ -1,18 +1,20 @@
 import init, { Schedule as WasmSchedule } from "../../dist/pkg/dateme";
+import type { ScheduleSpec } from "./model";
 
 export { default as init } from "../../dist/pkg/dateme";
 export * as wasm from "../../dist/pkg/dateme";
+export * from "./model";
 
 /**
- * A recurrence schedule. Construct from the JSON spec (string or object), then
- * query occurrence instants. Reference instants default to `new Date()`.
+ * A recurrence schedule. Construct from a typed spec object or its JSON string,
+ * then query occurrence instants. Reference instants default to `new Date()`.
  *
  * The WASM module must be initialized first: `await init()` (or `initSync`).
  */
 export class Schedule {
   private inner: WasmSchedule;
 
-  constructor(spec: string | object) {
+  constructor(spec: ScheduleSpec | string) {
     this.inner = new WasmSchedule(
       typeof spec === "string" ? spec : JSON.stringify(spec),
     );
@@ -23,9 +25,14 @@ export class Schedule {
     this.inner.validate();
   }
 
-  /** The schedule as a plain object (round-trips the JSON form). */
-  toJSON(): unknown {
+  /** The schedule as a plain spec object (round-trips the JSON form). */
+  toObject(): ScheduleSpec {
     return JSON.parse(this.inner.toJSON());
+  }
+
+  /** The schedule as a plain object; enables `JSON.stringify(schedule)`. */
+  toJSON(): ScheduleSpec {
+    return this.toObject();
   }
 
   /** First occurrence strictly after `after`; `null` if none. */

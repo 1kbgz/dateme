@@ -21,28 +21,71 @@ pub struct Schedule {
     calendars: DefaultCalendars,
 }
 
-#[pymethods]
+/// Normalize a Python spec into a JSON string. Accepts a JSON ``str``, a
+/// ``dict`` (or any JSON-serializable object), or any object exposing a
+/// ``to_dict()`` method (e.g. the ``dateme.model`` builders).
+fn spec_to_json(spec: &Bound<'_, PyAny>) -> PyResult<String> {
+    if let Ok(s) = spec.extract::<String>() {
+        return Ok(s);
+    }
+    let value = if spec.hasattr("to_dict")? {
+        spec.call_method0("to_dict")?
+    } else {
+        spec.clone()
+    };
+    let json = spec.py().import("json")?;
+    json.call_method1("dumps", (value,))?.extract()
+}
+
 impl Schedule {
-    /// Build a schedule from its JSON representation.
-    #[new]
-    fn new(json: &str) -> PyResult<Self> {
-        let inner: BaseSchedule =
+    /// Parse and validate a JSON schedule, returning a ready-to-query engine.
+    fn build(json: &str) -> PyResult<Self> {
+        let mut inner: BaseSchedule =
             serde_json::from_str(json).map_err(|e| PyValueError::new_err(e.to_string()))?;
+        inner
+            .validate()
+            .map_err(|e| PyValueError::new_err(e.to_string()))?;
         Ok(Schedule {
             inner,
             calendars: DefaultCalendars::new(),
         })
     }
+}
 
-    /// Build a schedule from its JSON representation (alias for the constructor).
-    #[staticmethod]
-    fn from_json(json: &str) -> PyResult<Self> {
-        Self::new(json)
+#[pymethods]
+impl Schedule {
+    /// Build a schedule from a JSON string, a ``dict``, or a typed
+    /// ``dateme.model`` builder (any object with a ``to_dict()`` method).
+    ///
+    /// The schedule is validated on construction; an invalid schedule raises
+    /// ``ValueError``.
+    #[new]
+    fn new(spec: &Bound<'_, PyAny>) -> PyResult<Self> {
+        let json = spec_to_json(spec)?;
+        Self::build(&json)
     }
 
-    /// Serialize back to JSON.
+    /// Build a schedule from its JSON representation.
+    #[staticmethod]
+    fn from_json(json: &str) -> PyResult<Self> {
+        Self::build(json)
+    }
+
+    /// Build a schedule from a ``dict`` or typed ``dateme.model`` builder.
+    #[staticmethod]
+    fn from_dict(spec: &Bound<'_, PyAny>) -> PyResult<Self> {
+        Self::new(spec)
+    }
+
+    /// Serialize back to a JSON string.
     fn to_json(&self) -> PyResult<String> {
         serde_json::to_string(&self.inner).map_err(|e| PyValueError::new_err(e.to_string()))
+    }
+
+    /// Serialize back to a ``dict``.
+    fn to_dict<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
+        let json = py.import("json")?;
+        json.call_method1("loads", (self.to_json()?,))
     }
 
     /// Structural validation. Raises `ValueError` on an invalid schedule.

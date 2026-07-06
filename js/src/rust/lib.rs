@@ -25,11 +25,13 @@ fn to_millis(dt: DateTime<Utc>) -> f64 {
 
 #[wasm_bindgen]
 impl Schedule {
-    /// Build a schedule from its JSON representation.
+    /// Build a schedule from its JSON representation. The schedule is validated
+    /// on construction; an invalid schedule throws.
     #[wasm_bindgen(constructor)]
     pub fn new(json: &str) -> Result<Schedule, JsError> {
-        let inner: BaseSchedule =
+        let mut inner: BaseSchedule =
             serde_json::from_str(json).map_err(|e| JsError::new(&e.to_string()))?;
+        inner.validate().map_err(|e| JsError::new(&e.to_string()))?;
         Ok(Schedule {
             inner,
             calendars: DefaultCalendars::new(),

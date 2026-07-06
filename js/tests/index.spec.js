@@ -79,4 +79,39 @@ test.describe("Schedule", () => {
     );
     expect(threw).toBe(true);
   });
+
+  test("structurally invalid schedule throws on construction", async ({
+    page,
+  }) => {
+    const threw = await run(
+      page,
+      `try {
+         new mod.Schedule({ freq: { type: "weekly", days: [], time: "09:00" }, timezone: "UTC" });
+         return false;
+       } catch (e) { return true; }`,
+    );
+    expect(threw).toBe(true);
+  });
+
+  test("constructs from a typed spec object using model enums", async ({
+    page,
+  }) => {
+    const res = await run(
+      page,
+      `const spec = {
+         freq: { type: "weekly", days: [mod.Weekday.Mon], time: "17:30" },
+         timezone: "America/New_York",
+         overlays: [{ calendar: mod.CalendarId.NyseHoliday, rule: mod.OverlayRule.Exclude }],
+         makeup: mod.Makeup.After,
+       };
+       const s = new mod.Schedule(spec);
+       s.validate();
+       return {
+         next: s.next(new Date(Date.UTC(2026, 0, 13))).toISOString(),
+         roundtrip: s.toObject().freq.type,
+       };`,
+    );
+    expect(res.next).toBe("2026-01-20T22:30:00.000Z");
+    expect(res.roundtrip).toBe("weekly");
+  });
 });

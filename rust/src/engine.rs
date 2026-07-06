@@ -50,10 +50,13 @@ fn resolve_local_to_utc(
         LocalResult::None => match mode {
             Nonexistent::Skip => None,
             Nonexistent::Shift => {
-                // Step forward in small increments to the far edge of the gap.
+                // Step forward one minute at a time to the first valid local time
+                // at/after the gap. Minute granularity matches `NaiveTime` here,
+                // so this lands exactly on the gap's far edge (e.g. 02:20 -> 03:00)
+                // rather than overshooting. Cap at 6h to bound pathological zones.
                 let mut t = naive;
-                for _ in 0..(6 * 4) {
-                    t += Duration::minutes(15);
+                for _ in 0..(6 * 60) {
+                    t += Duration::minutes(1);
                     match tz.from_local_datetime(&t) {
                         LocalResult::Single(dt) => return Some(dt.with_timezone(&Utc)),
                         LocalResult::Ambiguous(dt, _) => return Some(dt.with_timezone(&Utc)),
@@ -82,8 +85,12 @@ fn days_in_month(year: i32, month: u32) -> u32 {
 }
 
 /// Concrete date for a [`MonthDay`] within `(year, month)`, or `None` if the day
-/// does not exist (e.g. day 31 in February).
+/// does not exist (e.g. day 31 in February) or `month` is out of range. Guarding
+/// `month` here keeps an unvalidated `Yearly { month }` from panicking.
 fn month_day_date(year: i32, month: u32, md: MonthDay) -> Option<NaiveDate> {
+    if !(1..=12).contains(&month) {
+        return None;
+    }
     match md {
         MonthDay::Day { value } => {
             let v = value as u32;
