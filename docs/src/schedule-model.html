@@ -288,13 +288,19 @@ native objects instead of hand-writing JSON.</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">&quot;none&quot;</span></code></p></td>
 <td><p>What to do when an overlay drops an occurrence.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">start</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max_makeup_hops</span></code></p></td>
+<td><p>integer or null</p></td>
+<td><p>no</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
+<td><p>Maximum days to scan for makeup; <code class="docutils literal notranslate"><span class="pre">null</span></code> uses the built-in limit.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">start</span></code></p></td>
 <td><p>RFC 3339 datetime or null</p></td>
 <td><p>no</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
 <td><p>No occurrence before this instant.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">end</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">end</span></code></p></td>
 <td><p>RFC 3339 datetime or null</p></td>
 <td><p>no</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
@@ -644,10 +650,12 @@ overlays are <strong>ANDed</strong>: an occurrence survives only if it passes ev
 </tbody>
 </table>
 </div>
-<p>The makeup search scans at most 14 days; if no surviving day is found within that
-range the occurrence is dropped. A made-up occurrence that coincides with another
-occurrence already produced by the schedule is dropped rather than duplicated.
-See <a class="reference internal" href="explanation.html#overlays-and-makeup"><span class="std std-ref">Overlays and makeup</span></a>.</p>
+<p>The makeup search scans at most 14 days by default; set <code class="docutils literal notranslate"><span class="pre">max_makeup_hops</span></code> to
+cap that search. <code class="docutils literal notranslate"><span class="pre">null</span></code> or an absent field uses the default limit, <code class="docutils literal notranslate"><span class="pre">0</span></code> disables
+makeup for dropped occurrences, and a positive integer scans up to that many
+days, capped at 14. A made-up occurrence that coincides with another occurrence
+already produced by the schedule is dropped rather than duplicated. See
+<a class="reference internal" href="explanation.html#overlays-and-makeup"><span class="std std-ref">Overlays and makeup</span></a>.</p>
 </section>
 <section id="serialization-notes">
 <h2>Serialization notes<a class="headerlink" href="#serialization-notes" title="Link to this heading">¶</a></h2>
