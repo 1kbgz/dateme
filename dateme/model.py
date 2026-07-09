@@ -17,6 +17,7 @@ __all__ = [
     "Weekday",
     "Nth",
     "Makeup",
+    "WeekdayMakeup",
     "OverlayRule",
     "CalendarId",
     "MakeupFailure",
@@ -62,6 +63,28 @@ class Makeup(str, Enum):
 class MakeupFailure(str, Enum):
     SKIP = "skip"
     KEEP_ORIGINAL = "keep_original"
+
+
+@dataclass(frozen=True)
+class WeekdayMakeup:
+    """Makeup directions selected by the excluded date's weekday."""
+
+    mon: Makeup | None = None
+    tue: Makeup | None = None
+    wed: Makeup | None = None
+    thu: Makeup | None = None
+    fri: Makeup | None = None
+    sat: Makeup | None = None
+    sun: Makeup | None = None
+    default: Makeup | None = None
+
+    def to_dict(self) -> dict:
+        out = {}
+        for name in ("mon", "tue", "wed", "thu", "fri", "sat", "sun", "default"):
+            value = getattr(self, name)
+            if value is not None:
+                out[name] = value.value
+        return out
 
 
 class OverlayRule(str, Enum):
@@ -241,7 +264,7 @@ class Schedule:
     freq: Frequency
     timezone: str
     overlays: list[Overlay] = field(default_factory=list)
-    makeup: Makeup = Makeup.NONE
+    makeup: Makeup | WeekdayMakeup = Makeup.NONE
     max_makeup_hops: int | None = None
     makeup_failure: MakeupFailure = MakeupFailure.SKIP
     skip_if_consecutive_excluded: int | None = None
@@ -257,7 +280,7 @@ class Schedule:
             "freq": self.freq.to_dict(),
             "timezone": self.timezone,
             "overlays": [o.to_dict() for o in self.overlays],
-            "makeup": self.makeup.value,
+            "makeup": self.makeup.value if isinstance(self.makeup, Makeup) else self.makeup.to_dict(),
             "max_makeup_hops": self.max_makeup_hops,
             "makeup_failure": self.makeup_failure.value,
             "skip_if_consecutive_excluded": self.skip_if_consecutive_excluded,

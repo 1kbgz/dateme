@@ -3,7 +3,7 @@
 //! `since`, `upcoming`).
 
 use crate::calendar::CalendarProvider;
-use crate::schedule::{Frequency, Makeup, MakeupFailure, MonthDay, Nth, Schedule};
+use crate::schedule::{Frequency, MakeupDirection, MakeupFailure, MonthDay, Nth, Schedule};
 use chrono::{
     DateTime, Datelike, Duration, LocalResult, NaiveDate, NaiveTime, TimeZone, Utc, Weekday,
 };
@@ -289,10 +289,10 @@ impl Schedule {
 
     /// Apply the makeup rule to a dropped base `date`.
     fn make_up(&self, date: NaiveDate, cal: &dyn CalendarProvider) -> MakeupOutcome {
-        let step = match self.makeup {
-            Makeup::None => return MakeupOutcome::Disabled,
-            Makeup::Before => -1,
-            Makeup::After => 1,
+        let step = match self.makeup.direction_for(date.weekday()) {
+            MakeupDirection::None => return MakeupOutcome::Disabled,
+            MakeupDirection::Before => -1,
+            MakeupDirection::After => 1,
         };
         let max_hops = self
             .max_makeup_hops

@@ -148,6 +148,21 @@ test.describe("Schedule", () => {
     expect(res).toBe("keep_original");
   });
 
+  test("round-trips weekday makeup from typed specs", async ({ page }) => {
+    const res = await run(
+      page,
+      `const spec = {
+         freq: { type: "weekly", days: [mod.Weekday.Mon, mod.Weekday.Fri], time: "17:30" },
+         timezone: "America/New_York",
+         overlays: [{ calendar: mod.CalendarId.NyseHoliday, rule: mod.OverlayRule.Exclude }],
+         makeup: { mon: mod.Makeup.After, fri: mod.Makeup.Before, default: mod.Makeup.None },
+       };
+       const s = new mod.Schedule(spec);
+       return s.toObject().makeup;`,
+    );
+    expect(res).toEqual({ mon: "after", fri: "before", default: "none" });
+  });
+
   test("round-trips skip_if_consecutive_excluded from typed specs", async ({
     page,
   }) => {

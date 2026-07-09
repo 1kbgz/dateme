@@ -14,6 +14,7 @@ from dateme import (
     OverlayRule,
     Schedule,
     Weekday,
+    WeekdayMakeup,
     Weekly,
     model,
 )
@@ -72,6 +73,19 @@ def test_typed_model_serializes_makeup_failure():
     )
     assert keep.to_dict()["makeup_failure"] == "keep_original"
     assert Schedule(keep).to_dict()["makeup_failure"] == "keep_original"
+
+
+def test_typed_model_serializes_weekday_makeup():
+    spec = nyse_monday_spec()
+    weekday_makeup = model.Schedule(
+        freq=spec.freq,
+        timezone=spec.timezone,
+        overlays=spec.overlays,
+        makeup=WeekdayMakeup(mon=Makeup.AFTER, fri=Makeup.BEFORE, default=Makeup.NONE),
+    )
+    expected = {"mon": "after", "fri": "before", "default": "none"}
+    assert weekday_makeup.to_dict()["makeup"] == expected
+    assert Schedule(weekday_makeup).to_dict()["makeup"] == expected
 
 
 def test_typed_model_serializes_skip_if_consecutive_excluded():

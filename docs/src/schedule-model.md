@@ -192,13 +192,27 @@ Built-in calendar identifiers for the `calendar` field, backed by the
 
 ## Makeup
 
-What to do when an overlay drops a base occurrence. One of:
+What to do when an overlay drops a base occurrence. Use a single direction for
+every excluded date:
 
 | Value      | Effect                                                                          |
 | ---------- | ------------------------------------------------------------------------------- |
 | `"none"`   | Skip the cycle entirely.                                                        |
 | `"before"` | Move to the nearest **earlier** day that passes all overlays, at the same time. |
 | `"after"`  | Move to the nearest **later** day that passes all overlays, at the same time.   |
+
+Or select a direction by the excluded date's weekday:
+
+```json
+{
+  "mon": "after",
+  "fri": "before",
+  "default": "none"
+}
+```
+
+Weekday keys are optional. If an excluded date's weekday is not present, the
+engine uses `default`; if `default` is absent, the occurrence is skipped.
 
 The makeup search scans at most 14 days by default; set `max_makeup_hops` to
 cap that search. `null` or an absent field uses the default limit, `0` disables
@@ -243,8 +257,9 @@ is dropped and does not use `makeup` or `makeup_failure`.
 - `time` is `"HH:MM"` (24-hour). Seconds are always zero.
 - Weekdays are the lowercase three-letter strings `"mon"`…`"sun"`.
 - `start` and `end` are RFC 3339 datetimes, or `null`.
-- Enum-valued fields (`type`, `rule`, `nth`, `makeup`, `makeup_failure`,
-  `calendar`) use the lowercase `snake_case` spellings shown above.
+- Enum-valued fields (`type`, `rule`, `nth`, `makeup`, weekday makeup values,
+  `makeup_failure`, `calendar`) use the lowercase `snake_case` spellings shown
+  above.
 - `skip_if_consecutive_excluded` must be `null`, absent, or an integer at least
   `1`.
 
