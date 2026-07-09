@@ -88,6 +88,31 @@ def test_typed_model_serializes_weekday_makeup():
     assert Schedule(weekday_makeup).to_dict()["makeup"] == expected
 
 
+def test_typed_model_serializes_nearest_makeup():
+    spec = nyse_monday_spec()
+    nearest = model.Schedule(
+        freq=spec.freq,
+        timezone=spec.timezone,
+        overlays=spec.overlays,
+        makeup=Makeup.NEAREST,
+    )
+    assert nearest.to_dict()["makeup"] == "nearest"
+    assert Schedule(nearest).to_dict()["makeup"] == "nearest"
+
+
+def test_typed_model_serializes_makeup_only_on():
+    spec = nyse_monday_spec()
+    restricted = model.Schedule(
+        freq=spec.freq,
+        timezone=spec.timezone,
+        overlays=spec.overlays,
+        makeup=spec.makeup,
+        makeup_only_on=[Weekday.TUE, Weekday.WED],
+    )
+    assert restricted.to_dict()["makeup_only_on"] == ["tue", "wed"]
+    assert Schedule(restricted).to_dict()["makeup_only_on"] == ["tue", "wed"]
+
+
 def test_typed_model_serializes_skip_if_consecutive_excluded():
     spec = nyse_monday_spec()
     threshold = model.Schedule(

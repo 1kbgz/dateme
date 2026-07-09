@@ -48,6 +48,7 @@ fn weekly_monday_nyse_exclude_after() {
         makeup: Makeup::After,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -83,6 +84,7 @@ fn makeup_hops_cap_drops_when_next_day_is_excluded() {
         makeup: Makeup::After,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -125,6 +127,7 @@ fn makeup_failure_can_keep_original_excluded_date() {
         makeup: Makeup::After,
         max_makeup_hops: Some(1),
         makeup_failure: MakeupFailure::KeepOriginal,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -161,6 +164,7 @@ fn consecutive_excluded_base_occurrences_skip_before_makeup() {
         makeup: Makeup::After,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -202,6 +206,7 @@ fn consecutive_excluded_threshold_keeps_short_runs() {
         makeup: Makeup::After,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: Some(2),
         start: None,
         end: None,
@@ -237,6 +242,7 @@ fn makeup_can_vary_by_excluded_weekday() {
         }),
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -256,6 +262,82 @@ fn makeup_can_vary_by_excluded_weekday() {
     );
 }
 
+#[test]
+fn nearest_makeup_prefers_after_then_nearest_survivor() {
+    let cal_tie = |id: CalendarId, d: NaiveDate| match id {
+        CalendarId::UsFederalHoliday => Some(d == date(2026, 1, 5)),
+        _ => Some(false),
+    };
+    let s = Schedule {
+        freq: Frequency::Daily { time: hm(9, 0) },
+        timezone: Tz::UTC,
+        overlays: vec![Overlay {
+            calendar: CalendarId::UsFederalHoliday,
+            rule: OverlayRule::Exclude,
+        }],
+        makeup: Makeup::Nearest,
+        max_makeup_hops: None,
+        makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
+        skip_if_consecutive_excluded: None,
+        start: None,
+        end: None,
+    };
+
+    assert_eq!(
+        s.until(
+            utc("2026-01-07T00:00:00Z"),
+            utc("2026-01-03T10:00:00Z"),
+            &cal_tie,
+        ),
+        vec![utc("2026-01-04T09:00:00Z"), utc("2026-01-06T09:00:00Z")]
+    );
+
+    let cal_after_blocked = |id: CalendarId, d: NaiveDate| match id {
+        CalendarId::UsFederalHoliday => Some(d == date(2026, 1, 5) || d == date(2026, 1, 6)),
+        _ => Some(false),
+    };
+    assert_eq!(
+        s.until(
+            utc("2026-01-07T00:00:00Z"),
+            utc("2026-01-03T10:00:00Z"),
+            &cal_after_blocked,
+        ),
+        vec![utc("2026-01-04T09:00:00Z")]
+    );
+}
+
+#[test]
+fn makeup_only_on_restricts_destination_weekdays() {
+    let cal = |id: CalendarId, d: NaiveDate| match id {
+        CalendarId::NyseHoliday => Some(d == date(2026, 1, 19)),
+        _ => Some(false),
+    };
+    let s = Schedule {
+        freq: Frequency::Weekly {
+            days: vec![Weekday::Mon],
+            time: hm(17, 30),
+        },
+        timezone: ny(),
+        overlays: vec![Overlay {
+            calendar: CalendarId::NyseHoliday,
+            rule: OverlayRule::Exclude,
+        }],
+        makeup: Makeup::After,
+        max_makeup_hops: None,
+        makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: Some(vec![Weekday::Wed]),
+        skip_if_consecutive_excluded: None,
+        start: None,
+        end: None,
+    };
+
+    assert_eq!(
+        s.next(utc("2026-01-13T00:00:00Z"), &cal),
+        Some(utc("2026-01-21T22:30:00Z"))
+    );
+}
+
 // ---- Test vector 2: daily, exclude holiday, before, dedup ----
 
 #[test]
@@ -271,6 +353,7 @@ fn daily_exclude_before_dedup() {
         makeup: Makeup::Before,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -303,6 +386,7 @@ fn monthly_day_31_skips_short_months() {
         makeup: Makeup::None,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -335,6 +419,7 @@ fn monthly_fifth_friday() {
         makeup: Makeup::None,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -368,6 +453,7 @@ fn last_business_day_before() {
         makeup: Makeup::Before,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -392,6 +478,7 @@ fn dst_spring_forward() {
         makeup: Makeup::None,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -414,6 +501,7 @@ fn dst_fall_back() {
         makeup: Makeup::None,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -439,6 +527,7 @@ fn dst_spring_forward_off_grid_minutes() {
             makeup: Makeup::None,
             max_makeup_hops: None,
             makeup_failure: MakeupFailure::Skip,
+            makeup_only_on: None,
             skip_if_consecutive_excluded: None,
             start: None,
             end: None,
@@ -462,6 +551,7 @@ fn dst_hourly_counts() {
         makeup: Makeup::None,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -504,6 +594,7 @@ fn dst_sub_hour_zone() {
         makeup: Makeup::None,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -531,6 +622,7 @@ fn end_bound() {
         makeup: Makeup::None,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: Some(utc("2026-01-03T00:00:00Z")),
@@ -549,6 +641,7 @@ fn start_bound() {
         makeup: Makeup::None,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: Some(utc("2026-06-01T00:00:00Z")),
         end: None,
@@ -573,6 +666,7 @@ fn weekly_multi_day() {
         makeup: Makeup::None,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -606,6 +700,7 @@ fn invalid_yearly_month_does_not_panic() {
         makeup: Makeup::None,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -627,6 +722,7 @@ fn previous_and_since_symmetry() {
         makeup: Makeup::None,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -660,6 +756,7 @@ fn until_first_equals_next() {
         makeup: Makeup::None,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -680,6 +777,7 @@ fn strictly_after_excludes_exact() {
         makeup: Makeup::None,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -705,6 +803,7 @@ fn overlay_removes_everything_terminates() {
         makeup: Makeup::None,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -782,6 +881,7 @@ fn validate_rejects_and_dedupes() {
         makeup: Makeup::None,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -798,6 +898,7 @@ fn validate_rejects_and_dedupes() {
         makeup: Makeup::None,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: None,
         end: None,
@@ -814,6 +915,7 @@ fn validate_rejects_and_dedupes() {
         makeup: Makeup::None,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: None,
         start: Some(utc("2026-02-01T00:00:00Z")),
         end: Some(utc("2026-01-01T00:00:00Z")),
@@ -827,6 +929,7 @@ fn validate_rejects_and_dedupes() {
         makeup: Makeup::None,
         max_makeup_hops: None,
         makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
         skip_if_consecutive_excluded: Some(0),
         start: None,
         end: None,

@@ -287,12 +287,22 @@ impl Schedule {
         skipped
     }
 
+    fn valid_makeup_target(&self, date: NaiveDate, cal: &dyn CalendarProvider) -> bool {
+        self.survives(date, cal)
+            && self
+                .makeup_only_on
+                .as_ref()
+                .is_none_or(|days| days.contains(&date.weekday()))
+    }
+
     /// Apply the makeup rule to a dropped base `date`.
     fn make_up(&self, date: NaiveDate, cal: &dyn CalendarProvider) -> MakeupOutcome {
-        let step = match self.makeup.direction_for(date.weekday()) {
+        let direction = self.makeup.direction_for(date.weekday());
+        let step = match direction {
             MakeupDirection::None => return MakeupOutcome::Disabled,
             MakeupDirection::Before => -1,
             MakeupDirection::After => 1,
+            MakeupDirection::Nearest => 1,
         };
         let max_hops = self
             .max_makeup_hops
@@ -303,10 +313,21 @@ impl Schedule {
             return MakeupOutcome::Failed;
         }
         for k in 1..=max_hops {
+            if matches!(direction, MakeupDirection::Nearest) {
+                for step in [1, -1] {
+                    let Some(d) = date.checked_add_signed(Duration::days(step * k)) else {
+                        continue;
+                    };
+                    if self.valid_makeup_target(d, cal) {
+                        return MakeupOutcome::Moved(d);
+                    }
+                }
+                continue;
+            }
             let Some(d) = date.checked_add_signed(Duration::days(step * k)) else {
                 return MakeupOutcome::Failed;
             };
-            if self.survives(d, cal) {
+            if self.valid_makeup_target(d, cal) {
                 return MakeupOutcome::Moved(d);
             }
         }

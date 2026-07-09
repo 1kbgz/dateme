@@ -27,6 +27,7 @@ export const Makeup = {
   None: "none",
   Before: "before",
   After: "after",
+  Nearest: "nearest",
 } as const;
 export type Makeup = (typeof Makeup)[keyof typeof Makeup];
 
@@ -88,6 +89,7 @@ export interface ScheduleSpec {
   makeup?: Makeup | WeekdayMakeup;
   max_makeup_hops?: number | null;
   makeup_failure?: MakeupFailure;
+  makeup_only_on?: Weekday[] | null;
   skip_if_consecutive_excluded?: number | null;
   start?: string | null;
   end?: string | null;

@@ -195,11 +195,12 @@ Built-in calendar identifiers for the `calendar` field, backed by the
 What to do when an overlay drops a base occurrence. Use a single direction for
 every excluded date:
 
-| Value      | Effect                                                                          |
-| ---------- | ------------------------------------------------------------------------------- |
-| `"none"`   | Skip the cycle entirely.                                                        |
-| `"before"` | Move to the nearest **earlier** day that passes all overlays, at the same time. |
-| `"after"`  | Move to the nearest **later** day that passes all overlays, at the same time.   |
+| Value       | Effect                                                                            |
+| ----------- | --------------------------------------------------------------------------------- |
+| `"none"`    | Skip the cycle entirely.                                                          |
+| `"before"`  | Move to the nearest **earlier** day that passes all overlays, at the same time.   |
+| `"after"`   | Move to the nearest **later** day that passes all overlays, at the same time.     |
+| `"nearest"` | Move to the nearest day that passes all overlays, preferring later dates on ties. |
 
 Or select a direction by the excluded date's weekday:
 
@@ -217,8 +218,16 @@ engine uses `default`; if `default` is absent, the occurrence is skipped.
 The makeup search scans at most 14 days by default; set `max_makeup_hops` to
 cap that search. `null` or an absent field uses the default limit, `0` disables
 makeup for dropped occurrences, and a positive integer scans up to that many
-days, capped at 14. A made-up occurrence that coincides with another occurrence
-already produced by the schedule is dropped rather than duplicated. See
+days, capped at 14.
+
+Set `makeup_only_on` to restrict makeup destination dates to specific weekdays:
+
+```json
+{ "makeup_only_on": ["tue", "wed", "thu"] }
+```
+
+A made-up occurrence that coincides with another occurrence already produced by
+the schedule is dropped rather than duplicated. See
 [Overlays and makeup](#overlays-and-makeup).
 
 (makeup-failure)=
