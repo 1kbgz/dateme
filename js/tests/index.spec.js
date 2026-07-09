@@ -130,4 +130,21 @@ test.describe("Schedule", () => {
     );
     expect(res).toBe(1);
   });
+
+  test("round-trips makeup_failure from typed specs", async ({ page }) => {
+    const res = await run(
+      page,
+      `const spec = {
+         freq: { type: "weekly", days: [mod.Weekday.Mon], time: "17:30" },
+         timezone: "America/New_York",
+         overlays: [{ calendar: mod.CalendarId.NyseHoliday, rule: mod.OverlayRule.Exclude }],
+         makeup: mod.Makeup.After,
+         max_makeup_hops: 1,
+         makeup_failure: mod.MakeupFailure.KeepOriginal,
+       };
+       const s = new mod.Schedule(spec);
+       return s.toObject().makeup_failure;`,
+    );
+    expect(res).toBe("keep_original");
+  });
 });

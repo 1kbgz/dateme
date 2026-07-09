@@ -12,15 +12,16 @@ native objects instead of hand-writing JSON.
 
 ## Schedule object
 
-| Field             | Type                          | Required | Default  | Description                                                       |
-| ----------------- | ----------------------------- | -------- | -------- | ----------------------------------------------------------------- |
-| `freq`            | [Frequency](#frequency)       | yes      | —        | The base recurrence.                                              |
-| `timezone`        | string (IANA name)            | yes      | —        | Timezone occurrences are generated in, e.g. `"America/New_York"`. |
-| `overlays`        | array of [Overlay](#overlays) | no       | `[]`     | Calendar filters, ANDed. Empty means no filtering.                |
-| `makeup`          | [Makeup](#makeup)             | no       | `"none"` | What to do when an overlay drops an occurrence.                   |
-| `max_makeup_hops` | integer or null               | no       | `null`   | Maximum days to scan for makeup; `null` uses the built-in limit.  |
-| `start`           | RFC 3339 datetime or null     | no       | `null`   | No occurrence before this instant.                                |
-| `end`             | RFC 3339 datetime or null     | no       | `null`   | No occurrence at or after this instant.                           |
+| Field             | Type                              | Required | Default  | Description                                                       |
+| ----------------- | --------------------------------- | -------- | -------- | ----------------------------------------------------------------- |
+| `freq`            | [Frequency](#frequency)           | yes      | —        | The base recurrence.                                              |
+| `timezone`        | string (IANA name)                | yes      | —        | Timezone occurrences are generated in, e.g. `"America/New_York"`. |
+| `overlays`        | array of [Overlay](#overlays)     | no       | `[]`     | Calendar filters, ANDed. Empty means no filtering.                |
+| `makeup`          | [Makeup](#makeup)                 | no       | `"none"` | What to do when an overlay drops an occurrence.                   |
+| `max_makeup_hops` | integer or null                   | no       | `null`   | Maximum days to scan for makeup; `null` uses the built-in limit.  |
+| `makeup_failure`  | [Makeup failure](#makeup-failure) | no       | `"skip"` | What to do when makeup cannot find a surviving date.              |
+| `start`           | RFC 3339 datetime or null         | no       | `null`   | No occurrence before this instant.                                |
+| `end`             | RFC 3339 datetime or null         | no       | `null`   | No occurrence at or after this instant.                           |
 
 `start` and `end` are UTC instants (e.g. `"2026-06-01T00:00:00Z"`). Comparison is
 against the final occurrence instant, after any makeup.
@@ -205,14 +206,28 @@ days, capped at 14. A made-up occurrence that coincides with another occurrence
 already produced by the schedule is dropped rather than duplicated. See
 [Overlays and makeup](#overlays-and-makeup).
 
+(makeup-failure)=
+
+## Makeup Failure
+
+What to do when `makeup` is `"before"` or `"after"` but no surviving destination
+is found within `max_makeup_hops`. One of:
+
+| Value             | Effect                                            |
+| ----------------- | ------------------------------------------------- |
+| `"skip"`          | Drop the occurrence silently.                     |
+| `"keep_original"` | Emit the occurrence on its original excluded day. |
+
+When `makeup` is `"none"`, the cycle is skipped and `makeup_failure` is ignored.
+
 ## Serialization notes
 
 - `timezone` is the IANA name string (`"UTC"`, `"America/New_York"`, …).
 - `time` is `"HH:MM"` (24-hour). Seconds are always zero.
 - Weekdays are the lowercase three-letter strings `"mon"`…`"sun"`.
 - `start` and `end` are RFC 3339 datetimes, or `null`.
-- Enum-valued fields (`type`, `rule`, `nth`, `makeup`, `calendar`) use the
-  lowercase `snake_case` spellings shown above.
+- Enum-valued fields (`type`, `rule`, `nth`, `makeup`, `makeup_failure`,
+  `calendar`) use the lowercase `snake_case` spellings shown above.
 
 (validation)=
 
