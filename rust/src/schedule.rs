@@ -22,6 +22,10 @@ pub struct Schedule {
     /// What to do when an overlay drops a base occurrence.
     #[serde(default)]
     pub makeup: Makeup,
+    /// Maximum number of days to scan for makeup. `None` keeps the built-in
+    /// search limit.
+    #[serde(default)]
+    pub max_makeup_hops: Option<u32>,
     /// No occurrence before this instant (future-start support).
     #[serde(default)]
     pub start: Option<DateTime<Utc>>,

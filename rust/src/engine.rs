@@ -254,12 +254,20 @@ impl Schedule {
     /// Apply the makeup rule to a dropped base `date`; returns the surviving
     /// destination date, or `None` if makeup is disabled or exhausted.
     fn make_up(&self, date: NaiveDate, cal: &dyn CalendarProvider) -> Option<NaiveDate> {
+        let max_hops = self
+            .max_makeup_hops
+            .map(i64::from)
+            .unwrap_or(MAX_MAKEUP_DAYS)
+            .min(MAX_MAKEUP_DAYS);
+        if max_hops == 0 {
+            return None;
+        }
         let step = match self.makeup {
             Makeup::None => return None,
             Makeup::Before => -1,
             Makeup::After => 1,
         };
-        for k in 1..=MAX_MAKEUP_DAYS {
+        for k in 1..=max_hops {
             let d = date.checked_add_signed(Duration::days(step * k))?;
             if self.survives(d, cal) {
                 return Some(d);

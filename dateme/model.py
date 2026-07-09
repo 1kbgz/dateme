@@ -236,6 +236,7 @@ class Schedule:
     timezone: str
     overlays: list[Overlay] = field(default_factory=list)
     makeup: Makeup = Makeup.NONE
+    max_makeup_hops: int | None = None
     start: str | datetime | None = None
     end: str | datetime | None = None
 
@@ -245,6 +246,7 @@ class Schedule:
             "timezone": self.timezone,
             "overlays": [o.to_dict() for o in self.overlays],
             "makeup": self.makeup.value,
+            "max_makeup_hops": self.max_makeup_hops,
             "start": _instant_str(self.start),
             "end": _instant_str(self.end),
         }

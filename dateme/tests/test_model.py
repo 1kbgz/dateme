@@ -46,6 +46,19 @@ def test_typed_dict_json_agree():
     assert a == b == c
 
 
+def test_typed_model_serializes_max_makeup_hops():
+    spec = nyse_monday_spec()
+    capped = model.Schedule(
+        freq=spec.freq,
+        timezone=spec.timezone,
+        overlays=spec.overlays,
+        makeup=spec.makeup,
+        max_makeup_hops=1,
+    )
+    assert capped.to_dict()["max_makeup_hops"] == 1
+    assert Schedule(capped).to_dict()["max_makeup_hops"] == 1
+
+
 def test_construct_from_plain_dict():
     s = Schedule(
         {
