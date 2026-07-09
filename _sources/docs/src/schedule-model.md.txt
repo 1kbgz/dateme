@@ -12,16 +12,17 @@ native objects instead of hand-writing JSON.
 
 ## Schedule object
 
-| Field             | Type                              | Required | Default  | Description                                                       |
-| ----------------- | --------------------------------- | -------- | -------- | ----------------------------------------------------------------- |
-| `freq`            | [Frequency](#frequency)           | yes      | —        | The base recurrence.                                              |
-| `timezone`        | string (IANA name)                | yes      | —        | Timezone occurrences are generated in, e.g. `"America/New_York"`. |
-| `overlays`        | array of [Overlay](#overlays)     | no       | `[]`     | Calendar filters, ANDed. Empty means no filtering.                |
-| `makeup`          | [Makeup](#makeup)                 | no       | `"none"` | What to do when an overlay drops an occurrence.                   |
-| `max_makeup_hops` | integer or null                   | no       | `null`   | Maximum days to scan for makeup; `null` uses the built-in limit.  |
-| `makeup_failure`  | [Makeup failure](#makeup-failure) | no       | `"skip"` | What to do when makeup cannot find a surviving date.              |
-| `start`           | RFC 3339 datetime or null         | no       | `null`   | No occurrence before this instant.                                |
-| `end`             | RFC 3339 datetime or null         | no       | `null`   | No occurrence at or after this instant.                           |
+| Field                          | Type                              | Required | Default  | Description                                                       |
+| ------------------------------ | --------------------------------- | -------- | -------- | ----------------------------------------------------------------- |
+| `freq`                         | [Frequency](#frequency)           | yes      | —        | The base recurrence.                                              |
+| `timezone`                     | string (IANA name)                | yes      | —        | Timezone occurrences are generated in, e.g. `"America/New_York"`. |
+| `overlays`                     | array of [Overlay](#overlays)     | no       | `[]`     | Calendar filters, ANDed. Empty means no filtering.                |
+| `makeup`                       | [Makeup](#makeup)                 | no       | `"none"` | What to do when an overlay drops an occurrence.                   |
+| `max_makeup_hops`              | integer or null                   | no       | `null`   | Maximum days to scan for makeup; `null` uses the built-in limit.  |
+| `makeup_failure`               | [Makeup failure](#makeup-failure) | no       | `"skip"` | What to do when makeup cannot find a surviving date.              |
+| `skip_if_consecutive_excluded` | integer or null                   | no       | `null`   | Skip excluded base-occurrence runs at or above this length.       |
+| `start`                        | RFC 3339 datetime or null         | no       | `null`   | No occurrence before this instant.                                |
+| `end`                          | RFC 3339 datetime or null         | no       | `null`   | No occurrence at or after this instant.                           |
 
 `start` and `end` are UTC instants (e.g. `"2026-06-01T00:00:00Z"`). Comparison is
 against the final occurrence instant, after any makeup.
@@ -220,6 +221,22 @@ is found within `max_makeup_hops`. One of:
 
 When `makeup` is `"none"`, the cycle is skipped and `makeup_failure` is ignored.
 
+(threshold-skip)=
+
+## Threshold Skip
+
+Set `skip_if_consecutive_excluded` to skip runs of excluded base occurrences
+before makeup is applied.
+
+```json
+{ "skip_if_consecutive_excluded": 2 }
+```
+
+The value is a positive integer. `null` or an absent field disables the rule. A
+run is counted over consecutive entries in the base recurrence series. When a
+run length is at least the threshold, every excluded base occurrence in that run
+is dropped and does not use `makeup` or `makeup_failure`.
+
 ## Serialization notes
 
 - `timezone` is the IANA name string (`"UTC"`, `"America/New_York"`, …).
@@ -228,6 +245,8 @@ When `makeup` is `"none"`, the cycle is skipped and `makeup_failure` is ignored.
 - `start` and `end` are RFC 3339 datetimes, or `null`.
 - Enum-valued fields (`type`, `rule`, `nth`, `makeup`, `makeup_failure`,
   `calendar`) use the lowercase `snake_case` spellings shown above.
+- `skip_if_consecutive_excluded` must be `null`, absent, or an integer at least
+  `1`.
 
 (validation)=
 

@@ -315,8 +315,9 @@ filter occurrences against built-in calendars (<code class="docutils literal not
 <a class="reference external" href="https://crates.io/crates/finance-dates"><code class="docutils literal notranslate"><span class="pre">finance-dates</span></code></a>); <code class="docutils literal notranslate"><span class="pre">makeup</span></code> shifts a
 dropped occurrence to the nearest surviving day (<code class="docutils literal notranslate"><span class="pre">before</span></code> / <code class="docutils literal notranslate"><span class="pre">after</span></code>), or drops
 it (<code class="docutils literal notranslate"><span class="pre">none</span></code>). <code class="docutils literal notranslate"><span class="pre">max_makeup_hops</span></code> can cap that search, and <code class="docutils literal notranslate"><span class="pre">makeup_failure</span></code> can
-keep the original date when makeup cannot find a surviving date. DST gaps and
-overlaps are resolved on conversion to UTC.</p>
+keep the original date when makeup cannot find a surviving date.
+<code class="docutils literal notranslate"><span class="pre">skip_if_consecutive_excluded</span></code> can drop runs of excluded base occurrences before
+makeup. DST gaps and overlaps are resolved on conversion to UTC.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This library was generated using <a class="reference external" href="https://copier.readthedocs.io/en/stable/">copier</a> from the <a class="reference external" href="https://github.com/python-project-templates/base">Base Python Project Template repository</a>.</p>
