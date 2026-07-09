@@ -69,6 +69,7 @@ export interface ScheduleSpec {
   timezone: string;
   overlays?: Overlay[];
   makeup?: Makeup;
+  max_makeup_hops?: number | null;
   start?: string | null;
   end?: string | null;
 }

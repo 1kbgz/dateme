@@ -46,6 +46,7 @@ fn weekly_monday_nyse_exclude_after() {
             rule: OverlayRule::Exclude,
         }],
         makeup: Makeup::After,
+        max_makeup_hops: None,
         start: None,
         end: None,
     };
@@ -58,6 +59,46 @@ fn weekly_monday_nyse_exclude_after() {
     assert_eq!(
         s.next(utc("2026-01-13T00:00:00Z"), &cal),
         Some(utc("2026-01-20T22:30:00Z"))
+    );
+}
+
+#[test]
+fn makeup_hops_cap_drops_when_next_day_is_excluded() {
+    let cal = |id: CalendarId, d: NaiveDate| match id {
+        CalendarId::NyseHoliday => Some(d == date(2026, 1, 19) || d == date(2026, 1, 20)),
+        _ => Some(false),
+    };
+    let mut s = Schedule {
+        freq: Frequency::Weekly {
+            days: vec![Weekday::Mon],
+            time: hm(17, 30),
+        },
+        timezone: ny(),
+        overlays: vec![Overlay {
+            calendar: CalendarId::NyseHoliday,
+            rule: OverlayRule::Exclude,
+        }],
+        makeup: Makeup::After,
+        max_makeup_hops: None,
+        start: None,
+        end: None,
+    };
+
+    assert_eq!(
+        s.next(utc("2026-01-13T00:00:00Z"), &cal),
+        Some(utc("2026-01-21T22:30:00Z"))
+    );
+
+    s.max_makeup_hops = Some(1);
+    assert_eq!(
+        s.next(utc("2026-01-13T00:00:00Z"), &cal),
+        Some(utc("2026-01-26T22:30:00Z"))
+    );
+
+    s.max_makeup_hops = Some(0);
+    assert_eq!(
+        s.next(utc("2026-01-13T00:00:00Z"), &cal),
+        Some(utc("2026-01-26T22:30:00Z"))
     );
 }
 
@@ -74,6 +115,7 @@ fn daily_exclude_before_dedup() {
             rule: OverlayRule::Exclude,
         }],
         makeup: Makeup::Before,
+        max_makeup_hops: None,
         start: None,
         end: None,
     };
@@ -103,6 +145,7 @@ fn monthly_day_31_skips_short_months() {
         timezone: Tz::UTC,
         overlays: vec![],
         makeup: Makeup::None,
+        max_makeup_hops: None,
         start: None,
         end: None,
     };
@@ -132,6 +175,7 @@ fn monthly_fifth_friday() {
         timezone: Tz::UTC,
         overlays: vec![],
         makeup: Makeup::None,
+        max_makeup_hops: None,
         start: None,
         end: None,
     };
@@ -162,6 +206,7 @@ fn last_business_day_before() {
             rule: OverlayRule::Only,
         }],
         makeup: Makeup::Before,
+        max_makeup_hops: None,
         start: None,
         end: None,
     };
@@ -183,6 +228,7 @@ fn dst_spring_forward() {
         timezone: ny(),
         overlays: vec![],
         makeup: Makeup::None,
+        max_makeup_hops: None,
         start: None,
         end: None,
     };
@@ -202,6 +248,7 @@ fn dst_fall_back() {
         timezone: ny(),
         overlays: vec![],
         makeup: Makeup::None,
+        max_makeup_hops: None,
         start: None,
         end: None,
     };
@@ -224,6 +271,7 @@ fn dst_spring_forward_off_grid_minutes() {
             timezone: ny(),
             overlays: vec![],
             makeup: Makeup::None,
+            max_makeup_hops: None,
             start: None,
             end: None,
         };
@@ -244,6 +292,7 @@ fn dst_hourly_counts() {
         timezone: ny(),
         overlays: vec![],
         makeup: Makeup::None,
+        max_makeup_hops: None,
         start: None,
         end: None,
     };
@@ -283,6 +332,7 @@ fn dst_sub_hour_zone() {
         timezone: tz,
         overlays: vec![],
         makeup: Makeup::None,
+        max_makeup_hops: None,
         start: None,
         end: None,
     };
@@ -307,6 +357,7 @@ fn end_bound() {
         timezone: Tz::UTC,
         overlays: vec![],
         makeup: Makeup::None,
+        max_makeup_hops: None,
         start: None,
         end: Some(utc("2026-01-03T00:00:00Z")),
     };
@@ -322,6 +373,7 @@ fn start_bound() {
         timezone: Tz::UTC,
         overlays: vec![],
         makeup: Makeup::None,
+        max_makeup_hops: None,
         start: Some(utc("2026-06-01T00:00:00Z")),
         end: None,
     };
@@ -343,6 +395,7 @@ fn weekly_multi_day() {
         timezone: Tz::UTC,
         overlays: vec![],
         makeup: Makeup::None,
+        max_makeup_hops: None,
         start: None,
         end: None,
     };
@@ -373,6 +426,7 @@ fn invalid_yearly_month_does_not_panic() {
         timezone: Tz::UTC,
         overlays: vec![],
         makeup: Makeup::None,
+        max_makeup_hops: None,
         start: None,
         end: None,
     };
@@ -391,6 +445,7 @@ fn previous_and_since_symmetry() {
         timezone: Tz::UTC,
         overlays: vec![],
         makeup: Makeup::None,
+        max_makeup_hops: None,
         start: None,
         end: None,
     };
@@ -421,6 +476,7 @@ fn until_first_equals_next() {
         timezone: Tz::UTC,
         overlays: vec![],
         makeup: Makeup::None,
+        max_makeup_hops: None,
         start: None,
         end: None,
     };
@@ -438,6 +494,7 @@ fn strictly_after_excludes_exact() {
         timezone: Tz::UTC,
         overlays: vec![],
         makeup: Makeup::None,
+        max_makeup_hops: None,
         start: None,
         end: None,
     };
@@ -460,6 +517,7 @@ fn overlay_removes_everything_terminates() {
             rule: OverlayRule::Only,
         }],
         makeup: Makeup::None,
+        max_makeup_hops: None,
         start: None,
         end: None,
     };
@@ -512,6 +570,7 @@ fn validate_rejects_and_dedupes() {
         timezone: Tz::UTC,
         overlays: vec![],
         makeup: Makeup::None,
+        max_makeup_hops: None,
         start: None,
         end: None,
     };
@@ -525,6 +584,7 @@ fn validate_rejects_and_dedupes() {
         timezone: Tz::UTC,
         overlays: vec![],
         makeup: Makeup::None,
+        max_makeup_hops: None,
         start: None,
         end: None,
     };
@@ -538,6 +598,7 @@ fn validate_rejects_and_dedupes() {
         timezone: Tz::UTC,
         overlays: vec![],
         makeup: Makeup::None,
+        max_makeup_hops: None,
         start: Some(utc("2026-02-01T00:00:00Z")),
         end: Some(utc("2026-01-01T00:00:00Z")),
     };

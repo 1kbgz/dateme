@@ -12,14 +12,15 @@ native objects instead of hand-writing JSON.
 
 ## Schedule object
 
-| Field      | Type                          | Required | Default  | Description                                                       |
-| ---------- | ----------------------------- | -------- | -------- | ----------------------------------------------------------------- |
-| `freq`     | [Frequency](#frequency)       | yes      | —        | The base recurrence.                                              |
-| `timezone` | string (IANA name)            | yes      | —        | Timezone occurrences are generated in, e.g. `"America/New_York"`. |
-| `overlays` | array of [Overlay](#overlays) | no       | `[]`     | Calendar filters, ANDed. Empty means no filtering.                |
-| `makeup`   | [Makeup](#makeup)             | no       | `"none"` | What to do when an overlay drops an occurrence.                   |
-| `start`    | RFC 3339 datetime or null     | no       | `null`   | No occurrence before this instant.                                |
-| `end`      | RFC 3339 datetime or null     | no       | `null`   | No occurrence at or after this instant.                           |
+| Field             | Type                          | Required | Default  | Description                                                       |
+| ----------------- | ----------------------------- | -------- | -------- | ----------------------------------------------------------------- |
+| `freq`            | [Frequency](#frequency)       | yes      | —        | The base recurrence.                                              |
+| `timezone`        | string (IANA name)            | yes      | —        | Timezone occurrences are generated in, e.g. `"America/New_York"`. |
+| `overlays`        | array of [Overlay](#overlays) | no       | `[]`     | Calendar filters, ANDed. Empty means no filtering.                |
+| `makeup`          | [Makeup](#makeup)             | no       | `"none"` | What to do when an overlay drops an occurrence.                   |
+| `max_makeup_hops` | integer or null               | no       | `null`   | Maximum days to scan for makeup; `null` uses the built-in limit.  |
+| `start`           | RFC 3339 datetime or null     | no       | `null`   | No occurrence before this instant.                                |
+| `end`             | RFC 3339 datetime or null     | no       | `null`   | No occurrence at or after this instant.                           |
 
 `start` and `end` are UTC instants (e.g. `"2026-06-01T00:00:00Z"`). Comparison is
 against the final occurrence instant, after any makeup.
@@ -197,10 +198,12 @@ What to do when an overlay drops a base occurrence. One of:
 | `"before"` | Move to the nearest **earlier** day that passes all overlays, at the same time. |
 | `"after"`  | Move to the nearest **later** day that passes all overlays, at the same time.   |
 
-The makeup search scans at most 14 days; if no surviving day is found within that
-range the occurrence is dropped. A made-up occurrence that coincides with another
-occurrence already produced by the schedule is dropped rather than duplicated.
-See [Overlays and makeup](#overlays-and-makeup).
+The makeup search scans at most 14 days by default; set `max_makeup_hops` to
+cap that search. `null` or an absent field uses the default limit, `0` disables
+makeup for dropped occurrences, and a positive integer scans up to that many
+days, capped at 14. A made-up occurrence that coincides with another occurrence
+already produced by the schedule is dropped rather than duplicated. See
+[Overlays and makeup](#overlays-and-makeup).
 
 ## Serialization notes
 

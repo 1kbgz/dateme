@@ -114,4 +114,20 @@ test.describe("Schedule", () => {
     expect(res.next).toBe("2026-01-20T22:30:00.000Z");
     expect(res.roundtrip).toBe("weekly");
   });
+
+  test("round-trips max_makeup_hops from typed specs", async ({ page }) => {
+    const res = await run(
+      page,
+      `const spec = {
+         freq: { type: "weekly", days: [mod.Weekday.Mon], time: "17:30" },
+         timezone: "America/New_York",
+         overlays: [{ calendar: mod.CalendarId.NyseHoliday, rule: mod.OverlayRule.Exclude }],
+         makeup: mod.Makeup.After,
+         max_makeup_hops: 1,
+       };
+       const s = new mod.Schedule(spec);
+       return s.toObject().max_makeup_hops;`,
+    );
+    expect(res).toBe(1);
+  });
 });
