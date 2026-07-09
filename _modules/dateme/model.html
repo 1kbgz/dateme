@@ -256,6 +256,7 @@
     <span class="s2">&quot;Makeup&quot;</span><span class="p">,</span>
     <span class="s2">&quot;OverlayRule&quot;</span><span class="p">,</span>
     <span class="s2">&quot;CalendarId&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MakeupFailure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;MonthDay&quot;</span><span class="p">,</span>
     <span class="s2">&quot;NthWeekday&quot;</span><span class="p">,</span>
     <span class="s2">&quot;Overlay&quot;</span><span class="p">,</span>
@@ -301,6 +302,14 @@
     <span class="n">NONE</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
     <span class="n">BEFORE</span> <span class="o">=</span> <span class="s2">&quot;before&quot;</span>
     <span class="n">AFTER</span> <span class="o">=</span> <span class="s2">&quot;after&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="MakeupFailure">
+<a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.MakeupFailure">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MakeupFailure</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+    <span class="n">SKIP</span> <span class="o">=</span> <span class="s2">&quot;skip&quot;</span>
+    <span class="n">KEEP_ORIGINAL</span> <span class="o">=</span> <span class="s2">&quot;keep_original&quot;</span></div>
 
 
 
@@ -521,6 +530,7 @@
     <span class="n">overlays</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Overlay</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
     <span class="n">makeup</span><span class="p">:</span> <span class="n">Makeup</span> <span class="o">=</span> <span class="n">Makeup</span><span class="o">.</span><span class="n">NONE</span>
     <span class="n">max_makeup_hops</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">makeup_failure</span><span class="p">:</span> <span class="n">MakeupFailure</span> <span class="o">=</span> <span class="n">MakeupFailure</span><span class="o">.</span><span class="n">SKIP</span>
     <span class="n">start</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">end</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -531,6 +541,7 @@
             <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">o</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">overlays</span><span class="p">],</span>
             <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="s2">&quot;max_makeup_hops&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_makeup_hops</span><span class="p">,</span>
+            <span class="s2">&quot;makeup_failure&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup_failure</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="n">_instant_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">),</span>
             <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="n">_instant_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">),</span>
         <span class="p">}</span>
