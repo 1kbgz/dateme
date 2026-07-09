@@ -147,4 +147,22 @@ test.describe("Schedule", () => {
     );
     expect(res).toBe("keep_original");
   });
+
+  test("round-trips skip_if_consecutive_excluded from typed specs", async ({
+    page,
+  }) => {
+    const res = await run(
+      page,
+      `const spec = {
+         freq: { type: "weekly", days: [mod.Weekday.Mon], time: "17:30" },
+         timezone: "America/New_York",
+         overlays: [{ calendar: mod.CalendarId.NyseHoliday, rule: mod.OverlayRule.Exclude }],
+         makeup: mod.Makeup.After,
+         skip_if_consecutive_excluded: 2,
+       };
+       const s = new mod.Schedule(spec);
+       return s.toObject().skip_if_consecutive_excluded;`,
+    );
+    expect(res).toBe(2);
+  });
 });

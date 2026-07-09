@@ -244,8 +244,13 @@ class Schedule:
     makeup: Makeup = Makeup.NONE
     max_makeup_hops: int | None = None
     makeup_failure: MakeupFailure = MakeupFailure.SKIP
+    skip_if_consecutive_excluded: int | None = None
     start: str | datetime | None = None
     end: str | datetime | None = None
+
+    def __post_init__(self) -> None:
+        if self.skip_if_consecutive_excluded is not None and self.skip_if_consecutive_excluded < 1:
+            raise ValueError("skip_if_consecutive_excluded must be at least 1")
 
     def to_dict(self) -> dict:
         return {
@@ -255,6 +260,7 @@ class Schedule:
             "makeup": self.makeup.value,
             "max_makeup_hops": self.max_makeup_hops,
             "makeup_failure": self.makeup_failure.value,
+            "skip_if_consecutive_excluded": self.skip_if_consecutive_excluded,
             "start": _instant_str(self.start),
             "end": _instant_str(self.end),
         }

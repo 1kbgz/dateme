@@ -29,6 +29,9 @@ pub struct Schedule {
     /// What to do when makeup is enabled but no surviving destination is found.
     #[serde(default)]
     pub makeup_failure: MakeupFailure,
+    /// Skip excluded base-occurrence runs at or above this length before makeup.
+    #[serde(default)]
+    pub skip_if_consecutive_excluded: Option<u32>,
     /// No occurrence before this instant (future-start support).
     #[serde(default)]
     pub start: Option<DateTime<Utc>>,
@@ -160,6 +163,7 @@ pub enum ScheduleError {
     EmptyDays,
     InvalidMonthDay(u8),
     InvalidMonth(u8),
+    InvalidSkipThreshold(u32),
     StartNotBeforeEnd,
     NeverFires,
 }
@@ -171,6 +175,9 @@ impl fmt::Display for ScheduleError {
             ScheduleError::EmptyDays => write!(f, "day/weekday selection is empty"),
             ScheduleError::InvalidMonthDay(d) => write!(f, "month day {d} out of range 1..=31"),
             ScheduleError::InvalidMonth(m) => write!(f, "month {m} out of range 1..=12"),
+            ScheduleError::InvalidSkipThreshold(n) => {
+                write!(f, "skip threshold {n} out of range 1..")
+            }
             ScheduleError::StartNotBeforeEnd => write!(f, "start must be strictly before end"),
             ScheduleError::NeverFires => write!(f, "schedule can never produce an occurrence"),
         }
@@ -223,6 +230,10 @@ impl Schedule {
             if start >= end {
                 return Err(ScheduleError::StartNotBeforeEnd);
             }
+        }
+
+        if let Some(0) = self.skip_if_consecutive_excluded {
+            return Err(ScheduleError::InvalidSkipThreshold(0));
         }
 
         Ok(())
