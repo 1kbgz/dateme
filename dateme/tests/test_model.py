@@ -74,6 +74,31 @@ def test_typed_model_serializes_makeup_failure():
     assert Schedule(keep).to_dict()["makeup_failure"] == "keep_original"
 
 
+def test_typed_model_serializes_skip_if_consecutive_excluded():
+    spec = nyse_monday_spec()
+    threshold = model.Schedule(
+        freq=spec.freq,
+        timezone=spec.timezone,
+        overlays=spec.overlays,
+        makeup=spec.makeup,
+        skip_if_consecutive_excluded=2,
+    )
+    assert threshold.to_dict()["skip_if_consecutive_excluded"] == 2
+    assert Schedule(threshold).to_dict()["skip_if_consecutive_excluded"] == 2
+
+
+def test_host_validation_skip_if_consecutive_excluded():
+    spec = nyse_monday_spec()
+    with pytest.raises(ValueError):
+        model.Schedule(
+            freq=spec.freq,
+            timezone=spec.timezone,
+            overlays=spec.overlays,
+            makeup=spec.makeup,
+            skip_if_consecutive_excluded=0,
+        )
+
+
 def test_construct_from_plain_dict():
     s = Schedule(
         {
@@ -152,5 +177,16 @@ def test_construction_rejects_out_of_range_month():
             {
                 "freq": {"type": "yearly", "month": 13, "day": {"type": "day", "value": 1}, "time": "12:00"},
                 "timezone": "UTC",
+            }
+        )
+
+
+def test_construction_rejects_bad_skip_if_consecutive_excluded():
+    with pytest.raises(ValueError):
+        Schedule(
+            {
+                "freq": {"type": "daily", "time": "09:00"},
+                "timezone": "UTC",
+                "skip_if_consecutive_excluded": 0,
             }
         )

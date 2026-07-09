@@ -77,6 +77,7 @@ export interface ScheduleSpec {
   makeup?: Makeup;
   max_makeup_hops?: number | null;
   makeup_failure?: MakeupFailure;
+  skip_if_consecutive_excluded?: number | null;
   start?: string | null;
   end?: string | null;
 }

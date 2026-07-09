@@ -257,6 +257,36 @@ impl Schedule {
         true
     }
 
+    fn skipped_excluded_runs(
+        &self,
+        base: &[(NaiveDate, NaiveTime)],
+        cal: &dyn CalendarProvider,
+    ) -> BTreeSet<(NaiveDate, NaiveTime)> {
+        let threshold = match self.skip_if_consecutive_excluded {
+            Some(n) if n > 0 => n as usize,
+            _ => return BTreeSet::new(),
+        };
+        let mut skipped = BTreeSet::new();
+        let mut run = Vec::new();
+
+        for &(date, time) in base {
+            if self.survives(date, cal) {
+                if run.len() >= threshold {
+                    skipped.extend(run.drain(..));
+                } else {
+                    run.clear();
+                }
+            } else {
+                run.push((date, time));
+            }
+        }
+        if run.len() >= threshold {
+            skipped.extend(run);
+        }
+
+        skipped
+    }
+
     /// Apply the makeup rule to a dropped base `date`.
     fn make_up(&self, date: NaiveDate, cal: &dyn CalendarProvider) -> MakeupOutcome {
         let step = match self.makeup {
@@ -296,7 +326,13 @@ impl Schedule {
             _ => Nonexistent::Shift,
         };
         let mut set = BTreeSet::new();
-        for (date, time) in self.enumerate_base(lo, hi) {
+        let mut base = self.enumerate_base(lo, hi);
+        base.sort_unstable();
+        let skipped_base = self.skipped_excluded_runs(&base, cal);
+        for (date, time) in base {
+            if skipped_base.contains(&(date, time)) {
+                continue;
+            }
             let dest = if self.survives(date, cal) {
                 Some(date)
             } else {

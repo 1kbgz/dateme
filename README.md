@@ -78,8 +78,9 @@ filter occurrences against built-in calendars (`us_federal_holiday`,
 [`finance-dates`](https://crates.io/crates/finance-dates)); `makeup` shifts a
 dropped occurrence to the nearest surviving day (`before` / `after`), or drops
 it (`none`). `max_makeup_hops` can cap that search, and `makeup_failure` can
-keep the original date when makeup cannot find a surviving date. DST gaps and
-overlaps are resolved on conversion to UTC.
+keep the original date when makeup cannot find a surviving date.
+`skip_if_consecutive_excluded` can drop runs of excluded base occurrences before
+makeup. DST gaps and overlaps are resolved on conversion to UTC.
 
 > [!NOTE]
 > This library was generated using [copier](https://copier.readthedocs.io/en/stable/) from the [Base Python Project Template repository](https://github.com/python-project-templates/base).
