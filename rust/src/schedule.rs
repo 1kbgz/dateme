@@ -7,7 +7,9 @@
 
 use chrono::{DateTime, NaiveTime, Utc, Weekday};
 use chrono_tz::Tz;
-use serde::{Deserialize, Serialize};
+use serde::de::{self, MapAccess, Visitor};
+use serde::ser::SerializeMap;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt;
 
 /// A recurrence rule. Serialize to JSON for storage.
@@ -133,8 +135,7 @@ pub enum CalendarId {
 }
 
 /// What to do when an overlay drops a base occurrence.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum Makeup {
     /// Skip the cycle entirely.
     #[default]
@@ -143,6 +144,203 @@ pub enum Makeup {
     Before,
     /// Move to the nearest LATER surviving day (same time-of-day).
     After,
+    /// Select a makeup direction based on the excluded date's weekday.
+    ByWeekday(WeekdayMakeup),
+}
+
+impl Makeup {
+    pub(crate) fn direction_for(&self, weekday: Weekday) -> MakeupDirection {
+        match self {
+            Makeup::None => MakeupDirection::None,
+            Makeup::Before => MakeupDirection::Before,
+            Makeup::After => MakeupDirection::After,
+            Makeup::ByWeekday(map) => map.direction_for(weekday),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct WeekdayMakeup {
+    pub mon: Option<MakeupDirection>,
+    pub tue: Option<MakeupDirection>,
+    pub wed: Option<MakeupDirection>,
+    pub thu: Option<MakeupDirection>,
+    pub fri: Option<MakeupDirection>,
+    pub sat: Option<MakeupDirection>,
+    pub sun: Option<MakeupDirection>,
+    pub default: Option<MakeupDirection>,
+}
+
+impl WeekdayMakeup {
+    fn direction_for(&self, weekday: Weekday) -> MakeupDirection {
+        let selected = match weekday {
+            Weekday::Mon => self.mon,
+            Weekday::Tue => self.tue,
+            Weekday::Wed => self.wed,
+            Weekday::Thu => self.thu,
+            Weekday::Fri => self.fri,
+            Weekday::Sat => self.sat,
+            Weekday::Sun => self.sun,
+        };
+        selected.or(self.default).unwrap_or(MakeupDirection::None)
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum MakeupDirection {
+    #[default]
+    None,
+    Before,
+    After,
+}
+
+impl From<MakeupDirection> for Makeup {
+    fn from(value: MakeupDirection) -> Self {
+        match value {
+            MakeupDirection::None => Makeup::None,
+            MakeupDirection::Before => Makeup::Before,
+            MakeupDirection::After => Makeup::After,
+        }
+    }
+}
+
+impl From<Makeup> for MakeupDirection {
+    fn from(value: Makeup) -> Self {
+        match value {
+            Makeup::None | Makeup::ByWeekday(_) => MakeupDirection::None,
+            Makeup::Before => MakeupDirection::Before,
+            Makeup::After => MakeupDirection::After,
+        }
+    }
+}
+
+impl Serialize for Makeup {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            Makeup::None => MakeupDirection::None.serialize(serializer),
+            Makeup::Before => MakeupDirection::Before.serialize(serializer),
+            Makeup::After => MakeupDirection::After.serialize(serializer),
+            Makeup::ByWeekday(map) => map.serialize(serializer),
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for Makeup {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct MakeupVisitor;
+
+        impl<'de> Visitor<'de> for MakeupVisitor {
+            type Value = Makeup;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+                formatter.write_str("a makeup direction string or weekday makeup map")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+            where
+                E: de::Error,
+            {
+                let direction = match value {
+                    "none" => MakeupDirection::None,
+                    "before" => MakeupDirection::Before,
+                    "after" => MakeupDirection::After,
+                    _ => return Err(E::unknown_variant(value, &["none", "before", "after"])),
+                };
+                Ok(direction.into())
+            }
+
+            fn visit_map<A>(self, map: A) -> Result<Self::Value, A::Error>
+            where
+                A: MapAccess<'de>,
+            {
+                WeekdayMakeup::deserialize(de::value::MapAccessDeserializer::new(map))
+                    .map(Makeup::ByWeekday)
+            }
+        }
+
+        deserializer.deserialize_any(MakeupVisitor)
+    }
+}
+
+impl Serialize for WeekdayMakeup {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut map = serializer.serialize_map(None)?;
+        if let Some(value) = self.mon {
+            map.serialize_entry("mon", &value)?;
+        }
+        if let Some(value) = self.tue {
+            map.serialize_entry("tue", &value)?;
+        }
+        if let Some(value) = self.wed {
+            map.serialize_entry("wed", &value)?;
+        }
+        if let Some(value) = self.thu {
+            map.serialize_entry("thu", &value)?;
+        }
+        if let Some(value) = self.fri {
+            map.serialize_entry("fri", &value)?;
+        }
+        if let Some(value) = self.sat {
+            map.serialize_entry("sat", &value)?;
+        }
+        if let Some(value) = self.sun {
+            map.serialize_entry("sun", &value)?;
+        }
+        if let Some(value) = self.default {
+            map.serialize_entry("default", &value)?;
+        }
+        map.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for WeekdayMakeup {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        #[serde(deny_unknown_fields)]
+        struct Raw {
+            #[serde(default)]
+            mon: Option<MakeupDirection>,
+            #[serde(default)]
+            tue: Option<MakeupDirection>,
+            #[serde(default)]
+            wed: Option<MakeupDirection>,
+            #[serde(default)]
+            thu: Option<MakeupDirection>,
+            #[serde(default)]
+            fri: Option<MakeupDirection>,
+            #[serde(default)]
+            sat: Option<MakeupDirection>,
+            #[serde(default)]
+            sun: Option<MakeupDirection>,
+            #[serde(default, rename = "default")]
+            default_direction: Option<MakeupDirection>,
+        }
+
+        let raw = Raw::deserialize(deserializer)?;
+        Ok(WeekdayMakeup {
+            mon: raw.mon,
+            tue: raw.tue,
+            wed: raw.wed,
+            thu: raw.thu,
+            fri: raw.fri,
+            sat: raw.sat,
+            sun: raw.sun,
+            default: raw.default_direction,
+        })
+    }
 }
 
 /// What to do when enabled makeup cannot find a surviving destination.

@@ -213,6 +213,49 @@ fn consecutive_excluded_threshold_keeps_short_runs() {
     );
 }
 
+#[test]
+fn makeup_can_vary_by_excluded_weekday() {
+    let cal = |id: CalendarId, d: NaiveDate| match id {
+        CalendarId::NyseHoliday => Some(d == date(2026, 1, 19) || d == date(2026, 1, 23)),
+        _ => Some(false),
+    };
+    let s = Schedule {
+        freq: Frequency::Weekly {
+            days: vec![Weekday::Mon, Weekday::Fri],
+            time: hm(17, 30),
+        },
+        timezone: ny(),
+        overlays: vec![Overlay {
+            calendar: CalendarId::NyseHoliday,
+            rule: OverlayRule::Exclude,
+        }],
+        makeup: Makeup::ByWeekday(WeekdayMakeup {
+            mon: Some(MakeupDirection::After),
+            fri: Some(MakeupDirection::Before),
+            default: Some(MakeupDirection::None),
+            ..WeekdayMakeup::default()
+        }),
+        max_makeup_hops: None,
+        makeup_failure: MakeupFailure::Skip,
+        skip_if_consecutive_excluded: None,
+        start: None,
+        end: None,
+    };
+
+    assert_eq!(
+        s.until(
+            utc("2026-01-27T00:00:00Z"),
+            utc("2026-01-18T00:00:00Z"),
+            &cal,
+        ),
+        vec![
+            utc("2026-01-20T22:30:00Z"),
+            utc("2026-01-22T22:30:00Z"),
+            utc("2026-01-26T22:30:00Z"),
+        ]
+    );
+}
+
 // ---- Test vector 2: daily, exclude holiday, before, dedup ----
 
 #[test]
@@ -704,6 +747,28 @@ fn serde_monthday_forms() {
     } else {
         panic!("wrong freq");
     }
+}
+
+#[test]
+fn serde_weekday_makeup_form() {
+    let json = r#"{ "freq": { "type": "weekly", "days": ["mon", "fri"], "time": "17:30" },
+        "timezone": "America/New_York", "overlays": [],
+        "makeup": { "mon": "after", "fri": "before", "default": "none" },
+        "start": null, "end": null }"#;
+    let s: Schedule = serde_json::from_str(json).unwrap();
+    assert_eq!(
+        s.makeup,
+        Makeup::ByWeekday(WeekdayMakeup {
+            mon: Some(MakeupDirection::After),
+            fri: Some(MakeupDirection::Before),
+            default: Some(MakeupDirection::None),
+            ..WeekdayMakeup::default()
+        })
+    );
+
+    let out = serde_json::to_string(&s).unwrap();
+    let s2: Schedule = serde_json::from_str(&out).unwrap();
+    assert_eq!(s, s2);
 }
 
 // ---- validate ----

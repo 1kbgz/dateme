@@ -14,6 +14,7 @@ from .model import (
     Overlay,
     OverlayRule,
     Weekday,
+    WeekdayMakeup,
     Weekly,
     Yearly,
 )
@@ -37,5 +38,6 @@ __all__ = [
     "OverlayRule",
     "Weekday",
     "Weekly",
+    "WeekdayMakeup",
     "Yearly",
 ]

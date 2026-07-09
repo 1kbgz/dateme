@@ -30,6 +30,17 @@ export const Makeup = {
 } as const;
 export type Makeup = (typeof Makeup)[keyof typeof Makeup];
 
+export interface WeekdayMakeup {
+  mon?: Makeup;
+  tue?: Makeup;
+  wed?: Makeup;
+  thu?: Makeup;
+  fri?: Makeup;
+  sat?: Makeup;
+  sun?: Makeup;
+  default?: Makeup;
+}
+
 export const MakeupFailure = {
   Skip: "skip",
   KeepOriginal: "keep_original",
@@ -74,7 +85,7 @@ export interface ScheduleSpec {
   freq: Frequency;
   timezone: string;
   overlays?: Overlay[];
-  makeup?: Makeup;
+  makeup?: Makeup | WeekdayMakeup;
   max_makeup_hops?: number | null;
   makeup_failure?: MakeupFailure;
   skip_if_consecutive_excluded?: number | null;
