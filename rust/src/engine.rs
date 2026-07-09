@@ -3,7 +3,7 @@
 //! `since`, `upcoming`).
 
 use crate::calendar::CalendarProvider;
-use crate::schedule::{Frequency, Makeup, MonthDay, Nth, Schedule};
+use crate::schedule::{Frequency, Makeup, MakeupFailure, MonthDay, Nth, Schedule};
 use chrono::{
     DateTime, Datelike, Duration, LocalResult, NaiveDate, NaiveTime, TimeZone, Utc, Weekday,
 };
@@ -32,6 +32,12 @@ enum Nonexistent {
     Skip,
     /// Shift to the first valid instant at/after the gap.
     Shift,
+}
+
+enum MakeupOutcome {
+    Moved(NaiveDate),
+    Failed,
+    Disabled,
 }
 
 /// Resolve a local date+time in `tz` to a UTC instant, handling DST per spec §6:
@@ -251,29 +257,30 @@ impl Schedule {
         true
     }
 
-    /// Apply the makeup rule to a dropped base `date`; returns the surviving
-    /// destination date, or `None` if makeup is disabled or exhausted.
-    fn make_up(&self, date: NaiveDate, cal: &dyn CalendarProvider) -> Option<NaiveDate> {
+    /// Apply the makeup rule to a dropped base `date`.
+    fn make_up(&self, date: NaiveDate, cal: &dyn CalendarProvider) -> MakeupOutcome {
+        let step = match self.makeup {
+            Makeup::None => return MakeupOutcome::Disabled,
+            Makeup::Before => -1,
+            Makeup::After => 1,
+        };
         let max_hops = self
             .max_makeup_hops
             .map(i64::from)
             .unwrap_or(MAX_MAKEUP_DAYS)
             .min(MAX_MAKEUP_DAYS);
         if max_hops == 0 {
-            return None;
+            return MakeupOutcome::Failed;
         }
-        let step = match self.makeup {
-            Makeup::None => return None,
-            Makeup::Before => -1,
-            Makeup::After => 1,
-        };
         for k in 1..=max_hops {
-            let d = date.checked_add_signed(Duration::days(step * k))?;
+            let Some(d) = date.checked_add_signed(Duration::days(step * k)) else {
+                return MakeupOutcome::Failed;
+            };
             if self.survives(d, cal) {
-                return Some(d);
+                return MakeupOutcome::Moved(d);
             }
         }
-        None
+        MakeupOutcome::Failed
     }
 
     /// Generate all surviving occurrences (overlays + makeup + dedup applied)
@@ -293,7 +300,14 @@ impl Schedule {
             let dest = if self.survives(date, cal) {
                 Some(date)
             } else {
-                self.make_up(date, cal)
+                match self.make_up(date, cal) {
+                    MakeupOutcome::Moved(d) => Some(d),
+                    MakeupOutcome::Failed => match self.makeup_failure {
+                        MakeupFailure::Skip => None,
+                        MakeupFailure::KeepOriginal => Some(date),
+                    },
+                    MakeupOutcome::Disabled => None,
+                }
             };
             if let Some(d) = dest {
                 if let Some(inst) = resolve_local_to_utc(self.timezone, d, time, mode) {

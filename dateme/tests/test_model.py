@@ -5,6 +5,7 @@ import pytest
 from dateme import (
     CalendarId,
     Makeup,
+    MakeupFailure,
     MonthDay,
     MonthlyByDay,
     Nth,
@@ -57,6 +58,20 @@ def test_typed_model_serializes_max_makeup_hops():
     )
     assert capped.to_dict()["max_makeup_hops"] == 1
     assert Schedule(capped).to_dict()["max_makeup_hops"] == 1
+
+
+def test_typed_model_serializes_makeup_failure():
+    spec = nyse_monday_spec()
+    keep = model.Schedule(
+        freq=spec.freq,
+        timezone=spec.timezone,
+        overlays=spec.overlays,
+        makeup=spec.makeup,
+        max_makeup_hops=1,
+        makeup_failure=MakeupFailure.KEEP_ORIGINAL,
+    )
+    assert keep.to_dict()["makeup_failure"] == "keep_original"
+    assert Schedule(keep).to_dict()["makeup_failure"] == "keep_original"
 
 
 def test_construct_from_plain_dict():

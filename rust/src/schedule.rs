@@ -26,6 +26,9 @@ pub struct Schedule {
     /// search limit.
     #[serde(default)]
     pub max_makeup_hops: Option<u32>,
+    /// What to do when makeup is enabled but no surviving destination is found.
+    #[serde(default)]
+    pub makeup_failure: MakeupFailure,
     /// No occurrence before this instant (future-start support).
     #[serde(default)]
     pub start: Option<DateTime<Utc>>,
@@ -137,6 +140,17 @@ pub enum Makeup {
     Before,
     /// Move to the nearest LATER surviving day (same time-of-day).
     After,
+}
+
+/// What to do when enabled makeup cannot find a surviving destination.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum MakeupFailure {
+    /// Drop the occurrence silently.
+    #[default]
+    Skip,
+    /// Emit the occurrence on its original excluded date.
+    KeepOriginal,
 }
 
 /// Structural validation error.

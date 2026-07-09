@@ -19,6 +19,7 @@ __all__ = [
     "Makeup",
     "OverlayRule",
     "CalendarId",
+    "MakeupFailure",
     "MonthDay",
     "NthWeekday",
     "Overlay",
@@ -56,6 +57,11 @@ class Makeup(str, Enum):
     NONE = "none"
     BEFORE = "before"
     AFTER = "after"
+
+
+class MakeupFailure(str, Enum):
+    SKIP = "skip"
+    KEEP_ORIGINAL = "keep_original"
 
 
 class OverlayRule(str, Enum):
@@ -237,6 +243,7 @@ class Schedule:
     overlays: list[Overlay] = field(default_factory=list)
     makeup: Makeup = Makeup.NONE
     max_makeup_hops: int | None = None
+    makeup_failure: MakeupFailure = MakeupFailure.SKIP
     start: str | datetime | None = None
     end: str | datetime | None = None
 
@@ -247,6 +254,7 @@ class Schedule:
             "overlays": [o.to_dict() for o in self.overlays],
             "makeup": self.makeup.value,
             "max_makeup_hops": self.max_makeup_hops,
+            "makeup_failure": self.makeup_failure.value,
             "start": _instant_str(self.start),
             "end": _instant_str(self.end),
         }

@@ -20,8 +20,8 @@ mod schedule;
 
 pub use calendar::{Calendar, CalendarProvider, NoCalendars};
 pub use schedule::{
-    CalendarId, Frequency, Makeup, MonthDay, Nth, NthWeekday, Overlay, OverlayRule, Schedule,
-    ScheduleError,
+    CalendarId, Frequency, Makeup, MakeupFailure, MonthDay, Nth, NthWeekday, Overlay, OverlayRule,
+    Schedule, ScheduleError,
 };
 
 #[cfg(feature = "calendars")]

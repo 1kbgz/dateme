@@ -30,6 +30,12 @@ export const Makeup = {
 } as const;
 export type Makeup = (typeof Makeup)[keyof typeof Makeup];
 
+export const MakeupFailure = {
+  Skip: "skip",
+  KeepOriginal: "keep_original",
+} as const;
+export type MakeupFailure = (typeof MakeupFailure)[keyof typeof MakeupFailure];
+
 export const OverlayRule = {
   Exclude: "exclude",
   Only: "only",
@@ -70,6 +76,7 @@ export interface ScheduleSpec {
   overlays?: Overlay[];
   makeup?: Makeup;
   max_makeup_hops?: number | null;
+  makeup_failure?: MakeupFailure;
   start?: string | null;
   end?: string | null;
 }
