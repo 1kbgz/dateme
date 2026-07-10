@@ -660,6 +660,9 @@ every excluded date:</p>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;after&quot;</span></code></p></td>
 <td><p>Move to the nearest <strong>later</strong> day that passes all overlays, at the same time.</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;nearest&quot;</span></code></p></td>
+<td><p>Move to the nearest day that passes all overlays, preferring later dates on ties.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -676,8 +679,13 @@ engine uses <code class="docutils literal notranslate"><span class="pre">default
 <p>The makeup search scans at most 14 days by default; set <code class="docutils literal notranslate"><span class="pre">max_makeup_hops</span></code> to
 cap that search. <code class="docutils literal notranslate"><span class="pre">null</span></code> or an absent field uses the default limit, <code class="docutils literal notranslate"><span class="pre">0</span></code> disables
 makeup for dropped occurrences, and a positive integer scans up to that many
-days, capped at 14. A made-up occurrence that coincides with another occurrence
-already produced by the schedule is dropped rather than duplicated. See
+days, capped at 14.</p>
+<p>Set <code class="docutils literal notranslate"><span class="pre">makeup_only_on</span></code> to restrict makeup destination dates to specific weekdays:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;makeup_only_on&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;tue&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wed&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;thu&quot;</span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>A made-up occurrence that coincides with another occurrence already produced by
+the schedule is dropped rather than duplicated. See
 <a class="reference internal" href="explanation.html#overlays-and-makeup"><span class="std std-ref">Overlays and makeup</span></a>.</p>
 </section>
 <section id="makeup-failure">

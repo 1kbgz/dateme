@@ -302,7 +302,8 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Makeup</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
     <span class="n">NONE</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
     <span class="n">BEFORE</span> <span class="o">=</span> <span class="s2">&quot;before&quot;</span>
-    <span class="n">AFTER</span> <span class="o">=</span> <span class="s2">&quot;after&quot;</span></div>
+    <span class="n">AFTER</span> <span class="o">=</span> <span class="s2">&quot;after&quot;</span>
+    <span class="n">NEAREST</span> <span class="o">=</span> <span class="s2">&quot;nearest&quot;</span></div>
 
 
 
@@ -557,6 +558,7 @@
     <span class="n">makeup</span><span class="p">:</span> <span class="n">Makeup</span> <span class="o">|</span> <span class="n">WeekdayMakeup</span> <span class="o">=</span> <span class="n">Makeup</span><span class="o">.</span><span class="n">NONE</span>
     <span class="n">max_makeup_hops</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">makeup_failure</span><span class="p">:</span> <span class="n">MakeupFailure</span> <span class="o">=</span> <span class="n">MakeupFailure</span><span class="o">.</span><span class="n">SKIP</span>
+    <span class="n">makeup_only_on</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Weekday</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">skip_if_consecutive_excluded</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">start</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">end</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
@@ -573,6 +575,7 @@
             <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">makeup</span><span class="p">,</span> <span class="n">Makeup</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
             <span class="s2">&quot;max_makeup_hops&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_makeup_hops</span><span class="p">,</span>
             <span class="s2">&quot;makeup_failure&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup_failure</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="s2">&quot;makeup_only_on&quot;</span><span class="p">:</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup_only_on</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup_only_on</span><span class="p">],</span>
             <span class="s2">&quot;skip_if_consecutive_excluded&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_if_consecutive_excluded</span><span class="p">,</span>
             <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="n">_instant_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">),</span>
             <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="n">_instant_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">),</span>
