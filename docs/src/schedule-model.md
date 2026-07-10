@@ -215,10 +215,24 @@ Or select a direction by the excluded date's weekday:
 Weekday keys are optional. If an excluded date's weekday is not present, the
 engine uses `default`; if `default` is absent, the occurrence is skipped.
 
+Or provide a cascade of fallback strategies:
+
+```json
+[
+  { "direction": "after", "max_hops": 3 },
+  { "direction": "before", "max_hops": 3 },
+  "none"
+]
+```
+
+Each step is tried in order. A step can be a direction string or an object with
+`direction` and optional `max_hops`.
+
 The makeup search scans at most 14 days by default; set `max_makeup_hops` to
 cap that search. `null` or an absent field uses the default limit, `0` disables
 makeup for dropped occurrences, and a positive integer scans up to that many
-days, capped at 14.
+days, capped at 14. Cascade steps without `max_hops` use this schedule-level
+limit.
 
 Set `makeup_only_on` to restrict makeup destination dates to specific weekdays:
 

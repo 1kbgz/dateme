@@ -83,8 +83,9 @@ cannot find a surviving date.
 `skip_if_consecutive_excluded` can drop runs of excluded base occurrences before
 makeup. `makeup` can also vary by excluded weekday, and `makeup_only_on` can
 restrict makeup target weekdays. Makeup can also be constrained to the same week,
-non-weekend days, or before the next base occurrence. DST gaps and overlaps are
-resolved on conversion to UTC.
+non-weekend days, or before the next base occurrence, and fallback makeup
+strategies can be tried in order. DST gaps and overlaps are resolved on
+conversion to UTC.
 
 > [!NOTE]
 > This library was generated using [copier](https://copier.readthedocs.io/en/stable/) from the [Base Python Project Template repository](https://github.com/python-project-templates/base).

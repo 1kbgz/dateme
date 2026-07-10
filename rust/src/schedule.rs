@@ -7,8 +7,8 @@
 
 use chrono::{DateTime, NaiveTime, Utc, Weekday};
 use chrono_tz::Tz;
-use serde::de::{self, MapAccess, Visitor};
-use serde::ser::SerializeMap;
+use serde::de::{self, MapAccess, SeqAccess, Visitor};
+use serde::ser::{SerializeMap, SerializeSeq};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt;
 
@@ -147,7 +147,7 @@ pub enum CalendarId {
 }
 
 /// What to do when an overlay drops a base occurrence.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub enum Makeup {
     /// Skip the cycle entirely.
     #[default]
@@ -160,18 +160,48 @@ pub enum Makeup {
     Nearest,
     /// Select a makeup direction based on the excluded date's weekday.
     ByWeekday(WeekdayMakeup),
+    /// Try makeup strategies in order until one succeeds or disables makeup.
+    Cascade(Vec<MakeupStep>),
 }
 
 impl Makeup {
-    pub(crate) fn direction_for(&self, weekday: Weekday) -> MakeupDirection {
+    pub(crate) fn steps_for(&self, weekday: Weekday) -> Vec<MakeupStep> {
         match self {
-            Makeup::None => MakeupDirection::None,
-            Makeup::Before => MakeupDirection::Before,
-            Makeup::After => MakeupDirection::After,
-            Makeup::Nearest => MakeupDirection::Nearest,
-            Makeup::ByWeekday(map) => map.direction_for(weekday),
+            Makeup::None => vec![MakeupStep::direction(MakeupDirection::None)],
+            Makeup::Before => vec![MakeupStep::direction(MakeupDirection::Before)],
+            Makeup::After => vec![MakeupStep::direction(MakeupDirection::After)],
+            Makeup::Nearest => vec![MakeupStep::direction(MakeupDirection::Nearest)],
+            Makeup::ByWeekday(map) => vec![MakeupStep::direction(map.direction_for(weekday))],
+            Makeup::Cascade(steps) => steps.clone(),
         }
     }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum MakeupStep {
+    Direction(MakeupDirection),
+    Options(MakeupStepOptions),
+}
+
+impl MakeupStep {
+    fn direction(direction: MakeupDirection) -> Self {
+        Self::Direction(direction)
+    }
+
+    pub(crate) fn parts(&self) -> (MakeupDirection, Option<u32>) {
+        match self {
+            MakeupStep::Direction(direction) => (*direction, None),
+            MakeupStep::Options(options) => (options.direction, options.max_hops),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct MakeupStepOptions {
+    pub direction: MakeupDirection,
+    #[serde(default)]
+    pub max_hops: Option<u32>,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -225,7 +255,7 @@ impl From<MakeupDirection> for Makeup {
 impl From<Makeup> for MakeupDirection {
     fn from(value: Makeup) -> Self {
         match value {
-            Makeup::None | Makeup::ByWeekday(_) => MakeupDirection::None,
+            Makeup::None | Makeup::ByWeekday(_) | Makeup::Cascade(_) => MakeupDirection::None,
             Makeup::Before => MakeupDirection::Before,
             Makeup::After => MakeupDirection::After,
             Makeup::Nearest => MakeupDirection::Nearest,
@@ -244,6 +274,13 @@ impl Serialize for Makeup {
             Makeup::After => MakeupDirection::After.serialize(serializer),
             Makeup::Nearest => MakeupDirection::Nearest.serialize(serializer),
             Makeup::ByWeekday(map) => map.serialize(serializer),
+            Makeup::Cascade(steps) => {
+                let mut seq = serializer.serialize_seq(Some(steps.len()))?;
+                for step in steps {
+                    seq.serialize_element(step)?;
+                }
+                seq.end()
+            }
         }
     }
 }
@@ -287,6 +324,14 @@ impl<'de> Deserialize<'de> for Makeup {
             {
                 WeekdayMakeup::deserialize(de::value::MapAccessDeserializer::new(map))
                     .map(Makeup::ByWeekday)
+            }
+
+            fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
+            where
+                A: SeqAccess<'de>,
+            {
+                Vec::<MakeupStep>::deserialize(de::value::SeqAccessDeserializer::new(seq))
+                    .map(Makeup::Cascade)
             }
         }
 

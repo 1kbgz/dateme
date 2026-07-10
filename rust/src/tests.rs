@@ -494,6 +494,50 @@ fn makeup_can_exclude_weekends() {
     );
 }
 
+#[test]
+fn cascade_makeup_tries_fallback_steps() {
+    let cal = |id: CalendarId, d: NaiveDate| match id {
+        CalendarId::NyseHoliday => Some(d == date(2026, 1, 5) || d == date(2026, 1, 6)),
+        _ => Some(false),
+    };
+    let s = Schedule {
+        freq: Frequency::Weekly {
+            days: vec![Weekday::Mon],
+            time: hm(9, 0),
+        },
+        timezone: Tz::UTC,
+        overlays: vec![Overlay {
+            calendar: CalendarId::NyseHoliday,
+            rule: OverlayRule::Exclude,
+        }],
+        makeup: Makeup::Cascade(vec![
+            MakeupStep::Options(MakeupStepOptions {
+                direction: MakeupDirection::After,
+                max_hops: Some(1),
+            }),
+            MakeupStep::Options(MakeupStepOptions {
+                direction: MakeupDirection::Before,
+                max_hops: Some(3),
+            }),
+            MakeupStep::Direction(MakeupDirection::None),
+        ]),
+        max_makeup_hops: None,
+        makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
+        makeup_within_week: false,
+        makeup_exclude_weekends: false,
+        makeup_before_next: false,
+        skip_if_consecutive_excluded: None,
+        start: None,
+        end: None,
+    };
+
+    assert_eq!(
+        s.next(utc("2026-01-01T00:00:00Z"), &cal),
+        Some(utc("2026-01-04T09:00:00Z"))
+    );
+}
+
 // ---- Test vector 2: daily, exclude holiday, before, dedup ----
 
 #[test]
@@ -1070,6 +1114,37 @@ fn serde_weekday_makeup_form() {
             default: Some(MakeupDirection::None),
             ..WeekdayMakeup::default()
         })
+    );
+
+    let out = serde_json::to_string(&s).unwrap();
+    let s2: Schedule = serde_json::from_str(&out).unwrap();
+    assert_eq!(s, s2);
+}
+
+#[test]
+fn serde_cascade_makeup_form() {
+    let json = r#"{ "freq": { "type": "weekly", "days": ["mon"], "time": "09:00" },
+        "timezone": "UTC", "overlays": [],
+        "makeup": [
+            { "direction": "after", "max_hops": 1 },
+            { "direction": "before", "max_hops": 3 },
+            "none"
+        ],
+        "start": null, "end": null }"#;
+    let s: Schedule = serde_json::from_str(json).unwrap();
+    assert_eq!(
+        s.makeup,
+        Makeup::Cascade(vec![
+            MakeupStep::Options(MakeupStepOptions {
+                direction: MakeupDirection::After,
+                max_hops: Some(1),
+            }),
+            MakeupStep::Options(MakeupStepOptions {
+                direction: MakeupDirection::Before,
+                max_hops: Some(3),
+            }),
+            MakeupStep::Direction(MakeupDirection::None),
+        ])
     );
 
     let out = serde_json::to_string(&s).unwrap();
