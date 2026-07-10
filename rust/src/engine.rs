@@ -327,41 +327,54 @@ impl Schedule {
         next_base: Option<NaiveDate>,
         cal: &dyn CalendarProvider,
     ) -> MakeupOutcome {
-        let direction = self.makeup.direction_for(date.weekday());
-        let step = match direction {
-            MakeupDirection::None => return MakeupOutcome::Disabled,
-            MakeupDirection::Before => -1,
-            MakeupDirection::After => 1,
-            MakeupDirection::Nearest => 1,
-        };
-        let max_hops = self
+        let default_max_hops = self
             .max_makeup_hops
             .map(i64::from)
             .unwrap_or(MAX_MAKEUP_DAYS)
             .min(MAX_MAKEUP_DAYS);
-        if max_hops == 0 {
-            return MakeupOutcome::Failed;
-        }
-        for k in 1..=max_hops {
-            if matches!(direction, MakeupDirection::Nearest) {
-                for step in [1, -1] {
-                    let Some(d) = date.checked_add_signed(Duration::days(step * k)) else {
-                        continue;
-                    };
-                    if self.valid_makeup_target(date, d, previous_base, next_base, cal) {
-                        return MakeupOutcome::Moved(d);
-                    }
-                }
+        let mut attempted = false;
+        for makeup_step in self.makeup.steps_for(date.weekday()) {
+            let (direction, max_hops) = makeup_step.parts();
+            let day_step = match direction {
+                MakeupDirection::None => return MakeupOutcome::Disabled,
+                MakeupDirection::Before => -1,
+                MakeupDirection::After => 1,
+                MakeupDirection::Nearest => 1,
+            };
+            let max_hops = max_hops
+                .map(i64::from)
+                .unwrap_or(default_max_hops)
+                .min(default_max_hops);
+            if max_hops == 0 {
+                attempted = true;
                 continue;
             }
-            let Some(d) = date.checked_add_signed(Duration::days(step * k)) else {
-                return MakeupOutcome::Failed;
-            };
-            if self.valid_makeup_target(date, d, previous_base, next_base, cal) {
-                return MakeupOutcome::Moved(d);
+            attempted = true;
+            for k in 1..=max_hops {
+                if matches!(direction, MakeupDirection::Nearest) {
+                    for step in [1, -1] {
+                        let Some(d) = date.checked_add_signed(Duration::days(step * k)) else {
+                            continue;
+                        };
+                        if self.valid_makeup_target(date, d, previous_base, next_base, cal) {
+                            return MakeupOutcome::Moved(d);
+                        }
+                    }
+                    continue;
+                }
+                let Some(d) = date.checked_add_signed(Duration::days(day_step * k)) else {
+                    break;
+                };
+                if self.valid_makeup_target(date, d, previous_base, next_base, cal) {
+                    return MakeupOutcome::Moved(d);
+                }
             }
         }
-        MakeupOutcome::Failed
+        if attempted {
+            MakeupOutcome::Failed
+        } else {
+            MakeupOutcome::Disabled
+        }
     }
 
     /// Generate all surviving occurrences (overlays + makeup + dedup applied)

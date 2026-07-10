@@ -6,6 +6,7 @@ from dateme import (
     CalendarId,
     Makeup,
     MakeupFailure,
+    MakeupStep,
     MonthDay,
     MonthlyByDay,
     Nth,
@@ -128,6 +129,27 @@ def test_typed_model_serializes_makeup_target_constraints():
     assert d["makeup_within_week"] is True
     assert d["makeup_exclude_weekends"] is True
     assert d["makeup_before_next"] is True
+
+
+def test_typed_model_serializes_cascade_makeup():
+    spec = nyse_monday_spec()
+    cascade = model.Schedule(
+        freq=spec.freq,
+        timezone=spec.timezone,
+        overlays=spec.overlays,
+        makeup=[
+            MakeupStep(Makeup.AFTER, max_hops=1),
+            MakeupStep(Makeup.BEFORE, max_hops=3),
+            Makeup.NONE,
+        ],
+    )
+    expected = [
+        {"direction": "after", "max_hops": 1},
+        {"direction": "before", "max_hops": 3},
+        "none",
+    ]
+    assert cascade.to_dict()["makeup"] == expected
+    assert Schedule(cascade).to_dict()["makeup"] == expected
 
 
 def test_typed_model_serializes_skip_if_consecutive_excluded():

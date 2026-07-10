@@ -17,6 +17,7 @@ __all__ = [
     "Weekday",
     "Nth",
     "Makeup",
+    "MakeupStep",
     "WeekdayMakeup",
     "OverlayRule",
     "CalendarId",
@@ -64,6 +65,17 @@ class Makeup(str, Enum):
 class MakeupFailure(str, Enum):
     SKIP = "skip"
     KEEP_ORIGINAL = "keep_original"
+
+
+@dataclass(frozen=True)
+class MakeupStep:
+    """One cascade makeup step."""
+
+    direction: Makeup
+    max_hops: int | None = None
+
+    def to_dict(self) -> dict:
+        return {"direction": self.direction.value, "max_hops": self.max_hops}
 
 
 @dataclass(frozen=True)
@@ -265,7 +277,7 @@ class Schedule:
     freq: Frequency
     timezone: str
     overlays: list[Overlay] = field(default_factory=list)
-    makeup: Makeup | WeekdayMakeup = Makeup.NONE
+    makeup: Makeup | WeekdayMakeup | list[Makeup | MakeupStep] = Makeup.NONE
     max_makeup_hops: int | None = None
     makeup_failure: MakeupFailure = MakeupFailure.SKIP
     makeup_only_on: list[Weekday] | None = None
@@ -281,11 +293,18 @@ class Schedule:
             raise ValueError("skip_if_consecutive_excluded must be at least 1")
 
     def to_dict(self) -> dict:
+        makeup = self.makeup
+        if isinstance(makeup, Makeup):
+            makeup_value = makeup.value
+        elif isinstance(makeup, WeekdayMakeup):
+            makeup_value = makeup.to_dict()
+        else:
+            makeup_value = [step.value if isinstance(step, Makeup) else step.to_dict() for step in makeup]
         return {
             "freq": self.freq.to_dict(),
             "timezone": self.timezone,
             "overlays": [o.to_dict() for o in self.overlays],
-            "makeup": self.makeup.value if isinstance(self.makeup, Makeup) else self.makeup.to_dict(),
+            "makeup": makeup_value,
             "max_makeup_hops": self.max_makeup_hops,
             "makeup_failure": self.makeup_failure.value,
             "makeup_only_on": None if self.makeup_only_on is None else [d.value for d in self.makeup_only_on],

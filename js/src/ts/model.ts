@@ -42,6 +42,11 @@ export interface WeekdayMakeup {
   default?: Makeup;
 }
 
+export interface MakeupStep {
+  direction: Makeup;
+  max_hops?: number | null;
+}
+
 export const MakeupFailure = {
   Skip: "skip",
   KeepOriginal: "keep_original",
@@ -86,7 +91,7 @@ export interface ScheduleSpec {
   freq: Frequency;
   timezone: string;
   overlays?: Overlay[];
-  makeup?: Makeup | WeekdayMakeup;
+  makeup?: Makeup | WeekdayMakeup | Array<Makeup | MakeupStep>;
   max_makeup_hops?: number | null;
   makeup_failure?: MakeupFailure;
   makeup_only_on?: Weekday[] | null;

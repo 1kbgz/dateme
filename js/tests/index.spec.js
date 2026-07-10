@@ -216,6 +216,29 @@ test.describe("Schedule", () => {
     expect(res.makeup_before_next).toBe(true);
   });
 
+  test("round-trips cascade makeup from typed specs", async ({ page }) => {
+    const res = await run(
+      page,
+      `const spec = {
+         freq: { type: "weekly", days: [mod.Weekday.Mon], time: "09:00" },
+         timezone: "UTC",
+         overlays: [{ calendar: mod.CalendarId.NyseHoliday, rule: mod.OverlayRule.Exclude }],
+         makeup: [
+           { direction: mod.Makeup.After, max_hops: 1 },
+           { direction: mod.Makeup.Before, max_hops: 3 },
+           mod.Makeup.None,
+         ],
+       };
+       const s = new mod.Schedule(spec);
+       return s.toObject().makeup;`,
+    );
+    expect(res).toEqual([
+      { direction: "after", max_hops: 1 },
+      { direction: "before", max_hops: 3 },
+      "none",
+    ]);
+  });
+
   test("round-trips skip_if_consecutive_excluded from typed specs", async ({
     page,
   }) => {
