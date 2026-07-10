@@ -287,16 +287,46 @@ impl Schedule {
         skipped
     }
 
-    fn valid_makeup_target(&self, date: NaiveDate, cal: &dyn CalendarProvider) -> bool {
-        self.survives(date, cal)
+    fn valid_makeup_target(
+        &self,
+        original: NaiveDate,
+        candidate: NaiveDate,
+        previous_base: Option<NaiveDate>,
+        next_base: Option<NaiveDate>,
+        cal: &dyn CalendarProvider,
+    ) -> bool {
+        if self.makeup_within_week && candidate.iso_week() != original.iso_week() {
+            return false;
+        }
+        if self.makeup_exclude_weekends
+            && matches!(candidate.weekday(), Weekday::Sat | Weekday::Sun)
+        {
+            return false;
+        }
+        if self.makeup_before_next {
+            if next_base.is_some_and(|next| original < next && candidate >= next) {
+                return false;
+            }
+            if previous_base.is_some_and(|previous| previous < original && candidate <= previous) {
+                return false;
+            }
+        }
+
+        self.survives(candidate, cal)
             && self
                 .makeup_only_on
                 .as_ref()
-                .is_none_or(|days| days.contains(&date.weekday()))
+                .is_none_or(|days| days.contains(&candidate.weekday()))
     }
 
     /// Apply the makeup rule to a dropped base `date`.
-    fn make_up(&self, date: NaiveDate, cal: &dyn CalendarProvider) -> MakeupOutcome {
+    fn make_up(
+        &self,
+        date: NaiveDate,
+        previous_base: Option<NaiveDate>,
+        next_base: Option<NaiveDate>,
+        cal: &dyn CalendarProvider,
+    ) -> MakeupOutcome {
         let direction = self.makeup.direction_for(date.weekday());
         let step = match direction {
             MakeupDirection::None => return MakeupOutcome::Disabled,
@@ -318,7 +348,7 @@ impl Schedule {
                     let Some(d) = date.checked_add_signed(Duration::days(step * k)) else {
                         continue;
                     };
-                    if self.valid_makeup_target(d, cal) {
+                    if self.valid_makeup_target(date, d, previous_base, next_base, cal) {
                         return MakeupOutcome::Moved(d);
                     }
                 }
@@ -327,7 +357,7 @@ impl Schedule {
             let Some(d) = date.checked_add_signed(Duration::days(step * k)) else {
                 return MakeupOutcome::Failed;
             };
-            if self.valid_makeup_target(d, cal) {
+            if self.valid_makeup_target(date, d, previous_base, next_base, cal) {
                 return MakeupOutcome::Moved(d);
             }
         }
@@ -350,14 +380,16 @@ impl Schedule {
         let mut base = self.enumerate_base(lo, hi);
         base.sort_unstable();
         let skipped_base = self.skipped_excluded_runs(&base, cal);
-        for (date, time) in base {
+        for (index, (date, time)) in base.iter().copied().enumerate() {
             if skipped_base.contains(&(date, time)) {
                 continue;
             }
             let dest = if self.survives(date, cal) {
                 Some(date)
             } else {
-                match self.make_up(date, cal) {
+                let previous_base = base[..index].last().map(|(d, _)| *d);
+                let next_base = base[index + 1..].first().map(|(d, _)| *d);
+                match self.make_up(date, previous_base, next_base, cal) {
                     MakeupOutcome::Moved(d) => Some(d),
                     MakeupOutcome::Failed => match self.makeup_failure {
                         MakeupFailure::Skip => None,

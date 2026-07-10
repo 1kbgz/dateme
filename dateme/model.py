@@ -269,6 +269,9 @@ class Schedule:
     max_makeup_hops: int | None = None
     makeup_failure: MakeupFailure = MakeupFailure.SKIP
     makeup_only_on: list[Weekday] | None = None
+    makeup_within_week: bool = False
+    makeup_exclude_weekends: bool = False
+    makeup_before_next: bool = False
     skip_if_consecutive_excluded: int | None = None
     start: str | datetime | None = None
     end: str | datetime | None = None
@@ -286,6 +289,9 @@ class Schedule:
             "max_makeup_hops": self.max_makeup_hops,
             "makeup_failure": self.makeup_failure.value,
             "makeup_only_on": None if self.makeup_only_on is None else [d.value for d in self.makeup_only_on],
+            "makeup_within_week": self.makeup_within_week,
+            "makeup_exclude_weekends": self.makeup_exclude_weekends,
+            "makeup_before_next": self.makeup_before_next,
             "skip_if_consecutive_excluded": self.skip_if_consecutive_excluded,
             "start": _instant_str(self.start),
             "end": _instant_str(self.end),

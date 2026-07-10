@@ -90,6 +90,9 @@ export interface ScheduleSpec {
   max_makeup_hops?: number | null;
   makeup_failure?: MakeupFailure;
   makeup_only_on?: Weekday[] | null;
+  makeup_within_week?: boolean;
+  makeup_exclude_weekends?: boolean;
+  makeup_before_next?: boolean;
   skip_if_consecutive_excluded?: number | null;
   start?: string | null;
   end?: string | null;
