@@ -254,6 +254,7 @@
     <span class="s2">&quot;Weekday&quot;</span><span class="p">,</span>
     <span class="s2">&quot;Nth&quot;</span><span class="p">,</span>
     <span class="s2">&quot;Makeup&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;MakeupStep&quot;</span><span class="p">,</span>
     <span class="s2">&quot;WeekdayMakeup&quot;</span><span class="p">,</span>
     <span class="s2">&quot;OverlayRule&quot;</span><span class="p">,</span>
     <span class="s2">&quot;CalendarId&quot;</span><span class="p">,</span>
@@ -312,6 +313,20 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MakeupFailure</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
     <span class="n">SKIP</span> <span class="o">=</span> <span class="s2">&quot;skip&quot;</span>
     <span class="n">KEEP_ORIGINAL</span> <span class="o">=</span> <span class="s2">&quot;keep_original&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="MakeupStep">
+<a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.MakeupStep">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MakeupStep</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;One cascade makeup step.&quot;&quot;&quot;</span>
+
+    <span class="n">direction</span><span class="p">:</span> <span class="n">Makeup</span>
+    <span class="n">max_hops</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;direction&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;max_hops&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_hops</span><span class="p">}</span></div>
 
 
 
@@ -555,7 +570,7 @@
     <span class="n">freq</span><span class="p">:</span> <span class="n">Frequency</span>
     <span class="n">timezone</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">overlays</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Overlay</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
-    <span class="n">makeup</span><span class="p">:</span> <span class="n">Makeup</span> <span class="o">|</span> <span class="n">WeekdayMakeup</span> <span class="o">=</span> <span class="n">Makeup</span><span class="o">.</span><span class="n">NONE</span>
+    <span class="n">makeup</span><span class="p">:</span> <span class="n">Makeup</span> <span class="o">|</span> <span class="n">WeekdayMakeup</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Makeup</span> <span class="o">|</span> <span class="n">MakeupStep</span><span class="p">]</span> <span class="o">=</span> <span class="n">Makeup</span><span class="o">.</span><span class="n">NONE</span>
     <span class="n">max_makeup_hops</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">makeup_failure</span><span class="p">:</span> <span class="n">MakeupFailure</span> <span class="o">=</span> <span class="n">MakeupFailure</span><span class="o">.</span><span class="n">SKIP</span>
     <span class="n">makeup_only_on</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Weekday</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
@@ -571,11 +586,18 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;skip_if_consecutive_excluded must be at least 1&quot;</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">makeup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">makeup</span><span class="p">,</span> <span class="n">Makeup</span><span class="p">):</span>
+            <span class="n">makeup_value</span> <span class="o">=</span> <span class="n">makeup</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">makeup</span><span class="p">,</span> <span class="n">WeekdayMakeup</span><span class="p">):</span>
+            <span class="n">makeup_value</span> <span class="o">=</span> <span class="n">makeup</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">makeup_value</span> <span class="o">=</span> <span class="p">[</span><span class="n">step</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">Makeup</span><span class="p">)</span> <span class="k">else</span> <span class="n">step</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">makeup</span><span class="p">]</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
             <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">timezone</span><span class="p">,</span>
             <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">o</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">overlays</span><span class="p">],</span>
-            <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">makeup</span><span class="p">,</span> <span class="n">Makeup</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
+            <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="n">makeup_value</span><span class="p">,</span>
             <span class="s2">&quot;max_makeup_hops&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_makeup_hops</span><span class="p">,</span>
             <span class="s2">&quot;makeup_failure&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup_failure</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="s2">&quot;makeup_only_on&quot;</span><span class="p">:</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup_only_on</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup_only_on</span><span class="p">],</span>
