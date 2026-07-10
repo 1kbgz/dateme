@@ -1,176 +1,416 @@
-# How-to guides
+# How-to Guides
 
-Practical recipes for common scheduling goals. Each assumes you already know the
-basics ([Getting started](tutorial.md)) and can build a `Schedule` from JSON.
-For the meaning of every field, see the [Schedule model](schedule-model.md).
+Practical recipes for common scheduling tasks. The examples use Python unless a
+JavaScript call is the point of the recipe. The same schedule JSON works in all
+bindings.
 
-The examples use Python. The same JSON and method names work in
-[JavaScript](api-javascript.md); only the datetime type differs (`Date` instead
-of `datetime`).
+For field-level details, see the [Schedule model](schedule-model.md). For API
+signatures, see the [Python API](api-python.md) and
+[JavaScript API](api-javascript.md).
 
-## Skip market holidays, moving the cycle to the next open day
+## How to Skip Market Holidays and Move to the Next Open Day
 
-Add an `exclude` overlay against the market's holiday calendar and set `makeup`
-to `after` so a dropped cycle moves forward to the next surviving day:
-
-```json
-{
-  "freq": { "type": "weekly", "days": ["mon"], "time": "17:30" },
-  "timezone": "America/New_York",
-  "overlays": [ { "calendar": "nyse_holiday", "rule": "exclude" } ],
-  "makeup": "after"
-}
-```
-
-Use `"makeup": "before"` to move to the previous open day instead, or
-`"makeup": "none"` to simply skip the cycle.
-
-## Run only on trading days
-
-To fire *only* when the market is open, use an `only` overlay against the trading
-calendar. This drops weekends and holidays in one rule:
-
-```json
-{
-  "freq": { "type": "daily", "time": "16:00" },
-  "timezone": "America/New_York",
-  "overlays": [ { "calendar": "nyse_trading_day", "rule": "only" } ],
-  "makeup": "none"
-}
-```
-
-`only` keeps a date when the calendar *contains* it; `exclude` drops a date when
-the calendar contains it. See [Calendars and overlays](#overlays).
-
-## Fire on the last business day of the month
-
-Combine the `last` day-of-month with an `only` business-day overlay and
-`makeup: before`, so a month that ends on a weekend or holiday rolls back to the
-last business day:
-
-```json
-{
-  "freq": { "type": "monthly_by_day", "days": [ { "type": "last" } ], "time": "16:00" },
-  "timezone": "America/New_York",
-  "overlays": [ { "calendar": "us_business_day", "rule": "only" } ],
-  "makeup": "before"
-}
-```
-
-For example May 31 2026 is a Sunday, so the May cycle fires on Friday May 29.
-
-## Fire on the first and third Tuesday of the month
-
-List several slots; the engine emits each, in ascending order:
-
-```json
-{
-  "freq": {
-    "type": "monthly_by_weekday",
-    "weekdays": [
-      { "nth": "first", "weekday": "tue" },
-      { "nth": "third", "weekday": "tue" }
-    ],
-    "time": "09:00"
-  },
-  "timezone": "America/New_York"
-}
-```
-
-The same applies to weekly `days` (`["mon", "wed", "fri"]`) and monthly
-`monthly_by_day` (`[{"type":"day","value":1}, {"type":"day","value":15}]`).
-
-## Start a series in the future
-
-Set `start` to the earliest allowed instant. No occurrence is returned before it —
-useful for a competition created now that should not open until later:
+Use an `exclude` overlay and `makeup: "after"`.
 
 ```python
 from datetime import datetime, timezone
 from dateme import Schedule
 
-schedule = Schedule.from_json("""
-{
-  "freq": { "type": "daily", "time": "12:00" },
-  "timezone": "UTC",
-  "start": "2026-06-01T00:00:00Z"
-}
-""")
+schedule = Schedule({
+    "freq": {"type": "weekly", "days": ["mon"], "time": "17:30"},
+    "timezone": "America/New_York",
+    "overlays": [{"calendar": "nyse_holiday", "rule": "exclude"}],
+    "makeup": "after",
+})
 
-schedule.next(datetime(2026, 1, 1, tzinfo=timezone.utc))
-# -> 2026-06-01 12:00:00+00:00
+after = datetime(2026, 1, 13, tzinfo=timezone.utc)
+schedule.next(after)
+# datetime.datetime(2026, 1, 20, 22, 30, tzinfo=datetime.timezone.utc)
 ```
 
-## End a series on a date
+Use `"makeup": "before"` to move backward. Use `"makeup": "none"` to drop the
+cycle.
 
-Set `end` to the exclusive upper bound. `next` returns `None` once the following
-occurrence would fall at or after it:
+## How to Run Only on Trading Days
+
+Use an `only` overlay against `nyse_trading_day`.
 
 ```python
-schedule = Schedule.from_json("""
-{
-  "freq": { "type": "daily", "time": "12:00" },
-  "timezone": "UTC",
-  "end": "2026-01-03T00:00:00Z"
-}
-""")
-
-schedule.next(datetime(2026, 1, 2, 13, tzinfo=timezone.utc)) is None
-# -> True   (the next 12:00 would be 2026-01-03, which is >= end)
+schedule = Schedule({
+    "freq": {"type": "daily", "time": "16:00"},
+    "timezone": "America/New_York",
+    "overlays": [{"calendar": "nyse_trading_day", "rule": "only"}],
+    "makeup": "none",
+})
 ```
 
-## Project the next N cycles for a UI
+## How to Run on the Last Business Day of Each Month
 
-To render an "upcoming instances" table, ask for a fixed count with `upcoming`.
-These are computed, not stored — future cycles need not exist yet:
+Use the last day of the month, require US business days, and roll back when the
+last calendar day is not a business day.
 
 ```python
-rows = schedule.upcoming(10)          # next 10 after now
+schedule = Schedule({
+    "freq": {
+        "type": "monthly_by_day",
+        "days": [{"type": "last"}],
+        "time": "16:00",
+    },
+    "timezone": "America/New_York",
+    "overlays": [{"calendar": "us_business_day", "rule": "only"}],
+    "makeup": "before",
+})
 ```
 
-If you have a concrete window instead of a count, use `until`:
+## How to Schedule Multiple Days in One Rule
+
+Put every selected slot in the frequency object.
+
+```python
+schedule = Schedule({
+    "freq": {
+        "type": "weekly",
+        "days": ["mon", "wed", "fri"],
+        "time": "09:00",
+    },
+    "timezone": "UTC",
+})
+```
+
+For monthly slots:
+
+```python
+schedule = Schedule({
+    "freq": {
+        "type": "monthly_by_weekday",
+        "weekdays": [
+            {"nth": "first", "weekday": "tue"},
+            {"nth": "third", "weekday": "tue"},
+        ],
+        "time": "09:00",
+    },
+    "timezone": "UTC",
+})
+```
+
+## How to Create Biweekly or Every-N-Day Schedules
+
+Use `every_n_weeks` when the schedule repeats by week.
+
+```python
+schedule = Schedule({
+    "freq": {
+        "type": "every_n_weeks",
+        "interval": 2,
+        "start_date": "2026-01-05",
+        "days": ["mon", "thu"],
+        "time": "17:00",
+    },
+    "timezone": "UTC",
+})
+```
+
+Use `every_n_days` when the schedule repeats by elapsed calendar days.
+
+```python
+schedule = Schedule({
+    "freq": {
+        "type": "every_n_days",
+        "interval": 3,
+        "start_date": "2026-01-01",
+        "time": "09:00",
+    },
+    "timezone": "UTC",
+})
+```
+
+## How to Schedule Quarterly Events
+
+Use `quarterly`. `month` is the month within each quarter: `1`, `2`, or `3`.
+
+```python
+schedule = Schedule({
+    "freq": {
+        "type": "quarterly",
+        "month": 1,
+        "day": {"type": "day", "value": 15},
+        "time": "12:00",
+    },
+    "timezone": "UTC",
+})
+```
+
+## How to Use a Cron Expression
+
+Use `custom_cron` for a five-field cron expression in schedule-local time.
+
+```python
+schedule = Schedule({
+    "freq": {"type": "custom_cron", "expr": "30 9 * * 1-5"},
+    "timezone": "America/New_York",
+})
+```
+
+## How to Bound a Series
+
+Set `start` and/or `end` as UTC instants.
+
+```python
+schedule = Schedule({
+    "freq": {"type": "daily", "time": "12:00"},
+    "timezone": "UTC",
+    "start": "2026-06-01T00:00:00Z",
+    "end": "2026-07-01T00:00:00Z",
+})
+```
+
+`end` is exclusive.
+
+## How to Render Upcoming Occurrences
+
+Use `upcoming` for a count.
+
+```python
+rows = schedule.upcoming(10)
+```
+
+Use `until` for a window.
 
 ```python
 from datetime import datetime, timezone
-year_end = datetime(2026, 12, 31, tzinfo=timezone.utc)
-rows = schedule.until(year_end)       # every occurrence from now to year end
+
+end = datetime(2026, 12, 31, tzinfo=timezone.utc)
+rows = schedule.until(end)
 ```
 
-## Show recent cycles, most-recent first
-
-`since` is the backward series and returns **descending** order, so the first
-element is the most recent occurrence:
+Use `since` for a reverse-ordered history.
 
 ```python
-from datetime import datetime, timezone
-year_start = datetime(2026, 1, 1, tzinfo=timezone.utc)
-recent = schedule.since(year_start)   # now back to Jan 1, newest first
-recent[0]                             # == schedule.previous()
+start = datetime(2026, 1, 1, tzinfo=timezone.utc)
+recent = schedule.since(start)
 ```
 
-## Handle daylight-saving time safely
+## How to Annotate Made-Up Occurrences
 
-Just give a local `time` and an IANA `timezone`; the engine tracks DST for you. A
-daily 09:00 schedule fires at 09:00 *local* every day, so the UTC instant shifts
-by an hour across the spring and autumn transitions — you do not manage that:
-
-```json
-{ "freq": { "type": "daily", "time": "09:00" }, "timezone": "America/New_York" }
-```
-
-Two edge cases are resolved automatically (see
-[Timezones and DST](#timezones-and-dst)): a local time that falls
-in a spring-forward gap moves to the first valid instant after the gap; a local
-time that occurs twice at an autumn fall-back uses the earlier instant.
-
-## Build a schedule from typed objects instead of JSON
-
-Use the `dateme.model` builders for a typed, autocomplete-friendly spec that is
-validated as you build it. Pass the result straight to `Schedule`:
+Use trace methods when a UI needs to show why an occurrence exists.
 
 ```python
-from dateme import Schedule, model as m
-from dateme import Weekly, Overlay, Makeup, CalendarId, OverlayRule, Weekday
+trace = schedule.next_trace(after)
+trace["instant"]
+trace["reason"]
+```
+
+For a list:
+
+```python
+rows = schedule.upcoming_trace(5, after)
+```
+
+## How to Check Membership and Count a Window
+
+Use `is_occurrence` for membership and `count_between` for counts.
+
+```python
+instant = datetime(2026, 1, 20, 22, 30, tzinfo=timezone.utc)
+schedule.is_occurrence(instant)
+schedule.count_between(after, end)
+```
+
+Python also supports membership syntax.
+
+```python
+instant in schedule
+```
+
+## How to Iterate a Bounded Schedule
+
+Set `end`, then iterate the schedule.
+
+```python
+schedule = Schedule({
+    "freq": {"type": "daily", "time": "12:00"},
+    "timezone": "UTC",
+    "start": "2026-01-01T00:00:00Z",
+    "end": "2026-01-04T00:00:00Z",
+})
+
+for instant in schedule:
+    print(instant)
+```
+
+Use explicit helpers for caller-provided bounds.
+
+```python
+list(schedule.iter_between(after, end))
+list(schedule.iter_upcoming(3, after))
+```
+
+In JavaScript:
+
+```js
+for (const instant of schedule) {
+  console.log(instant.toISOString());
+}
+
+Array.from(schedule.iterBetween(after, end));
+Array.from(schedule.iterUpcoming(3, after));
+```
+
+## How to Restrict Makeup Destinations
+
+Use destination constraints with a makeup direction.
+
+```python
+schedule = Schedule({
+    "freq": {"type": "weekly", "days": ["mon"], "time": "09:00"},
+    "timezone": "UTC",
+    "overlays": [{"calendar": "us_federal_holiday", "rule": "exclude"}],
+    "makeup": "after",
+    "makeup_only_on": ["tue", "wed", "thu"],
+    "makeup_within_week": True,
+    "makeup_exclude_weekends": True,
+    "makeup_before_next": True,
+})
+```
+
+## How to Use Different Makeup Rules by Weekday
+
+Use a weekday map for `makeup`.
+
+```python
+schedule = Schedule({
+    "freq": {"type": "weekly", "days": ["mon", "fri"], "time": "09:00"},
+    "timezone": "UTC",
+    "overlays": [{"calendar": "us_federal_holiday", "rule": "exclude"}],
+    "makeup": {
+        "mon": "after",
+        "fri": "before",
+        "default": "none",
+    },
+})
+```
+
+## How to Try Fallback Makeup Strategies
+
+Use a makeup cascade.
+
+```python
+schedule = Schedule({
+    "freq": {"type": "daily", "time": "09:00"},
+    "timezone": "UTC",
+    "overlays": [{"calendar": "us_federal_holiday", "rule": "exclude"}],
+    "makeup": [
+        {"direction": "after", "max_hops": 3},
+        {"direction": "before", "max_hops": 3},
+        "none",
+    ],
+})
+```
+
+## How to Fail When Makeup Cannot Find a Date
+
+Use `makeup_failure: "error"` for strict schedules.
+
+```python
+schedule = Schedule({
+    "freq": {"type": "daily", "time": "09:00"},
+    "timezone": "UTC",
+    "overlays": [{"calendar": {"dates": ["2026-01-02"]}, "rule": "exclude"}],
+    "makeup": "after",
+    "max_makeup_hops": 0,
+    "makeup_failure": "error",
+})
+```
+
+Queries raise/throw when the failure is encountered.
+
+## How to Skip Runs of Consecutive Exclusions
+
+Use `skip_if_consecutive_excluded`.
+
+```python
+schedule = Schedule({
+    "freq": {"type": "daily", "time": "09:00"},
+    "timezone": "UTC",
+    "overlays": [{"calendar": {"dates": ["2026-01-05", "2026-01-06"]}, "rule": "exclude"}],
+    "makeup": "after",
+    "skip_if_consecutive_excluded": 2,
+})
+```
+
+## How to Alert on Long Gaps
+
+Use `max_skip_gap`.
+
+```python
+schedule = Schedule({
+    "freq": {"type": "weekly", "days": ["mon"], "time": "09:00"},
+    "timezone": "UTC",
+    "max_skip_gap": 10,
+})
+```
+
+Queries raise/throw when the returned stream has a gap longer than the limit.
+
+## How to Combine Calendar Sets
+
+Use `dates` for inline sets, `union` for any child set, and `diff` for the first
+set minus later sets.
+
+```python
+schedule = Schedule({
+    "freq": {"type": "daily", "time": "09:00"},
+    "timezone": "UTC",
+    "overlays": [
+        {
+            "calendar": {
+                "union": [
+                    "us_federal_holiday",
+                    {"dates": ["2026-12-24"]},
+                    {"custom": "company_shutdown"},
+                ]
+            },
+            "rule": "exclude",
+        }
+    ],
+})
+```
+
+## How to Provide Custom Calendars
+
+Use `{ "custom": "name" }` in the schedule and pass a provider to the
+constructor.
+
+```python
+def contains(name: str, date: str) -> bool:
+    return name == "company_shutdown" and date in {"2026-12-24", "2026-12-31"}
+
+
+schedule = Schedule(
+    {
+        "freq": {"type": "daily", "time": "09:00"},
+        "timezone": "UTC",
+        "overlays": [{"calendar": {"custom": "company_shutdown"}, "rule": "exclude"}],
+    },
+    contains,
+)
+```
+
+JavaScript providers receive the same `(name, date)` arguments.
+
+```js
+const schedule = new Schedule(spec, (name, date) => {
+  return name === "company_shutdown" && date === "2026-12-24";
+});
+```
+
+## How to Build Schedules with Typed Builders
+
+Use `dateme.model` builders in Python.
+
+```python
+from dateme import Schedule, Weekly, Weekday, Overlay, CalendarId, OverlayRule, Makeup
+from dateme import model as m
 
 spec = m.Schedule(
     freq=Weekly([Weekday.MON], "17:30"),
@@ -178,34 +418,39 @@ spec = m.Schedule(
     overlays=[Overlay(CalendarId.NYSE_HOLIDAY, OverlayRule.EXCLUDE)],
     makeup=Makeup.AFTER,
 )
-schedule = Schedule(spec)             # or Schedule(spec.to_dict())
+
+schedule = Schedule(spec)
 ```
 
-In JavaScript/TypeScript the spec object is typed by `ScheduleSpec`, with runtime
-enums for the string values:
+Use `ScheduleSpec` and runtime enum objects in TypeScript.
 
 ```ts
 import init, { Schedule, Weekday, CalendarId, OverlayRule, Makeup } from "dateme";
+import type { ScheduleSpec } from "dateme";
 
-await init();
-const schedule = new Schedule({
+const spec: ScheduleSpec = {
   freq: { type: "weekly", days: [Weekday.Mon], time: "17:30" },
   timezone: "America/New_York",
   overlays: [{ calendar: CalendarId.NyseHoliday, rule: OverlayRule.Exclude }],
   makeup: Makeup.After,
-});
+};
+
+await init();
+const schedule = new Schedule(spec);
 ```
 
-## Store and reload a schedule
+## How to Store and Reload a Schedule
 
-`to_json` round-trips the schedule, so you can persist it (for example in a JSONB
-column) and rebuild it later:
+Store the JSON form.
 
 ```python
-blob = schedule.to_json()             # store this string
-again = Schedule.from_json(blob)      # rebuild identically
+blob = schedule.to_json()
+again = Schedule.from_json(blob)
 ```
 
-The same schedule is also available as a dict via `to_dict()` /
-`Schedule.from_dict(...)` (Python) or `toObject()` / `new Schedule(obj)`
-(JavaScript).
+In JavaScript:
+
+```js
+const blob = JSON.stringify(schedule);
+const again = new Schedule(blob);
+```
