@@ -521,6 +521,150 @@ fields.</p>
 </pre></div>
 </div>
 </section>
+<section id="every-n-days">
+<h3><code class="docutils literal notranslate"><span class="pre">every_n_days</span></code><a class="headerlink" href="#every-n-days" title="Link to this heading">¶</a></h3>
+<p>One occurrence every <code class="docutils literal notranslate"><span class="pre">interval</span></code> days, anchored to <code class="docutils literal notranslate"><span class="pre">start_date</span></code>, at <code class="docutils literal notranslate"><span class="pre">time</span></code>.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">type</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;every_n_days&quot;</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interval</span></code></p></td>
+<td><p>integer &gt;= 1</p></td>
+<td><p>Number of days per step.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">start_date</span></code></p></td>
+<td><p>date string</p></td>
+<td><p>Anchor date, <code class="docutils literal notranslate"><span class="pre">YYYY-MM-DD</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">time</span></code></p></td>
+<td><p>string <code class="docutils literal notranslate"><span class="pre">&quot;HH:MM&quot;</span></code></p></td>
+<td><p>Time of day.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;every_n_days&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;start_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-01&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;09:00&quot;</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="every-n-weeks">
+<h3><code class="docutils literal notranslate"><span class="pre">every_n_weeks</span></code><a class="headerlink" href="#every-n-weeks" title="Link to this heading">¶</a></h3>
+<p>One occurrence on each selected weekday every <code class="docutils literal notranslate"><span class="pre">interval</span></code> weeks. The repeating
+week cycle is anchored to the week containing <code class="docutils literal notranslate"><span class="pre">start_date</span></code>.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">type</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;every_n_weeks&quot;</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">interval</span></code></p></td>
+<td><p>integer &gt;= 1</p></td>
+<td><p>Number of weeks per step.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">start_date</span></code></p></td>
+<td><p>date string</p></td>
+<td><p>Anchor date, <code class="docutils literal notranslate"><span class="pre">YYYY-MM-DD</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">days</span></code></p></td>
+<td><p>array of weekday strings</p></td>
+<td><p>Non-empty; <code class="docutils literal notranslate"><span class="pre">&quot;mon&quot;</span></code>…<code class="docutils literal notranslate"><span class="pre">&quot;sun&quot;</span></code>. Deduped.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">time</span></code></p></td>
+<td><p>string <code class="docutils literal notranslate"><span class="pre">&quot;HH:MM&quot;</span></code></p></td>
+<td><p>Time of day.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;every_n_weeks&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;start_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2026-01-05&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;days&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;thu&quot;</span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;17:00&quot;</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="quarterly">
+<h3><code class="docutils literal notranslate"><span class="pre">quarterly</span></code><a class="headerlink" href="#quarterly" title="Link to this heading">¶</a></h3>
+<p>One occurrence every quarter, at <code class="docutils literal notranslate"><span class="pre">time</span></code>, using <code class="docutils literal notranslate"><span class="pre">month</span></code> as the month within each
+quarter. <code class="docutils literal notranslate"><span class="pre">month:</span> <span class="pre">1</span></code> means Jan/Apr/Jul/Oct, <code class="docutils literal notranslate"><span class="pre">2</span></code> means Feb/May/Aug/Nov, and <code class="docutils literal notranslate"><span class="pre">3</span></code>
+means Mar/Jun/Sep/Dec. A nonexistent <a class="reference internal" href="#monthday">MonthDay</a> is skipped for that
+quarter.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">type</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;quarterly&quot;</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">month</span></code></p></td>
+<td><p>integer 1-3</p></td>
+<td><p>Month within each quarter.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">day</span></code></p></td>
+<td><p><a class="reference internal" href="#monthday">MonthDay</a></p></td>
+<td><p>Day within the quarter month.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">time</span></code></p></td>
+<td><p>string <code class="docutils literal notranslate"><span class="pre">&quot;HH:MM&quot;</span></code></p></td>
+<td><p>Time of day.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;quarterly&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;month&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;day&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;day&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;12:00&quot;</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="custom-cron">
+<h3><code class="docutils literal notranslate"><span class="pre">custom_cron</span></code><a class="headerlink" href="#custom-cron" title="Link to this heading">¶</a></h3>
+<p>One occurrence for every local minute matching a five-field cron expression:
+<code class="docutils literal notranslate"><span class="pre">minute</span> <span class="pre">hour</span> <span class="pre">day-of-month</span> <span class="pre">month</span> <span class="pre">day-of-week</span></code>.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">type</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;custom_cron&quot;</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">expr</span></code></p></td>
+<td><p>string</p></td>
+<td><p>Five cron fields.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Fields support <code class="docutils literal notranslate"><span class="pre">*</span></code>, comma lists, ranges, and step syntax such as <code class="docutils literal notranslate"><span class="pre">*/15</span></code> or
+<code class="docutils literal notranslate"><span class="pre">1-5/2</span></code>. Day-of-week accepts <code class="docutils literal notranslate"><span class="pre">0</span></code>-<code class="docutils literal notranslate"><span class="pre">6</span></code>, where <code class="docutils literal notranslate"><span class="pre">0</span></code> is Sunday. When both
+day-of-month and day-of-week are constrained, both must match.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;custom_cron&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;expr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;30 9 * * 1-5&quot;</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="monthday">
 <span id="id2"></span><h2>MonthDay<a class="headerlink" href="#monthday" title="Link to this heading">¶</a></h2>
@@ -825,6 +969,9 @@ above.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">skip_if_consecutive_excluded</span></code> must be <code class="docutils literal notranslate"><span class="pre">null</span></code>, absent, or an integer at least
 <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">max_skip_gap</span></code> must be <code class="docutils literal notranslate"><span class="pre">null</span></code>, absent, or an integer at least <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">every_n_days.interval</span></code> and <code class="docutils literal notranslate"><span class="pre">every_n_weeks.interval</span></code> must be at least <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">quarterly.month</span></code> must be <code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">2</span></code>, or <code class="docutils literal notranslate"><span class="pre">3</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">custom_cron.expr</span></code> must be a valid five-field expression.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">union</span></code> and <code class="docutils literal notranslate"><span class="pre">diff</span></code> calendar groups must have at least one child calendar.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">custom</span></code> calendar names must be non-empty strings.</p></li>
 </ul>
@@ -852,22 +999,31 @@ above.</p></li>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">yearly.month</span></code> outside 1–12</p></td>
 <td><p>month out of range</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">skip_if_consecutive_excluded</span></code> less than 1</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">every_n_days</span></code> / <code class="docutils literal notranslate"><span class="pre">every_n_weeks</span></code> interval below 1</p></td>
+<td><p>interval out of range</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">quarterly.month</span></code> outside 1–3</p></td>
+<td><p>quarter month out of range</p></td>
+</tr>
+<tr class="row-even"><td><p>Invalid five-field cron expression</p></td>
+<td><p>invalid cron expression</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">skip_if_consecutive_excluded</span></code> less than 1</p></td>
 <td><p>skip threshold out of range</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">max_skip_gap</span></code> less than 1</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max_skip_gap</span></code> less than 1</p></td>
 <td><p>max skip gap out of range</p></td>
 </tr>
-<tr class="row-even"><td><p>Empty overlay <code class="docutils literal notranslate"><span class="pre">any</span></code> group</p></td>
+<tr class="row-odd"><td><p>Empty overlay <code class="docutils literal notranslate"><span class="pre">any</span></code> group</p></td>
 <td><p>overlay group is empty</p></td>
 </tr>
-<tr class="row-odd"><td><p>Empty <code class="docutils literal notranslate"><span class="pre">union</span></code> / <code class="docutils literal notranslate"><span class="pre">diff</span></code> calendar group</p></td>
+<tr class="row-even"><td><p>Empty <code class="docutils literal notranslate"><span class="pre">union</span></code> / <code class="docutils literal notranslate"><span class="pre">diff</span></code> calendar group</p></td>
 <td><p>calendar group is empty</p></td>
 </tr>
-<tr class="row-even"><td><p>Empty <code class="docutils literal notranslate"><span class="pre">custom</span></code> calendar name</p></td>
+<tr class="row-odd"><td><p>Empty <code class="docutils literal notranslate"><span class="pre">custom</span></code> calendar name</p></td>
 <td><p>custom calendar name empty</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">start</span></code> not strictly before <code class="docutils literal notranslate"><span class="pre">end</span></code> (when both set)</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">start</span></code> not strictly before <code class="docutils literal notranslate"><span class="pre">end</span></code> (when both set)</p></td>
 <td><p>start must be before end</p></td>
 </tr>
 </tbody>
@@ -941,6 +1097,10 @@ above.</p></li>
 <li><a class="reference internal" href="#monthly-by-day"><code class="docutils literal notranslate"><span class="pre">monthly_by_day</span></code></a></li>
 <li><a class="reference internal" href="#monthly-by-weekday"><code class="docutils literal notranslate"><span class="pre">monthly_by_weekday</span></code></a></li>
 <li><a class="reference internal" href="#yearly"><code class="docutils literal notranslate"><span class="pre">yearly</span></code></a></li>
+<li><a class="reference internal" href="#every-n-days"><code class="docutils literal notranslate"><span class="pre">every_n_days</span></code></a></li>
+<li><a class="reference internal" href="#every-n-weeks"><code class="docutils literal notranslate"><span class="pre">every_n_weeks</span></code></a></li>
+<li><a class="reference internal" href="#quarterly"><code class="docutils literal notranslate"><span class="pre">quarterly</span></code></a></li>
+<li><a class="reference internal" href="#custom-cron"><code class="docutils literal notranslate"><span class="pre">custom_cron</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#monthday">MonthDay</a></li>

@@ -340,6 +340,38 @@ function or an object with <code class="docutils literal notranslate"><span clas
 <td><p><code class="docutils literal notranslate"><span class="pre">Date[]</span></code></p></td>
 <td><p>ascending</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nextTrace(after</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">OccurrenceTrace</span></code> or <code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">previousTrace(before</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">OccurrenceTrace</span></code> or <code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">untilTrace(before,</span> <span class="pre">after</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">OccurrenceTrace[]</span></code></p></td>
+<td><p>ascending</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sinceTrace(after,</span> <span class="pre">before</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">OccurrenceTrace[]</span></code></p></td>
+<td><p>descending</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">upcomingTrace(n,</span> <span class="pre">after</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">OccurrenceTrace[]</span></code></p></td>
+<td><p>ascending</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">isOccurrence(instant)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">boolean</span></code></p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">countBetween(after,</span> <span class="pre">before)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">number</span></code></p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">describe()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">string</span></code></p></td>
+<td><p>—</p></td>
+</tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">validate()</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">void</span></code> (throws on error)</p></td>
 <td><p>—</p></td>
@@ -359,6 +391,8 @@ function or an object with <code class="docutils literal notranslate"><span clas
 <li><p>Every optional reference instant defaults to <code class="docutils literal notranslate"><span class="pre">new</span> <span class="pre">Date()</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">until(end)[0]</span></code> equals <code class="docutils literal notranslate"><span class="pre">next()</span></code>; <code class="docutils literal notranslate"><span class="pre">since(start)[0]</span></code> equals <code class="docutils literal notranslate"><span class="pre">previous()</span></code>.</p></li>
 <li><p>Results are strictly between the two bounds and deduplicated by instant.</p></li>
+<li><p>Trace methods return <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">instant:</span> <span class="pre">Date,</span> <span class="pre">reason:</span> <span class="pre">string</span> <span class="pre">}</span></code>. Reasons include
+<code class="docutils literal notranslate"><span class="pre">base</span></code>, <code class="docutils literal notranslate"><span class="pre">makeup_from(YYYY-MM-DD)</span></code>, and <code class="docutils literal notranslate"><span class="pre">shifted_dst</span></code>.</p></li>
 </ul>
 </section>
 <section id="example">

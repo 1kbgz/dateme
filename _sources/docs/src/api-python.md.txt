@@ -74,21 +74,31 @@ below).
 
 ## Method summary
 
-| Method                     | Returns                  | Order      |
-| -------------------------- | ------------------------ | ---------- |
-| `next(after=now)`          | `datetime` or `None`     | —          |
-| `previous(before=now)`     | `datetime` or `None`     | —          |
-| `until(before, after=now)` | `list[datetime]`         | ascending  |
-| `since(after, before=now)` | `list[datetime]`         | descending |
-| `upcoming(n, after=now)`   | `list[datetime]`         | ascending  |
-| `validate()`               | `None` (raises on error) | —          |
-| `to_json()`                | `str`                    | —          |
-| `to_dict()`                | `dict`                   | —          |
-| `from_json(json)`          | `Schedule` (static)      | —          |
-| `from_dict(obj)`           | `Schedule` (static)      | —          |
+| Method                           | Returns                  | Order      |
+| -------------------------------- | ------------------------ | ---------- |
+| `next(after=now)`                | `datetime` or `None`     | —          |
+| `previous(before=now)`           | `datetime` or `None`     | —          |
+| `until(before, after=now)`       | `list[datetime]`         | ascending  |
+| `since(after, before=now)`       | `list[datetime]`         | descending |
+| `upcoming(n, after=now)`         | `list[datetime]`         | ascending  |
+| `next_trace(after=now)`          | `dict` or `None`         | —          |
+| `previous_trace(before=now)`     | `dict` or `None`         | —          |
+| `until_trace(before, after=now)` | `list[dict]`             | ascending  |
+| `since_trace(after, before=now)` | `list[dict]`             | descending |
+| `upcoming_trace(n, after=now)`   | `list[dict]`             | ascending  |
+| `is_occurrence(instant)`         | `bool`                   | —          |
+| `count_between(after, before)`   | `int`                    | —          |
+| `describe()`                     | `str`                    | —          |
+| `validate()`                     | `None` (raises on error) | —          |
+| `to_json()`                      | `str`                    | —          |
+| `to_dict()`                      | `dict`                   | —          |
+| `from_json(json)`                | `Schedule` (static)      | —          |
+| `from_dict(obj)`                 | `Schedule` (static)      | —          |
 
 `until(end)[0]` equals `next()`; `since(start)[0]` equals `previous()`. All
 results are strictly between the two bounds and deduplicated by instant.
+Trace methods return dictionaries with `instant` and `reason`. Reasons include
+`base`, `makeup_from(YYYY-MM-DD)`, and `shifted_dst`.
 
 (typed-model)=
 

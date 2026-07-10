@@ -309,7 +309,8 @@ in Rust with bindings for Python (pyo3) and JavaScript (WebAssembly).</p>
 </pre></div>
 </div>
 <p>Supported frequencies: <code class="docutils literal notranslate"><span class="pre">hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">weekly</span></code>, <code class="docutils literal notranslate"><span class="pre">monthly_by_day</span></code> (fixed day
-or <code class="docutils literal notranslate"><span class="pre">last</span></code>), <code class="docutils literal notranslate"><span class="pre">monthly_by_weekday</span></code> (nth / last weekday), and <code class="docutils literal notranslate"><span class="pre">yearly</span></code>. Overlays
+or <code class="docutils literal notranslate"><span class="pre">last</span></code>), <code class="docutils literal notranslate"><span class="pre">monthly_by_weekday</span></code> (nth / last weekday), <code class="docutils literal notranslate"><span class="pre">yearly</span></code>,
+<code class="docutils literal notranslate"><span class="pre">every_n_days</span></code>, <code class="docutils literal notranslate"><span class="pre">every_n_weeks</span></code>, <code class="docutils literal notranslate"><span class="pre">quarterly</span></code>, and <code class="docutils literal notranslate"><span class="pre">custom_cron</span></code>. Overlays
 filter occurrences against built-in calendars (<code class="docutils literal notranslate"><span class="pre">us_federal_holiday</span></code>,
 <code class="docutils literal notranslate"><span class="pre">us_business_day</span></code>, <code class="docutils literal notranslate"><span class="pre">nyse_holiday</span></code>, <code class="docutils literal notranslate"><span class="pre">nyse_trading_day</span></code>, backed by
 <a class="reference external" href="https://crates.io/crates/finance-dates"><code class="docutils literal notranslate"><span class="pre">finance-dates</span></code></a>), inline date sets,
@@ -326,6 +327,9 @@ non-weekend days, or before the next base occurrence, and fallback makeup
 strategies can be tried in order. Overlay groups can express OR composition, and
 individual overlays can override makeup behavior. DST gaps and overlaps are
 resolved on conversion to UTC.</p>
+<p>For observability, schedules can answer whether an instant is an occurrence,
+count occurrences in a window, describe the rule, and return occurrence traces
+that include reasons such as <code class="docutils literal notranslate"><span class="pre">base</span></code>, <code class="docutils literal notranslate"><span class="pre">makeup_from(YYYY-MM-DD)</span></code>, or <code class="docutils literal notranslate"><span class="pre">shifted_dst</span></code>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This library was generated using <a class="reference external" href="https://copier.readthedocs.io/en/stable/">copier</a> from the <a class="reference external" href="https://github.com/python-project-templates/base">Base Python Project Template repository</a>.</p>
