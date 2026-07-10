@@ -588,7 +588,7 @@ passes every overlay.</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">calendar</span></code></p></td>
-<td><p><a class="reference internal" href="#calendars">CalendarId</a></p></td>
+<td><p><a class="reference internal" href="#calendars">Calendar</a></p></td>
 <td><p>Which calendar set.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rule</span></code></p></td>
@@ -639,7 +639,8 @@ the schedule-level <code class="docutils literal notranslate"><span class="pre">
 </section>
 <section id="calendars">
 <span id="id6"></span><h2>Calendars<a class="headerlink" href="#calendars" title="Link to this heading">¶</a></h2>
-<p>Built-in calendar identifiers for the <code class="docutils literal notranslate"><span class="pre">calendar</span></code> field, backed by the
+<p>The <code class="docutils literal notranslate"><span class="pre">calendar</span></code> field accepts built-in identifiers or inline calendar specs.
+Built-in calendars are backed by the
 <a class="reference external" href="https://crates.io/crates/finance-dates"><code class="docutils literal notranslate"><span class="pre">finance-dates</span></code></a> dataset.</p>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
@@ -664,6 +665,25 @@ the schedule-level <code class="docutils literal notranslate"><span class="pre">
 </tbody>
 </table>
 </div>
+<p>Inline date sets:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;dates&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;2026-07-03&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;2026-07-04&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;2026-12-25&quot;</span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Calendar set algebra:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;union&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;nyse_holiday&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;us_federal_holiday&quot;</span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+<span class="p">{</span><span class="w"> </span><span class="nt">&quot;diff&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;us_federal_holiday&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;nyse_holiday&quot;</span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">union</span></code> contains dates present in any child calendar. <code class="docutils literal notranslate"><span class="pre">diff</span></code> contains dates in
+the first child calendar, minus dates present in every following child calendar.
+Children can be built-ins or nested calendar specs.</p>
+<p>Custom provider calendars:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;custom&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;company_shutdown&quot;</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Python and JavaScript constructors accept an optional provider used to resolve
+<code class="docutils literal notranslate"><span class="pre">custom</span></code> calendars at query time. Missing custom calendars are treated as not in
+the set.</p>
 </section>
 <section id="makeup">
 <span id="id7"></span><h2>Makeup<a class="headerlink" href="#makeup" title="Link to this heading">¶</a></h2>
@@ -805,6 +825,8 @@ above.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">skip_if_consecutive_excluded</span></code> must be <code class="docutils literal notranslate"><span class="pre">null</span></code>, absent, or an integer at least
 <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">max_skip_gap</span></code> must be <code class="docutils literal notranslate"><span class="pre">null</span></code>, absent, or an integer at least <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">union</span></code> and <code class="docutils literal notranslate"><span class="pre">diff</span></code> calendar groups must have at least one child calendar.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">custom</span></code> calendar names must be non-empty strings.</p></li>
 </ul>
 </section>
 <section id="validation">
@@ -838,6 +860,12 @@ above.</p></li>
 </tr>
 <tr class="row-even"><td><p>Empty overlay <code class="docutils literal notranslate"><span class="pre">any</span></code> group</p></td>
 <td><p>overlay group is empty</p></td>
+</tr>
+<tr class="row-odd"><td><p>Empty <code class="docutils literal notranslate"><span class="pre">union</span></code> / <code class="docutils literal notranslate"><span class="pre">diff</span></code> calendar group</p></td>
+<td><p>calendar group is empty</p></td>
+</tr>
+<tr class="row-even"><td><p>Empty <code class="docutils literal notranslate"><span class="pre">custom</span></code> calendar name</p></td>
+<td><p>custom calendar name empty</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">start</span></code> not strictly before <code class="docutils literal notranslate"><span class="pre">end</span></code> (when both set)</p></td>
 <td><p>start must be before end</p></td>

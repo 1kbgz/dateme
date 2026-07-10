@@ -35,11 +35,27 @@ const schedule = new Schedule({
 });
 ```
 
+Pass an optional custom calendar provider as the second constructor argument
+when the spec uses `{ custom: "name" }` calendar refs. The provider can be a
+function or an object with `contains(name, date)`, where `date` is a
+`"YYYY-MM-DD"` string:
+
+```js
+const schedule = new Schedule(
+  {
+    freq: { type: "daily", time: "09:00" },
+    timezone: "UTC",
+    overlays: [{ calendar: { custom: "shutdown" }, rule: "exclude" }],
+  },
+  (name, date) => name === "shutdown" && date === "2026-08-14",
+);
+```
+
 ## Typed model
 
 The package exports TypeScript types mirroring the [Schedule model](schedule-model.md)
-— `ScheduleSpec`, `Frequency`, `MonthDay`, `NthWeekday`, `Overlay` — so the spec
-object is checked at compile time. It also exports runtime enum objects
+— `ScheduleSpec`, `Frequency`, `CalendarSpec`, `MonthDay`, `NthWeekday`,
+`Overlay` — so the spec object is checked at compile time. It also exports runtime enum objects
 (`Weekday`, `Nth`, `Makeup`, `OverlayRule`, `CalendarId`) for plain JavaScript:
 
 ```ts

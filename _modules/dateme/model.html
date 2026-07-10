@@ -247,7 +247,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span> <span class="k">as</span> <span class="n">Date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">time</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -258,6 +258,10 @@
     <span class="s2">&quot;WeekdayMakeup&quot;</span><span class="p">,</span>
     <span class="s2">&quot;OverlayRule&quot;</span><span class="p">,</span>
     <span class="s2">&quot;CalendarId&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CalendarDates&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CalendarUnion&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CalendarDiff&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CustomCalendar&quot;</span><span class="p">,</span>
     <span class="s2">&quot;MakeupFailure&quot;</span><span class="p">,</span>
     <span class="s2">&quot;MonthDay&quot;</span><span class="p">,</span>
     <span class="s2">&quot;NthWeekday&quot;</span><span class="p">,</span>
@@ -375,6 +379,87 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_date_str</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Date</span> <span class="o">|</span> <span class="n">datetime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">date</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Date</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+
+<div class="viewcode-block" id="CalendarDates">
+<a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.CalendarDates">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CalendarDates</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An inline set of local dates.&quot;&quot;&quot;</span>
+
+    <span class="n">dates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Date</span> <span class="o">|</span> <span class="n">datetime</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;dates&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">_date_str</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dates</span><span class="p">]}</span></div>
+
+
+
+<div class="viewcode-block" id="CalendarUnion">
+<a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.CalendarUnion">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CalendarUnion</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A calendar that contains dates present in any child calendar.&quot;&quot;&quot;</span>
+
+    <span class="n">union</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CalendarSpec</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">union</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;calendar union is empty&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;union&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">_calendar_to_json</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">union</span><span class="p">]}</span></div>
+
+
+
+<div class="viewcode-block" id="CalendarDiff">
+<a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.CalendarDiff">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CalendarDiff</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A calendar containing dates in the first child, minus following children.&quot;&quot;&quot;</span>
+
+    <span class="n">diff</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CalendarSpec</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">diff</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;calendar diff is empty&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;diff&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">_calendar_to_json</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">diff</span><span class="p">]}</span></div>
+
+
+
+<div class="viewcode-block" id="CustomCalendar">
+<a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.CustomCalendar">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CustomCalendar</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A named calendar resolved by a runtime provider.&quot;&quot;&quot;</span>
+
+    <span class="n">custom</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;custom calendar name is empty&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;custom&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom</span><span class="p">}</span></div>
+
+
+
+<span class="n">CalendarSpec</span> <span class="o">=</span> <span class="n">CalendarId</span> <span class="o">|</span> <span class="n">CalendarDates</span> <span class="o">|</span> <span class="n">CalendarUnion</span> <span class="o">|</span> <span class="n">CalendarDiff</span> <span class="o">|</span> <span class="n">CustomCalendar</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_calendar_to_json</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">CalendarSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">CalendarId</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span>
+    <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_makeup_to_json</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Makeup</span> <span class="o">|</span> <span class="n">WeekdayMakeup</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Makeup</span> <span class="o">|</span> <span class="n">MakeupStep</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">dict</span> <span class="o">|</span> <span class="nb">list</span><span class="p">:</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Makeup</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span>
@@ -446,12 +531,12 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Overlay</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A calendar filter applied to occurrences.&quot;&quot;&quot;</span>
 
-    <span class="n">calendar</span><span class="p">:</span> <span class="n">CalendarId</span>
+    <span class="n">calendar</span><span class="p">:</span> <span class="n">CalendarSpec</span>
     <span class="n">rule</span><span class="p">:</span> <span class="n">OverlayRule</span>
     <span class="n">makeup</span><span class="p">:</span> <span class="n">Makeup</span> <span class="o">|</span> <span class="n">WeekdayMakeup</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Makeup</span> <span class="o">|</span> <span class="n">MakeupStep</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">calendar</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rule</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="n">_calendar_to_json</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calendar</span><span class="p">),</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rule</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">out</span><span class="p">[</span><span class="s2">&quot;makeup&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_makeup_to_json</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">makeup</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span></div>
