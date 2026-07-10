@@ -31,6 +31,9 @@ pub struct Schedule {
     /// What to do when makeup is enabled but no surviving destination is found.
     #[serde(default)]
     pub makeup_failure: MakeupFailure,
+    /// Restrict makeup destination dates to these weekdays.
+    #[serde(default, with = "weekday_vec_opt")]
+    pub makeup_only_on: Option<Vec<Weekday>>,
     /// Skip excluded base-occurrence runs at or above this length before makeup.
     #[serde(default)]
     pub skip_if_consecutive_excluded: Option<u32>,
@@ -144,6 +147,8 @@ pub enum Makeup {
     Before,
     /// Move to the nearest LATER surviving day (same time-of-day).
     After,
+    /// Move to the nearest surviving day, preferring later dates on ties.
+    Nearest,
     /// Select a makeup direction based on the excluded date's weekday.
     ByWeekday(WeekdayMakeup),
 }
@@ -154,6 +159,7 @@ impl Makeup {
             Makeup::None => MakeupDirection::None,
             Makeup::Before => MakeupDirection::Before,
             Makeup::After => MakeupDirection::After,
+            Makeup::Nearest => MakeupDirection::Nearest,
             Makeup::ByWeekday(map) => map.direction_for(weekday),
         }
     }
@@ -193,6 +199,7 @@ pub enum MakeupDirection {
     None,
     Before,
     After,
+    Nearest,
 }
 
 impl From<MakeupDirection> for Makeup {
@@ -201,6 +208,7 @@ impl From<MakeupDirection> for Makeup {
             MakeupDirection::None => Makeup::None,
             MakeupDirection::Before => Makeup::Before,
             MakeupDirection::After => Makeup::After,
+            MakeupDirection::Nearest => Makeup::Nearest,
         }
     }
 }
@@ -211,6 +219,7 @@ impl From<Makeup> for MakeupDirection {
             Makeup::None | Makeup::ByWeekday(_) => MakeupDirection::None,
             Makeup::Before => MakeupDirection::Before,
             Makeup::After => MakeupDirection::After,
+            Makeup::Nearest => MakeupDirection::Nearest,
         }
     }
 }
@@ -224,6 +233,7 @@ impl Serialize for Makeup {
             Makeup::None => MakeupDirection::None.serialize(serializer),
             Makeup::Before => MakeupDirection::Before.serialize(serializer),
             Makeup::After => MakeupDirection::After.serialize(serializer),
+            Makeup::Nearest => MakeupDirection::Nearest.serialize(serializer),
             Makeup::ByWeekday(map) => map.serialize(serializer),
         }
     }
@@ -251,7 +261,13 @@ impl<'de> Deserialize<'de> for Makeup {
                     "none" => MakeupDirection::None,
                     "before" => MakeupDirection::Before,
                     "after" => MakeupDirection::After,
-                    _ => return Err(E::unknown_variant(value, &["none", "before", "after"])),
+                    "nearest" => MakeupDirection::Nearest,
+                    _ => {
+                        return Err(E::unknown_variant(
+                            value,
+                            &["none", "before", "after", "nearest"],
+                        ))
+                    }
                 };
                 Ok(direction.into())
             }
@@ -544,6 +560,33 @@ mod weekday_vec {
                     .ok_or_else(|| serde::de::Error::custom(format!("invalid weekday: {s}")))
             })
             .collect()
+    }
+}
+
+mod weekday_vec_opt {
+    use super::{weekday_from_str, weekday_vec};
+    use chrono::Weekday;
+    use serde::{Deserialize, Deserializer, Serializer};
+
+    pub fn serialize<S: Serializer>(days: &Option<Vec<Weekday>>, s: S) -> Result<S::Ok, S::Error> {
+        match days {
+            Some(days) => weekday_vec::serialize(days, s),
+            None => s.serialize_none(),
+        }
+    }
+
+    pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<Option<Vec<Weekday>>, D::Error> {
+        Option::<Vec<String>>::deserialize(d)?
+            .map(|strs| {
+                strs.iter()
+                    .map(|s| {
+                        weekday_from_str(s).ok_or_else(|| {
+                            serde::de::Error::custom(format!("invalid weekday: {s}"))
+                        })
+                    })
+                    .collect()
+            })
+            .transpose()
     }
 }
 

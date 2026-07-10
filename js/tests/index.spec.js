@@ -163,6 +163,37 @@ test.describe("Schedule", () => {
     expect(res).toEqual({ mon: "after", fri: "before", default: "none" });
   });
 
+  test("round-trips nearest makeup from typed specs", async ({ page }) => {
+    const res = await run(
+      page,
+      `const spec = {
+         freq: { type: "weekly", days: [mod.Weekday.Mon], time: "17:30" },
+         timezone: "America/New_York",
+         overlays: [{ calendar: mod.CalendarId.NyseHoliday, rule: mod.OverlayRule.Exclude }],
+         makeup: mod.Makeup.Nearest,
+       };
+       const s = new mod.Schedule(spec);
+       return s.toObject().makeup;`,
+    );
+    expect(res).toBe("nearest");
+  });
+
+  test("round-trips makeup_only_on from typed specs", async ({ page }) => {
+    const res = await run(
+      page,
+      `const spec = {
+         freq: { type: "weekly", days: [mod.Weekday.Mon], time: "17:30" },
+         timezone: "America/New_York",
+         overlays: [{ calendar: mod.CalendarId.NyseHoliday, rule: mod.OverlayRule.Exclude }],
+         makeup: mod.Makeup.After,
+         makeup_only_on: [mod.Weekday.Tue, mod.Weekday.Wed],
+       };
+       const s = new mod.Schedule(spec);
+       return s.toObject().makeup_only_on;`,
+    );
+    expect(res).toEqual(["tue", "wed"]);
+  });
+
   test("round-trips skip_if_consecutive_excluded from typed specs", async ({
     page,
   }) => {

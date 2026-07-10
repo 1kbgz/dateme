@@ -58,6 +58,7 @@ class Makeup(str, Enum):
     NONE = "none"
     BEFORE = "before"
     AFTER = "after"
+    NEAREST = "nearest"
 
 
 class MakeupFailure(str, Enum):
@@ -267,6 +268,7 @@ class Schedule:
     makeup: Makeup | WeekdayMakeup = Makeup.NONE
     max_makeup_hops: int | None = None
     makeup_failure: MakeupFailure = MakeupFailure.SKIP
+    makeup_only_on: list[Weekday] | None = None
     skip_if_consecutive_excluded: int | None = None
     start: str | datetime | None = None
     end: str | datetime | None = None
@@ -283,6 +285,7 @@ class Schedule:
             "makeup": self.makeup.value if isinstance(self.makeup, Makeup) else self.makeup.to_dict(),
             "max_makeup_hops": self.max_makeup_hops,
             "makeup_failure": self.makeup_failure.value,
+            "makeup_only_on": None if self.makeup_only_on is None else [d.value for d in self.makeup_only_on],
             "skip_if_consecutive_excluded": self.skip_if_consecutive_excluded,
             "start": _instant_str(self.start),
             "end": _instant_str(self.end),
