@@ -72,7 +72,7 @@ checksum = "773648b94d0e5d620f64f280777445740e61fe701025087ec8b57f45c791888b"
 
 [[package]]
 name = "dateme"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "chrono",
  "chrono-tz",
@@ -83,7 +83,7 @@ dependencies = [
 
 [[package]]
 name = "dateme_js"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "chrono",
  "dateme",
@@ -94,7 +94,7 @@ dependencies = [
 
 [[package]]
 name = "dateme_py"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "chrono",
  "dateme",

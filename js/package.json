@@ -1,6 +1,6 @@
 {
   "name": "dateme",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Dates and intervals",
   "repository": "git@github.com:1kbgz/dateme.git",
   "author": "the dateme authors <dev@1kbgz.com>",
