@@ -98,37 +98,50 @@ impl Schedule {
 
     /// First occurrence strictly after `after` (default: now).
     #[pyo3(signature = (after=None))]
-    fn next(&self, after: Option<DateTime<Utc>>) -> Option<DateTime<Utc>> {
+    fn next(&self, after: Option<DateTime<Utc>>) -> PyResult<Option<DateTime<Utc>>> {
         self.inner
-            .next(after.unwrap_or_else(Utc::now), &self.calendars)
+            .try_next(after.unwrap_or_else(Utc::now), &self.calendars)
+            .map_err(|e| PyValueError::new_err(e.to_string()))
     }
 
     /// Last occurrence strictly before `before` (default: now).
     #[pyo3(signature = (before=None))]
-    fn previous(&self, before: Option<DateTime<Utc>>) -> Option<DateTime<Utc>> {
+    fn previous(&self, before: Option<DateTime<Utc>>) -> PyResult<Option<DateTime<Utc>>> {
         self.inner
-            .previous(before.unwrap_or_else(Utc::now), &self.calendars)
+            .try_previous(before.unwrap_or_else(Utc::now), &self.calendars)
+            .map_err(|e| PyValueError::new_err(e.to_string()))
     }
 
     /// Occurrences in `(after, before)`, ascending. `until(end)[0]` == `next()`.
     #[pyo3(signature = (before, after=None))]
-    fn until(&self, before: DateTime<Utc>, after: Option<DateTime<Utc>>) -> Vec<DateTime<Utc>> {
+    fn until(
+        &self,
+        before: DateTime<Utc>,
+        after: Option<DateTime<Utc>>,
+    ) -> PyResult<Vec<DateTime<Utc>>> {
         self.inner
-            .until(before, after.unwrap_or_else(Utc::now), &self.calendars)
+            .try_until(before, after.unwrap_or_else(Utc::now), &self.calendars)
+            .map_err(|e| PyValueError::new_err(e.to_string()))
     }
 
     /// Occurrences in `(after, before)`, descending. `since(start)[0]` == `previous()`.
     #[pyo3(signature = (after, before=None))]
-    fn since(&self, after: DateTime<Utc>, before: Option<DateTime<Utc>>) -> Vec<DateTime<Utc>> {
+    fn since(
+        &self,
+        after: DateTime<Utc>,
+        before: Option<DateTime<Utc>>,
+    ) -> PyResult<Vec<DateTime<Utc>>> {
         self.inner
-            .since(after, before.unwrap_or_else(Utc::now), &self.calendars)
+            .try_since(after, before.unwrap_or_else(Utc::now), &self.calendars)
+            .map_err(|e| PyValueError::new_err(e.to_string()))
     }
 
     /// The next `n` occurrences strictly after `after` (default: now), ascending.
     #[pyo3(signature = (n, after=None))]
-    fn upcoming(&self, n: usize, after: Option<DateTime<Utc>>) -> Vec<DateTime<Utc>> {
+    fn upcoming(&self, n: usize, after: Option<DateTime<Utc>>) -> PyResult<Vec<DateTime<Utc>>> {
         self.inner
-            .upcoming(n, after.unwrap_or_else(Utc::now), &self.calendars)
+            .try_upcoming(n, after.unwrap_or_else(Utc::now), &self.calendars)
+            .map_err(|e| PyValueError::new_err(e.to_string()))
     }
 
     fn __repr__(&self) -> String {

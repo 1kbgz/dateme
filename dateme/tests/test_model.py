@@ -3,6 +3,7 @@ from datetime import datetime, time, timezone
 import pytest
 
 from dateme import (
+    AnyOverlay,
     CalendarId,
     Makeup,
     MakeupFailure,
@@ -74,6 +75,21 @@ def test_typed_model_serializes_makeup_failure():
     )
     assert keep.to_dict()["makeup_failure"] == "keep_original"
     assert Schedule(keep).to_dict()["makeup_failure"] == "keep_original"
+
+
+def test_makeup_failure_error_raises_from_query():
+    spec = nyse_monday_spec()
+    strict = model.Schedule(
+        freq=spec.freq,
+        timezone=spec.timezone,
+        overlays=spec.overlays,
+        makeup=spec.makeup,
+        max_makeup_hops=1,
+        makeup_failure=MakeupFailure.ERROR,
+        makeup_only_on=[Weekday.MON],
+    )
+    with pytest.raises(ValueError, match="makeup failed"):
+        Schedule(strict).next(utc(2026, 1, 13))
 
 
 def test_typed_model_serializes_weekday_makeup():
@@ -163,6 +179,55 @@ def test_typed_model_serializes_skip_if_consecutive_excluded():
     )
     assert threshold.to_dict()["skip_if_consecutive_excluded"] == 2
     assert Schedule(threshold).to_dict()["skip_if_consecutive_excluded"] == 2
+
+
+def test_typed_model_serializes_max_skip_gap():
+    spec = nyse_monday_spec()
+    gap = model.Schedule(
+        freq=spec.freq,
+        timezone=spec.timezone,
+        overlays=spec.overlays,
+        makeup=spec.makeup,
+        max_skip_gap=3,
+    )
+    assert gap.to_dict()["max_skip_gap"] == 3
+    assert Schedule(gap).to_dict()["max_skip_gap"] == 3
+
+
+def test_max_skip_gap_raises_from_query():
+    spec = model.Schedule(
+        freq=Weekly([Weekday.MON], "09:00"),
+        timezone="UTC",
+        max_skip_gap=1,
+    )
+    with pytest.raises(ValueError, match="max_skip_gap"):
+        Schedule(spec).until(utc(2026, 1, 5), utc(2026, 1, 1))
+
+
+def test_typed_model_serializes_overlay_any_and_overlay_makeup():
+    overlay = AnyOverlay(
+        [
+            Overlay(CalendarId.US_FEDERAL_HOLIDAY, OverlayRule.EXCLUDE),
+            Overlay(CalendarId.NYSE_HOLIDAY, OverlayRule.EXCLUDE, makeup=Makeup.BEFORE),
+        ],
+        makeup=Makeup.NONE,
+    )
+    spec = model.Schedule(
+        freq=model.Daily("09:00"),
+        timezone="UTC",
+        overlays=[overlay],
+    )
+    expected = [
+        {
+            "any": [
+                {"calendar": "us_federal_holiday", "rule": "exclude"},
+                {"calendar": "nyse_holiday", "rule": "exclude", "makeup": "before"},
+            ],
+            "makeup": "none",
+        }
+    ]
+    assert spec.to_dict()["overlays"] == expected
+    assert Schedule(spec).to_dict()["overlays"] == expected
 
 
 def test_host_validation_skip_if_consecutive_excluded():

@@ -56,7 +56,8 @@ impl Schedule {
     pub fn next(&self, after_ms: f64) -> Result<Option<f64>, JsError> {
         Ok(self
             .inner
-            .next(from_millis(after_ms)?, &self.calendars)
+            .try_next(from_millis(after_ms)?, &self.calendars)
+            .map_err(|e| JsError::new(&e.to_string()))?
             .map(to_millis))
     }
 
@@ -64,7 +65,8 @@ impl Schedule {
     pub fn previous(&self, before_ms: f64) -> Result<Option<f64>, JsError> {
         Ok(self
             .inner
-            .previous(from_millis(before_ms)?, &self.calendars)
+            .try_previous(from_millis(before_ms)?, &self.calendars)
+            .map_err(|e| JsError::new(&e.to_string()))?
             .map(to_millis))
     }
 
@@ -72,11 +74,12 @@ impl Schedule {
     pub fn until(&self, before_ms: f64, after_ms: f64) -> Result<Vec<f64>, JsError> {
         Ok(self
             .inner
-            .until(
+            .try_until(
                 from_millis(before_ms)?,
                 from_millis(after_ms)?,
                 &self.calendars,
             )
+            .map_err(|e| JsError::new(&e.to_string()))?
             .into_iter()
             .map(to_millis)
             .collect())
@@ -86,11 +89,12 @@ impl Schedule {
     pub fn since(&self, after_ms: f64, before_ms: f64) -> Result<Vec<f64>, JsError> {
         Ok(self
             .inner
-            .since(
+            .try_since(
                 from_millis(after_ms)?,
                 from_millis(before_ms)?,
                 &self.calendars,
             )
+            .map_err(|e| JsError::new(&e.to_string()))?
             .into_iter()
             .map(to_millis)
             .collect())
@@ -100,7 +104,8 @@ impl Schedule {
     pub fn upcoming(&self, n: usize, after_ms: f64) -> Result<Vec<f64>, JsError> {
         Ok(self
             .inner
-            .upcoming(n, from_millis(after_ms)?, &self.calendars)
+            .try_upcoming(n, from_millis(after_ms)?, &self.calendars)
+            .map_err(|e| JsError::new(&e.to_string()))?
             .into_iter()
             .map(to_millis)
             .collect())

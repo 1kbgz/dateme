@@ -1,6 +1,7 @@
 from . import model
 from .dateme import Schedule
 from .model import (
+    AnyOverlay,
     CalendarId,
     Daily,
     Hourly,
@@ -25,6 +26,7 @@ __version__ = "0.1.0"
 __all__ = [
     "Schedule",
     "model",
+    "AnyOverlay",
     "CalendarId",
     "Daily",
     "Hourly",

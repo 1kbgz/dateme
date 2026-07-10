@@ -50,6 +50,7 @@ export interface MakeupStep {
 export const MakeupFailure = {
   Skip: "skip",
   KeepOriginal: "keep_original",
+  Error: "error",
 } as const;
 export type MakeupFailure = (typeof MakeupFailure)[keyof typeof MakeupFailure];
 
@@ -77,6 +78,12 @@ export interface NthWeekday {
 export interface Overlay {
   calendar: CalendarId;
   rule: OverlayRule;
+  makeup?: Makeup | WeekdayMakeup | Array<Makeup | MakeupStep> | null;
+}
+
+export interface AnyOverlay {
+  any: Array<Overlay | AnyOverlay>;
+  makeup?: Makeup | WeekdayMakeup | Array<Makeup | MakeupStep> | null;
 }
 
 export type Frequency =
@@ -90,7 +97,7 @@ export type Frequency =
 export interface ScheduleSpec {
   freq: Frequency;
   timezone: string;
-  overlays?: Overlay[];
+  overlays?: Array<Overlay | AnyOverlay>;
   makeup?: Makeup | WeekdayMakeup | Array<Makeup | MakeupStep>;
   max_makeup_hops?: number | null;
   makeup_failure?: MakeupFailure;
@@ -99,6 +106,7 @@ export interface ScheduleSpec {
   makeup_exclude_weekends?: boolean;
   makeup_before_next?: boolean;
   skip_if_consecutive_excluded?: number | null;
+  max_skip_gap?: number | null;
   start?: string | null;
   end?: string | null;
 }

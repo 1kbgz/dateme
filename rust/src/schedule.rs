@@ -46,6 +46,9 @@ pub struct Schedule {
     /// Skip excluded base-occurrence runs at or above this length before makeup.
     #[serde(default)]
     pub skip_if_consecutive_excluded: Option<u32>,
+    /// Error when a query window has a gap longer than this many days.
+    #[serde(default)]
+    pub max_skip_gap: Option<u32>,
     /// No occurrence before this instant (future-start support).
     #[serde(default)]
     pub start: Option<DateTime<Utc>>,
@@ -118,12 +121,30 @@ pub enum Nth {
     Last,
 }
 
-/// A calendar filter. Overlays are ANDed: an occurrence survives only if it
-/// passes every overlay.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Overlay {
+/// A calendar filter. Top-level overlays are ANDed: an occurrence survives only
+/// if it passes every overlay.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum Overlay {
+    Calendar(OverlayCalendar),
+    Any(OverlayAny),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct OverlayCalendar {
     pub calendar: CalendarId,
     pub rule: OverlayRule,
+    /// Makeup override used when this overlay drops a base occurrence.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub makeup: Option<Makeup>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct OverlayAny {
+    pub any: Vec<Overlay>,
+    /// Makeup override used when every child overlay fails.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub makeup: Option<Makeup>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -422,6 +443,8 @@ pub enum MakeupFailure {
     Skip,
     /// Emit the occurrence on its original excluded date.
     KeepOriginal,
+    /// Return a query error when enabled makeup cannot find a destination.
+    Error,
 }
 
 /// Structural validation error.
@@ -432,6 +455,8 @@ pub enum ScheduleError {
     InvalidMonthDay(u8),
     InvalidMonth(u8),
     InvalidSkipThreshold(u32),
+    InvalidMaxSkipGap(u32),
+    EmptyOverlayGroup,
     StartNotBeforeEnd,
     NeverFires,
 }
@@ -446,6 +471,10 @@ impl fmt::Display for ScheduleError {
             ScheduleError::InvalidSkipThreshold(n) => {
                 write!(f, "skip threshold {n} out of range 1..")
             }
+            ScheduleError::InvalidMaxSkipGap(n) => {
+                write!(f, "max skip gap {n} out of range 1..")
+            }
+            ScheduleError::EmptyOverlayGroup => write!(f, "overlay any group is empty"),
             ScheduleError::StartNotBeforeEnd => write!(f, "start must be strictly before end"),
             ScheduleError::NeverFires => write!(f, "schedule can never produce an occurrence"),
         }
@@ -504,7 +533,30 @@ impl Schedule {
             return Err(ScheduleError::InvalidSkipThreshold(0));
         }
 
+        if let Some(0) = self.max_skip_gap {
+            return Err(ScheduleError::InvalidMaxSkipGap(0));
+        }
+
+        for overlay in &self.overlays {
+            validate_overlay(overlay)?;
+        }
+
         Ok(())
+    }
+}
+
+fn validate_overlay(overlay: &Overlay) -> Result<(), ScheduleError> {
+    match overlay {
+        Overlay::Calendar(_) => Ok(()),
+        Overlay::Any(group) => {
+            if group.any.is_empty() {
+                return Err(ScheduleError::EmptyOverlayGroup);
+            }
+            for child in &group.any {
+                validate_overlay(child)?;
+            }
+            Ok(())
+        }
     }
 }
 
