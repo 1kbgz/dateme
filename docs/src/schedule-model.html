@@ -676,13 +676,45 @@ every excluded date:</p>
 </div>
 <p>Weekday keys are optional. If an excluded date’s weekday is not present, the
 engine uses <code class="docutils literal notranslate"><span class="pre">default</span></code>; if <code class="docutils literal notranslate"><span class="pre">default</span></code> is absent, the occurrence is skipped.</p>
+<p>Or provide a cascade of fallback strategies:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;after&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;max_hops&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;direction&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;before&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;max_hops&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="s2">&quot;none&quot;</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Each step is tried in order. A step can be a direction string or an object with
+<code class="docutils literal notranslate"><span class="pre">direction</span></code> and optional <code class="docutils literal notranslate"><span class="pre">max_hops</span></code>.</p>
 <p>The makeup search scans at most 14 days by default; set <code class="docutils literal notranslate"><span class="pre">max_makeup_hops</span></code> to
 cap that search. <code class="docutils literal notranslate"><span class="pre">null</span></code> or an absent field uses the default limit, <code class="docutils literal notranslate"><span class="pre">0</span></code> disables
 makeup for dropped occurrences, and a positive integer scans up to that many
-days, capped at 14.</p>
+days, capped at 14. Cascade steps without <code class="docutils literal notranslate"><span class="pre">max_hops</span></code> use this schedule-level
+limit.</p>
 <p>Set <code class="docutils literal notranslate"><span class="pre">makeup_only_on</span></code> to restrict makeup destination dates to specific weekdays:</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;makeup_only_on&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;tue&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;wed&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;thu&quot;</span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
 </pre></div>
+</div>
+<p>Additional target constraints:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>Effect</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">makeup_within_week</span></code></p></td>
+<td><p>Keep makeup within the original excluded date’s ISO week.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">makeup_exclude_weekends</span></code></p></td>
+<td><p>Reject Saturday and Sunday makeup destinations.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">makeup_before_next</span></code></p></td>
+<td><p>Reject makeup that lands on or crosses an adjacent base date.</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 <p>A made-up occurrence that coincides with another occurrence already produced by
 the schedule is dropped rather than duplicated. See
