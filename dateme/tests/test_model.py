@@ -113,6 +113,23 @@ def test_typed_model_serializes_makeup_only_on():
     assert Schedule(restricted).to_dict()["makeup_only_on"] == ["tue", "wed"]
 
 
+def test_typed_model_serializes_makeup_target_constraints():
+    spec = nyse_monday_spec()
+    constrained = model.Schedule(
+        freq=spec.freq,
+        timezone=spec.timezone,
+        overlays=spec.overlays,
+        makeup=spec.makeup,
+        makeup_within_week=True,
+        makeup_exclude_weekends=True,
+        makeup_before_next=True,
+    )
+    d = Schedule(constrained).to_dict()
+    assert d["makeup_within_week"] is True
+    assert d["makeup_exclude_weekends"] is True
+    assert d["makeup_before_next"] is True
+
+
 def test_typed_model_serializes_skip_if_consecutive_excluded():
     spec = nyse_monday_spec()
     threshold = model.Schedule(

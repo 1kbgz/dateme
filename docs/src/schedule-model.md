@@ -226,6 +226,14 @@ Set `makeup_only_on` to restrict makeup destination dates to specific weekdays:
 { "makeup_only_on": ["tue", "wed", "thu"] }
 ```
 
+Additional target constraints:
+
+| Field                     | Effect                                                        |
+| ------------------------- | ------------------------------------------------------------- |
+| `makeup_within_week`      | Keep makeup within the original excluded date's ISO week.     |
+| `makeup_exclude_weekends` | Reject Saturday and Sunday makeup destinations.               |
+| `makeup_before_next`      | Reject makeup that lands on or crosses an adjacent base date. |
+
 A made-up occurrence that coincides with another occurrence already produced by
 the schedule is dropped rather than duplicated. See
 [Overlays and makeup](#overlays-and-makeup).

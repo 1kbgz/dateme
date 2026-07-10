@@ -34,6 +34,15 @@ pub struct Schedule {
     /// Restrict makeup destination dates to these weekdays.
     #[serde(default, with = "weekday_vec_opt")]
     pub makeup_only_on: Option<Vec<Weekday>>,
+    /// Keep makeup destinations within the original ISO week.
+    #[serde(default)]
+    pub makeup_within_week: bool,
+    /// Reject Saturday and Sunday makeup destinations.
+    #[serde(default)]
+    pub makeup_exclude_weekends: bool,
+    /// Do not let makeup land on or cross an adjacent base occurrence.
+    #[serde(default)]
+    pub makeup_before_next: bool,
     /// Skip excluded base-occurrence runs at or above this length before makeup.
     #[serde(default)]
     pub skip_if_consecutive_excluded: Option<u32>,
