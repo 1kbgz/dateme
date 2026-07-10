@@ -89,6 +89,10 @@ below).
 | `is_occurrence(instant)`         | `bool`                   | —          |
 | `count_between(after, before)`   | `int`                    | —          |
 | `describe()`                     | `str`                    | —          |
+| `iter(schedule)`                 | iterator of `datetime`   | ascending  |
+| `iter_between(after, before)`    | iterator of `datetime`   | ascending  |
+| `iter_upcoming(n, after=now)`    | iterator of `datetime`   | ascending  |
+| `instant in schedule`            | `bool`                   | —          |
 | `validate()`                     | `None` (raises on error) | —          |
 | `to_json()`                      | `str`                    | —          |
 | `to_dict()`                      | `dict`                   | —          |
@@ -99,6 +103,11 @@ below).
 results are strictly between the two bounds and deduplicated by instant.
 Trace methods return dictionaries with `instant` and `reason`. Reasons include
 `base`, `makeup_from(YYYY-MM-DD)`, and `shifted_dst`.
+
+Iteration is bounded. `for instant in schedule` uses the schedule's `start`
+bound, or the current time when `start` is absent, and iterates until `end`.
+Schedules without `end` raise `ValueError` when iterated. Use `iter_between` or
+`iter_upcoming` when you want to provide an explicit bound or count.
 
 (typed-model)=
 

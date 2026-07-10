@@ -90,6 +90,9 @@ const schedule = new Schedule(spec);
 | `isOccurrence(instant)`                  | `boolean`                   | —          |
 | `countBetween(after, before)`            | `number`                    | —          |
 | `describe()`                             | `string`                    | —          |
+| `[Symbol.iterator]()`                    | `IterableIterator<Date>`    | ascending  |
+| `iterBetween(after, before)`             | `IterableIterator<Date>`    | ascending  |
+| `iterUpcoming(n, after = new Date())`    | `IterableIterator<Date>`    | ascending  |
 | `validate()`                             | `void` (throws on error)    | —          |
 | `toObject()`                             | `ScheduleSpec`              | —          |
 | `toJSON()`                               | `ScheduleSpec`              | —          |
@@ -99,6 +102,10 @@ const schedule = new Schedule(spec);
 - Results are strictly between the two bounds and deduplicated by instant.
 - Trace methods return `{ instant: Date, reason: string }`. Reasons include
   `base`, `makeup_from(YYYY-MM-DD)`, and `shifted_dst`.
+- Iteration is bounded. `for (const instant of schedule)` uses the schedule's
+  `start` bound, or the current time when `start` is absent, and iterates until
+  `end`. Schedules without `end` throw when iterated. Use `iterBetween` or
+  `iterUpcoming` when you want to provide an explicit bound or count.
 
 ## Example
 

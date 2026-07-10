@@ -146,6 +146,26 @@ export class Schedule {
   describe(): string {
     return this.inner.describe();
   }
+
+  /** Iterate occurrences from `start` (or now) until the schedule `end` bound. */
+  *[Symbol.iterator](): IterableIterator<Date> {
+    const spec = this.toObject();
+    if (spec.end == null) {
+      throw new Error("Schedule iteration requires an end bound");
+    }
+    const after = spec.start == null ? new Date() : new Date(spec.start);
+    yield* this.until(new Date(spec.end), after);
+  }
+
+  /** Iterate occurrences in `(after, before)`, ascending. */
+  *iterBetween(after: Date, before: Date): IterableIterator<Date> {
+    yield* this.until(before, after);
+  }
+
+  /** Iterate the next `n` occurrences strictly after `after`, ascending. */
+  *iterUpcoming(n: number, after: Date = new Date()): IterableIterator<Date> {
+    yield* this.upcoming(n, after);
+  }
 }
 
 export default Schedule;

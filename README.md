@@ -94,6 +94,8 @@ resolved on conversion to UTC.
 For observability, schedules can answer whether an instant is an occurrence,
 count occurrences in a window, describe the rule, and return occurrence traces
 that include reasons such as `base`, `makeup_from(YYYY-MM-DD)`, or `shifted_dst`.
+Python and JavaScript also support bounded iteration helpers for end-bounded
+series or caller-supplied windows/counts.
 
 > [!NOTE]
 > This library was generated using [copier](https://copier.readthedocs.io/en/stable/) from the [Base Python Project Template repository](https://github.com/python-project-templates/base).
