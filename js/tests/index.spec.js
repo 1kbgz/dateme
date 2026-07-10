@@ -148,6 +148,29 @@ test.describe("Schedule", () => {
     expect(res).toBe("keep_original");
   });
 
+  test("throws when makeup_failure is error", async ({ page }) => {
+    const message = await run(
+      page,
+      `const spec = {
+         freq: { type: "weekly", days: [mod.Weekday.Mon], time: "17:30" },
+         timezone: "America/New_York",
+         overlays: [{ calendar: mod.CalendarId.NyseHoliday, rule: mod.OverlayRule.Exclude }],
+         makeup: mod.Makeup.After,
+         max_makeup_hops: 1,
+         makeup_failure: mod.MakeupFailure.Error,
+         makeup_only_on: [mod.Weekday.Mon],
+       };
+       const s = new mod.Schedule(spec);
+       try {
+         s.next(new Date(Date.UTC(2026, 0, 13)));
+         return "";
+       } catch (e) {
+         return e.message;
+       }`,
+    );
+    expect(message).toContain("makeup failed");
+  });
+
   test("round-trips weekday makeup from typed specs", async ({ page }) => {
     const res = await run(
       page,
@@ -255,5 +278,69 @@ test.describe("Schedule", () => {
        return s.toObject().skip_if_consecutive_excluded;`,
     );
     expect(res).toBe(2);
+  });
+
+  test("round-trips max_skip_gap from typed specs", async ({ page }) => {
+    const res = await run(
+      page,
+      `const spec = {
+         freq: { type: "weekly", days: [mod.Weekday.Mon], time: "17:30" },
+         timezone: "America/New_York",
+         overlays: [{ calendar: mod.CalendarId.NyseHoliday, rule: mod.OverlayRule.Exclude }],
+         makeup: mod.Makeup.After,
+         max_skip_gap: 3,
+       };
+       const s = new mod.Schedule(spec);
+       return s.toObject().max_skip_gap;`,
+    );
+    expect(res).toBe(3);
+  });
+
+  test("throws when max_skip_gap is exceeded", async ({ page }) => {
+    const message = await run(
+      page,
+      `const s = new mod.Schedule({
+         freq: { type: "weekly", days: [mod.Weekday.Mon], time: "09:00" },
+         timezone: "UTC",
+         max_skip_gap: 1,
+       });
+       try {
+         s.until(new Date(Date.UTC(2026, 0, 5)), new Date(Date.UTC(2026, 0, 1)));
+         return "";
+       } catch (e) {
+         return e.message;
+       }`,
+    );
+    expect(message).toContain("max_skip_gap");
+  });
+
+  test("round-trips overlay any groups and per-overlay makeup", async ({
+    page,
+  }) => {
+    const res = await run(
+      page,
+      `const spec = {
+         freq: { type: "daily", time: "09:00" },
+         timezone: "UTC",
+         overlays: [{
+           any: [
+             { calendar: mod.CalendarId.UsFederalHoliday, rule: mod.OverlayRule.Exclude },
+             { calendar: mod.CalendarId.NyseHoliday, rule: mod.OverlayRule.Exclude, makeup: mod.Makeup.Before },
+           ],
+           makeup: mod.Makeup.None,
+         }],
+       };
+       const s = new mod.Schedule(spec);
+       return s.toObject().overlays;`,
+    );
+    expect(res).toEqual([
+      {
+        any: [
+          { calendar: "us_federal_holiday", rule: "exclude" },
+          { calendar: "nyse_holiday", rule: "exclude", makeup: "before" },
+        ],
+        makeup: "none",
+      },
+    ]);
   });
 });

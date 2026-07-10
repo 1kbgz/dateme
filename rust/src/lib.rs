@@ -19,9 +19,10 @@ mod engine;
 mod schedule;
 
 pub use calendar::{Calendar, CalendarProvider, NoCalendars};
+pub use engine::QueryError;
 pub use schedule::{
     CalendarId, Frequency, Makeup, MakeupDirection, MakeupFailure, MonthDay, Nth, NthWeekday,
-    Overlay, OverlayRule, Schedule, ScheduleError, WeekdayMakeup,
+    Overlay, OverlayAny, OverlayCalendar, OverlayRule, Schedule, ScheduleError, WeekdayMakeup,
 };
 
 #[cfg(feature = "calendars")]

@@ -3,7 +3,10 @@
 //! `since`, `upcoming`).
 
 use crate::calendar::CalendarProvider;
-use crate::schedule::{Frequency, MakeupDirection, MakeupFailure, MonthDay, Nth, Schedule};
+use crate::schedule::{
+    Frequency, Makeup, MakeupDirection, MakeupFailure, MonthDay, Nth, Overlay, OverlayRule,
+    Schedule,
+};
 use chrono::{
     DateTime, Datelike, Duration, LocalResult, NaiveDate, NaiveTime, TimeZone, Utc, Weekday,
 };
@@ -38,6 +41,40 @@ enum MakeupOutcome {
     Moved(NaiveDate),
     Failed,
     Disabled,
+}
+
+/// Runtime query error.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum QueryError {
+    MakeupFailed { date: NaiveDate },
+    MaxSkipGapExceeded { max_days: u32 },
+}
+
+impl std::fmt::Display for QueryError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            QueryError::MakeupFailed { date } => {
+                write!(f, "makeup failed for excluded occurrence on {date}")
+            }
+            QueryError::MaxSkipGapExceeded { max_days } => {
+                write!(f, "schedule gap exceeded max_skip_gap of {max_days} days")
+            }
+        }
+    }
+}
+
+impl std::error::Error for QueryError {}
+
+#[derive(Clone)]
+struct OverlayOutcome {
+    passes: bool,
+    makeup: Option<Makeup>,
+}
+
+enum GapCheck {
+    OpenHead,
+    OpenTail,
+    Closed,
 }
 
 /// Resolve a local date+time in `tz` to a UTC instant, handling DST per spec §6:
@@ -241,20 +278,63 @@ impl Schedule {
         out
     }
 
-    /// Whether a local `date` passes all overlays.
-    fn survives(&self, date: NaiveDate, cal: &dyn CalendarProvider) -> bool {
-        use crate::schedule::OverlayRule;
-        for ov in &self.overlays {
-            let in_set = cal.contains(ov.calendar, date).unwrap_or(false);
-            let pass = match ov.rule {
-                OverlayRule::Exclude => !in_set,
-                OverlayRule::Only => in_set,
-            };
-            if !pass {
-                return false;
+    fn overlay_outcome(
+        overlay: &Overlay,
+        date: NaiveDate,
+        cal: &dyn CalendarProvider,
+    ) -> OverlayOutcome {
+        match overlay {
+            Overlay::Calendar(overlay) => {
+                let in_set = cal.contains(overlay.calendar, date).unwrap_or(false);
+                let passes = match overlay.rule {
+                    OverlayRule::Exclude => !in_set,
+                    OverlayRule::Only => in_set,
+                };
+                OverlayOutcome {
+                    passes,
+                    makeup: if passes { None } else { overlay.makeup.clone() },
+                }
+            }
+            Overlay::Any(group) => {
+                let mut first_makeup = None;
+                for child in &group.any {
+                    let outcome = Self::overlay_outcome(child, date, cal);
+                    if outcome.passes {
+                        return OverlayOutcome {
+                            passes: true,
+                            makeup: None,
+                        };
+                    }
+                    if first_makeup.is_none() {
+                        first_makeup = outcome.makeup;
+                    }
+                }
+                OverlayOutcome {
+                    passes: false,
+                    makeup: group.makeup.clone().or(first_makeup),
+                }
             }
         }
-        true
+    }
+
+    /// Whether a local `date` passes all overlays. Returns the first failing
+    /// overlay's makeup override, if one is configured.
+    fn overlay_result(&self, date: NaiveDate, cal: &dyn CalendarProvider) -> OverlayOutcome {
+        for overlay in &self.overlays {
+            let outcome = Self::overlay_outcome(overlay, date, cal);
+            if !outcome.passes {
+                return outcome;
+            }
+        }
+        OverlayOutcome {
+            passes: true,
+            makeup: None,
+        }
+    }
+
+    /// Whether a local `date` passes all overlays.
+    fn survives(&self, date: NaiveDate, cal: &dyn CalendarProvider) -> bool {
+        self.overlay_result(date, cal).passes
     }
 
     fn skipped_excluded_runs(
@@ -325,6 +405,7 @@ impl Schedule {
         date: NaiveDate,
         previous_base: Option<NaiveDate>,
         next_base: Option<NaiveDate>,
+        makeup: Option<&Makeup>,
         cal: &dyn CalendarProvider,
     ) -> MakeupOutcome {
         let default_max_hops = self
@@ -333,7 +414,8 @@ impl Schedule {
             .unwrap_or(MAX_MAKEUP_DAYS)
             .min(MAX_MAKEUP_DAYS);
         let mut attempted = false;
-        for makeup_step in self.makeup.steps_for(date.weekday()) {
+        let makeup = makeup.unwrap_or(&self.makeup);
+        for makeup_step in makeup.steps_for(date.weekday()) {
             let (direction, max_hops) = makeup_step.parts();
             let day_step = match direction {
                 MakeupDirection::None => return MakeupOutcome::Disabled,
@@ -384,7 +466,7 @@ impl Schedule {
         lo: NaiveDate,
         hi: NaiveDate,
         cal: &dyn CalendarProvider,
-    ) -> BTreeSet<DateTime<Utc>> {
+    ) -> Result<BTreeSet<DateTime<Utc>>, QueryError> {
         let mode = match self.freq {
             Frequency::Hourly { .. } => Nonexistent::Skip,
             _ => Nonexistent::Shift,
@@ -397,16 +479,18 @@ impl Schedule {
             if skipped_base.contains(&(date, time)) {
                 continue;
             }
-            let dest = if self.survives(date, cal) {
+            let overlay = self.overlay_result(date, cal);
+            let dest = if overlay.passes {
                 Some(date)
             } else {
                 let previous_base = base[..index].last().map(|(d, _)| *d);
                 let next_base = base[index + 1..].first().map(|(d, _)| *d);
-                match self.make_up(date, previous_base, next_base, cal) {
+                match self.make_up(date, previous_base, next_base, overlay.makeup.as_ref(), cal) {
                     MakeupOutcome::Moved(d) => Some(d),
                     MakeupOutcome::Failed => match self.makeup_failure {
                         MakeupFailure::Skip => None,
                         MakeupFailure::KeepOriginal => Some(date),
+                        MakeupFailure::Error => return Err(QueryError::MakeupFailed { date }),
                     },
                     MakeupOutcome::Disabled => None,
                 }
@@ -419,24 +503,55 @@ impl Schedule {
                 }
             }
         }
-        set
+        Ok(set)
+    }
+
+    fn check_max_skip_gap(
+        &self,
+        lower: DateTime<Utc>,
+        upper: DateTime<Utc>,
+        occurrences: &[DateTime<Utc>],
+        gap_check: GapCheck,
+    ) -> Result<(), QueryError> {
+        let Some(max_days) = self.max_skip_gap else {
+            return Ok(());
+        };
+        let max_gap = Duration::days(i64::from(max_days));
+        let mut previous = if matches!(gap_check, GapCheck::OpenHead) {
+            occurrences.first().copied().unwrap_or(lower)
+        } else {
+            lower
+        };
+        for occurrence in occurrences {
+            if *occurrence - previous > max_gap {
+                return Err(QueryError::MaxSkipGapExceeded { max_days });
+            }
+            previous = *occurrence;
+        }
+        if matches!(gap_check, GapCheck::Closed | GapCheck::OpenHead) && upper - previous > max_gap
+        {
+            return Err(QueryError::MaxSkipGapExceeded { max_days });
+        }
+        Ok(())
     }
 
     /// Occurrences with instant strictly in `(lower, upper)`, ascending, with
     /// start/end bounds applied.
-    fn collect(
+    fn try_collect(
         &self,
         lower: DateTime<Utc>,
         upper: DateTime<Utc>,
+        gap_check: GapCheck,
         cal: &dyn CalendarProvider,
-    ) -> Vec<DateTime<Utc>> {
+    ) -> Result<Vec<DateTime<Utc>>, QueryError> {
         if upper <= lower {
-            return Vec::new();
+            return Ok(Vec::new());
         }
         let margin = Duration::days(WINDOW_MARGIN_DAYS);
         let lo_date = lower.with_timezone(&self.timezone).date_naive() - margin;
         let hi_date = upper.with_timezone(&self.timezone).date_naive() + margin;
-        self.generate(lo_date, hi_date, cal)
+        let occurrences: Vec<_> = self
+            .generate(lo_date, hi_date, cal)?
             .into_iter()
             .filter(|t| {
                 *t > lower
@@ -444,7 +559,9 @@ impl Schedule {
                     && self.start.is_none_or(|s| *t >= s)
                     && self.end.is_none_or(|e| *t < e)
             })
-            .collect()
+            .collect();
+        self.check_max_skip_gap(lower, upper, &occurrences, gap_check)?;
+        Ok(occurrences)
     }
 
     /// Effective hard upper bound for a forward search: the earlier of `end` and
@@ -468,7 +585,16 @@ impl Schedule {
     /// The first occurrence strictly after `after`. `None` ⇒ the series has
     /// ended or none exists within the search horizon.
     pub fn next(&self, after: DateTime<Utc>, cal: &dyn CalendarProvider) -> Option<DateTime<Utc>> {
-        self.upcoming(1, after, cal).into_iter().next()
+        self.try_next(after, cal).ok().flatten()
+    }
+
+    /// Fallible variant of [`Schedule::next`].
+    pub fn try_next(
+        &self,
+        after: DateTime<Utc>,
+        cal: &dyn CalendarProvider,
+    ) -> Result<Option<DateTime<Utc>>, QueryError> {
+        Ok(self.try_upcoming(1, after, cal)?.into_iter().next())
     }
 
     /// The last occurrence strictly before `before`. `None` ⇒ none exists within
@@ -478,16 +604,25 @@ impl Schedule {
         before: DateTime<Utc>,
         cal: &dyn CalendarProvider,
     ) -> Option<DateTime<Utc>> {
+        self.try_previous(before, cal).ok().flatten()
+    }
+
+    /// Fallible variant of [`Schedule::previous`].
+    pub fn try_previous(
+        &self,
+        before: DateTime<Utc>,
+        cal: &dyn CalendarProvider,
+    ) -> Result<Option<DateTime<Utc>>, QueryError> {
         let cap = self.backward_cap(before);
         let mut span = INITIAL_HORIZON_DAYS;
         loop {
             let lower = (before - Duration::days(span)).max(cap);
-            let occ = self.collect(lower, before, cal);
+            let occ = self.try_collect(lower, before, GapCheck::OpenHead, cal)?;
             if let Some(last) = occ.last() {
-                return Some(*last);
+                return Ok(Some(*last));
             }
             if lower <= cap {
-                return None;
+                return Ok(None);
             }
             span = (span * 2).min(ABSOLUTE_HORIZON_DAYS);
         }
@@ -500,19 +635,29 @@ impl Schedule {
         after: DateTime<Utc>,
         cal: &dyn CalendarProvider,
     ) -> Vec<DateTime<Utc>> {
+        self.try_upcoming(n, after, cal).unwrap_or_default()
+    }
+
+    /// Fallible variant of [`Schedule::upcoming`].
+    pub fn try_upcoming(
+        &self,
+        n: usize,
+        after: DateTime<Utc>,
+        cal: &dyn CalendarProvider,
+    ) -> Result<Vec<DateTime<Utc>>, QueryError> {
         if n == 0 {
-            return Vec::new();
+            return Ok(Vec::new());
         }
         let cap = self.forward_cap(after);
         let mut span = INITIAL_HORIZON_DAYS;
         loop {
             let upper = (after + Duration::days(span)).min(cap);
-            let occ = self.collect(after, upper, cal);
+            let occ = self.try_collect(after, upper, GapCheck::OpenTail, cal)?;
             if occ.len() >= n {
-                return occ.into_iter().take(n).collect();
+                return Ok(occ.into_iter().take(n).collect());
             }
             if upper >= cap {
-                return occ;
+                return Ok(occ);
             }
             span = (span * 2).min(ABSOLUTE_HORIZON_DAYS);
         }
@@ -526,7 +671,17 @@ impl Schedule {
         after: DateTime<Utc>,
         cal: &dyn CalendarProvider,
     ) -> Vec<DateTime<Utc>> {
-        self.collect(after, before, cal)
+        self.try_until(before, after, cal).unwrap_or_default()
+    }
+
+    /// Fallible variant of [`Schedule::until`].
+    pub fn try_until(
+        &self,
+        before: DateTime<Utc>,
+        after: DateTime<Utc>,
+        cal: &dyn CalendarProvider,
+    ) -> Result<Vec<DateTime<Utc>>, QueryError> {
+        self.try_collect(after, before, GapCheck::Closed, cal)
     }
 
     /// All occurrences strictly in `(after, before)`, **descending**.
@@ -537,8 +692,18 @@ impl Schedule {
         before: DateTime<Utc>,
         cal: &dyn CalendarProvider,
     ) -> Vec<DateTime<Utc>> {
-        let mut v = self.collect(after, before, cal);
+        self.try_since(after, before, cal).unwrap_or_default()
+    }
+
+    /// Fallible variant of [`Schedule::since`].
+    pub fn try_since(
+        &self,
+        after: DateTime<Utc>,
+        before: DateTime<Utc>,
+        cal: &dyn CalendarProvider,
+    ) -> Result<Vec<DateTime<Utc>>, QueryError> {
+        let mut v = self.try_collect(after, before, GapCheck::Closed, cal)?;
         v.reverse();
-        v
+        Ok(v)
     }
 }

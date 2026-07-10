@@ -25,6 +25,7 @@ __all__ = [
     "MonthDay",
     "NthWeekday",
     "Overlay",
+    "AnyOverlay",
     "Frequency",
     "Hourly",
     "Daily",
@@ -65,6 +66,7 @@ class Makeup(str, Enum):
 class MakeupFailure(str, Enum):
     SKIP = "skip"
     KEEP_ORIGINAL = "keep_original"
+    ERROR = "error"
 
 
 @dataclass(frozen=True)
@@ -110,6 +112,14 @@ class CalendarId(str, Enum):
     US_BUSINESS_DAY = "us_business_day"
     NYSE_HOLIDAY = "nyse_holiday"
     NYSE_TRADING_DAY = "nyse_trading_day"
+
+
+def _makeup_to_json(value: Makeup | WeekdayMakeup | list[Makeup | MakeupStep]) -> str | dict | list:
+    if isinstance(value, Makeup):
+        return value.value
+    if isinstance(value, WeekdayMakeup):
+        return value.to_dict()
+    return [step.value if isinstance(step, Makeup) else step.to_dict() for step in value]
 
 
 def _time_str(value: str | time) -> str:
@@ -169,9 +179,31 @@ class Overlay:
 
     calendar: CalendarId
     rule: OverlayRule
+    makeup: Makeup | WeekdayMakeup | list[Makeup | MakeupStep] | None = None
 
     def to_dict(self) -> dict:
-        return {"calendar": self.calendar.value, "rule": self.rule.value}
+        out = {"calendar": self.calendar.value, "rule": self.rule.value}
+        if self.makeup is not None:
+            out["makeup"] = _makeup_to_json(self.makeup)
+        return out
+
+
+@dataclass(frozen=True)
+class AnyOverlay:
+    """An overlay group that passes when any child overlay passes."""
+
+    any: list[Overlay | AnyOverlay]
+    makeup: Makeup | WeekdayMakeup | list[Makeup | MakeupStep] | None = None
+
+    def __post_init__(self) -> None:
+        if not self.any:
+            raise ValueError("overlay any group is empty")
+
+    def to_dict(self) -> dict:
+        out = {"any": [o.to_dict() for o in self.any]}
+        if self.makeup is not None:
+            out["makeup"] = _makeup_to_json(self.makeup)
+        return out
 
 
 class Frequency:
@@ -276,7 +308,7 @@ class Schedule:
 
     freq: Frequency
     timezone: str
-    overlays: list[Overlay] = field(default_factory=list)
+    overlays: list[Overlay | AnyOverlay] = field(default_factory=list)
     makeup: Makeup | WeekdayMakeup | list[Makeup | MakeupStep] = Makeup.NONE
     max_makeup_hops: int | None = None
     makeup_failure: MakeupFailure = MakeupFailure.SKIP
@@ -285,26 +317,22 @@ class Schedule:
     makeup_exclude_weekends: bool = False
     makeup_before_next: bool = False
     skip_if_consecutive_excluded: int | None = None
+    max_skip_gap: int | None = None
     start: str | datetime | None = None
     end: str | datetime | None = None
 
     def __post_init__(self) -> None:
         if self.skip_if_consecutive_excluded is not None and self.skip_if_consecutive_excluded < 1:
             raise ValueError("skip_if_consecutive_excluded must be at least 1")
+        if self.max_skip_gap is not None and self.max_skip_gap < 1:
+            raise ValueError("max_skip_gap must be at least 1")
 
     def to_dict(self) -> dict:
-        makeup = self.makeup
-        if isinstance(makeup, Makeup):
-            makeup_value = makeup.value
-        elif isinstance(makeup, WeekdayMakeup):
-            makeup_value = makeup.to_dict()
-        else:
-            makeup_value = [step.value if isinstance(step, Makeup) else step.to_dict() for step in makeup]
         return {
             "freq": self.freq.to_dict(),
             "timezone": self.timezone,
             "overlays": [o.to_dict() for o in self.overlays],
-            "makeup": makeup_value,
+            "makeup": _makeup_to_json(self.makeup),
             "max_makeup_hops": self.max_makeup_hops,
             "makeup_failure": self.makeup_failure.value,
             "makeup_only_on": None if self.makeup_only_on is None else [d.value for d in self.makeup_only_on],
@@ -312,6 +340,7 @@ class Schedule:
             "makeup_exclude_weekends": self.makeup_exclude_weekends,
             "makeup_before_next": self.makeup_before_next,
             "skip_if_consecutive_excluded": self.skip_if_consecutive_excluded,
+            "max_skip_gap": self.max_skip_gap,
             "start": _instant_str(self.start),
             "end": _instant_str(self.end),
         }
