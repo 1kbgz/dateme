@@ -74,6 +74,22 @@ pub enum Frequency {
         #[serde(with = "time_hm")]
         time: NaiveTime,
     },
+    /// Every N days from `start_date`, at `time`.
+    EveryNDays {
+        interval: u32,
+        start_date: NaiveDate,
+        #[serde(with = "time_hm")]
+        time: NaiveTime,
+    },
+    /// Every N weeks from the week containing `start_date`, on selected weekdays.
+    EveryNWeeks {
+        interval: u32,
+        start_date: NaiveDate,
+        #[serde(with = "weekday_vec")]
+        days: Vec<Weekday>,
+        #[serde(with = "time_hm")]
+        time: NaiveTime,
+    },
     /// Selected days-of-month at `time`.
     MonthlyByDay {
         days: Vec<MonthDay>,
@@ -93,6 +109,15 @@ pub enum Frequency {
         #[serde(with = "time_hm")]
         time: NaiveTime,
     },
+    /// Every quarter on `month` within each quarter (`1..=3`) and `day`.
+    Quarterly {
+        month: u8,
+        day: MonthDay,
+        #[serde(with = "time_hm")]
+        time: NaiveTime,
+    },
+    /// Five-field cron expression in schedule-local time.
+    CustomCron { expr: String },
 }
 
 /// A day within a month: a fixed `1..=31`, or the last day.
@@ -470,6 +495,9 @@ pub enum ScheduleError {
     EmptyDays,
     InvalidMonthDay(u8),
     InvalidMonth(u8),
+    InvalidInterval(u32),
+    InvalidQuarterMonth(u8),
+    InvalidCron(String),
     InvalidSkipThreshold(u32),
     InvalidMaxSkipGap(u32),
     EmptyOverlayGroup,
@@ -486,6 +514,11 @@ impl fmt::Display for ScheduleError {
             ScheduleError::EmptyDays => write!(f, "day/weekday selection is empty"),
             ScheduleError::InvalidMonthDay(d) => write!(f, "month day {d} out of range 1..=31"),
             ScheduleError::InvalidMonth(m) => write!(f, "month {m} out of range 1..=12"),
+            ScheduleError::InvalidInterval(n) => write!(f, "interval {n} out of range 1.."),
+            ScheduleError::InvalidQuarterMonth(m) => {
+                write!(f, "quarter month {m} out of range 1..=3")
+            }
+            ScheduleError::InvalidCron(e) => write!(f, "invalid cron expression: {e}"),
             ScheduleError::InvalidSkipThreshold(n) => {
                 write!(f, "skip threshold {n} out of range 1..")
             }
@@ -520,6 +553,20 @@ impl Schedule {
                     return Err(ScheduleError::EmptyDays);
                 }
             }
+            Frequency::EveryNDays { interval, .. } => {
+                if *interval == 0 {
+                    return Err(ScheduleError::InvalidInterval(*interval));
+                }
+            }
+            Frequency::EveryNWeeks { interval, days, .. } => {
+                if *interval == 0 {
+                    return Err(ScheduleError::InvalidInterval(*interval));
+                }
+                dedup_weekdays(days);
+                if days.is_empty() {
+                    return Err(ScheduleError::EmptyDays);
+                }
+            }
             Frequency::MonthlyByDay { days, .. } => {
                 for d in days.iter() {
                     check_month_day(d)?;
@@ -540,6 +587,15 @@ impl Schedule {
                     return Err(ScheduleError::InvalidMonth(*month));
                 }
                 check_month_day(day)?;
+            }
+            Frequency::Quarterly { month, day, .. } => {
+                if *month < 1 || *month > 3 {
+                    return Err(ScheduleError::InvalidQuarterMonth(*month));
+                }
+                check_month_day(day)?;
+            }
+            Frequency::CustomCron { expr } => {
+                validate_cron_expr(expr).map_err(ScheduleError::InvalidCron)?;
             }
         }
 
@@ -608,6 +664,63 @@ fn validate_calendar(calendar: &CalendarSpec) -> Result<(), ScheduleError> {
             Ok(())
         }
     }
+}
+
+fn validate_cron_expr(expr: &str) -> Result<(), String> {
+    let fields: Vec<_> = expr.split_whitespace().collect();
+    if fields.len() != 5 {
+        return Err("expected 5 fields".to_string());
+    }
+    let ranges = [(0, 59), (0, 23), (1, 31), (1, 12), (0, 7)];
+    for (field, (min, max)) in fields.iter().zip(ranges) {
+        validate_cron_field(field, min, max)?;
+    }
+    Ok(())
+}
+
+fn validate_cron_field(field: &str, min: u32, max: u32) -> Result<(), String> {
+    if field.is_empty() {
+        return Err("empty field".to_string());
+    }
+    for part in field.split(',') {
+        let (body, step) = part
+            .split_once('/')
+            .map_or((part, None), |(body, step)| (body, Some(step)));
+        if let Some(step) = step {
+            let step = step
+                .parse::<u32>()
+                .map_err(|_| format!("invalid step {step}"))?;
+            if step == 0 {
+                return Err("step must be at least 1".to_string());
+            }
+        }
+        if body == "*" {
+            continue;
+        }
+        let bounds = body.split_once('-');
+        match bounds {
+            Some((lo, hi)) => {
+                let lo = lo
+                    .parse::<u32>()
+                    .map_err(|_| format!("invalid value {lo}"))?;
+                let hi = hi
+                    .parse::<u32>()
+                    .map_err(|_| format!("invalid value {hi}"))?;
+                if lo > hi || lo < min || hi > max {
+                    return Err(format!("range {body} outside {min}..={max}"));
+                }
+            }
+            None => {
+                let value = body
+                    .parse::<u32>()
+                    .map_err(|_| format!("invalid value {body}"))?;
+                if value < min || value > max {
+                    return Err(format!("value {value} outside {min}..={max}"));
+                }
+            }
+        }
+    }
+    Ok(())
 }
 
 fn check_month_day(d: &MonthDay) -> Result<(), ScheduleError> {

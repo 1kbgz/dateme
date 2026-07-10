@@ -34,9 +34,13 @@ __all__ = [
     "Hourly",
     "Daily",
     "Weekly",
+    "EveryNDays",
+    "EveryNWeeks",
     "MonthlyByDay",
     "MonthlyByWeekday",
     "Yearly",
+    "Quarterly",
+    "CustomCron",
     "Schedule",
 ]
 
@@ -326,6 +330,52 @@ class Weekly(Frequency):
 
 
 @dataclass(frozen=True)
+class EveryNDays(Frequency):
+    """Every ``interval`` days from ``start_date`` at ``time``."""
+
+    interval: int
+    start_date: str | Date | datetime
+    time: str | time
+
+    def __post_init__(self) -> None:
+        if self.interval < 1:
+            raise ValueError("every_n_days interval must be at least 1")
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "every_n_days",
+            "interval": self.interval,
+            "start_date": _date_str(self.start_date),
+            "time": _time_str(self.time),
+        }
+
+
+@dataclass(frozen=True)
+class EveryNWeeks(Frequency):
+    """Every ``interval`` weeks from ``start_date`` on selected weekdays."""
+
+    interval: int
+    start_date: str | Date | datetime
+    days: list[Weekday]
+    time: str | time
+
+    def __post_init__(self) -> None:
+        if self.interval < 1:
+            raise ValueError("every_n_weeks interval must be at least 1")
+        if not self.days:
+            raise ValueError("every_n_weeks days selection is empty")
+
+    def to_dict(self) -> dict:
+        return {
+            "type": "every_n_weeks",
+            "interval": self.interval,
+            "start_date": _date_str(self.start_date),
+            "days": [d.value for d in self.days],
+            "time": _time_str(self.time),
+        }
+
+
+@dataclass(frozen=True)
 class MonthlyByDay(Frequency):
     """Selected days-of-month at ``time``."""
 
@@ -369,6 +419,32 @@ class Yearly(Frequency):
 
     def to_dict(self) -> dict:
         return {"type": "yearly", "month": self.month, "day": self.day.to_dict(), "time": _time_str(self.time)}
+
+
+@dataclass(frozen=True)
+class Quarterly(Frequency):
+    """Every quarter on ``month`` within quarter (1-3), on ``day`` at ``time``."""
+
+    month: int
+    day: MonthDay
+    time: str | time
+
+    def __post_init__(self) -> None:
+        if not 1 <= self.month <= 3:
+            raise ValueError(f"quarter month {self.month} out of range 1..=3")
+
+    def to_dict(self) -> dict:
+        return {"type": "quarterly", "month": self.month, "day": self.day.to_dict(), "time": _time_str(self.time)}
+
+
+@dataclass(frozen=True)
+class CustomCron(Frequency):
+    """Five-field cron expression in schedule-local time."""
+
+    expr: str
+
+    def to_dict(self) -> dict:
+        return {"type": "custom_cron", "expr": self.expr}
 
 
 @dataclass(frozen=True)

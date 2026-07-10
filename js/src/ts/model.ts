@@ -96,9 +96,19 @@ export type Frequency =
   | { type: "hourly"; minute: number }
   | { type: "daily"; time: string }
   | { type: "weekly"; days: Weekday[]; time: string }
+  | { type: "every_n_days"; interval: number; start_date: string; time: string }
+  | {
+      type: "every_n_weeks";
+      interval: number;
+      start_date: string;
+      days: Weekday[];
+      time: string;
+    }
   | { type: "monthly_by_day"; days: MonthDay[]; time: string }
   | { type: "monthly_by_weekday"; weekdays: NthWeekday[]; time: string }
-  | { type: "yearly"; month: number; day: MonthDay; time: string };
+  | { type: "yearly"; month: number; day: MonthDay; time: string }
+  | { type: "quarterly"; month: number; day: MonthDay; time: string }
+  | { type: "custom_cron"; expr: string };
 
 export interface ScheduleSpec {
   freq: Frequency;

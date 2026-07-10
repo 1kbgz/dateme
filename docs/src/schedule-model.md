@@ -125,6 +125,74 @@ One occurrence per year: the [MonthDay](#monthday) `day` within `month`, at
 { "type": "yearly", "month": 7, "day": { "type": "day", "value": 4 }, "time": "12:00" }
 ```
 
+### `every_n_days`
+
+One occurrence every `interval` days, anchored to `start_date`, at `time`.
+
+| Field        | Type             | Description                |
+| ------------ | ---------------- | -------------------------- |
+| `type`       | `"every_n_days"` |                            |
+| `interval`   | integer >= 1     | Number of days per step.   |
+| `start_date` | date string      | Anchor date, `YYYY-MM-DD`. |
+| `time`       | string `"HH:MM"` | Time of day.               |
+
+```json
+{ "type": "every_n_days", "interval": 3, "start_date": "2026-01-01", "time": "09:00" }
+```
+
+### `every_n_weeks`
+
+One occurrence on each selected weekday every `interval` weeks. The repeating
+week cycle is anchored to the week containing `start_date`.
+
+| Field        | Type                     | Description                          |
+| ------------ | ------------------------ | ------------------------------------ |
+| `type`       | `"every_n_weeks"`        |                                      |
+| `interval`   | integer >= 1             | Number of weeks per step.            |
+| `start_date` | date string              | Anchor date, `YYYY-MM-DD`.           |
+| `days`       | array of weekday strings | Non-empty; `"mon"`…`"sun"`. Deduped. |
+| `time`       | string `"HH:MM"`         | Time of day.                         |
+
+```json
+{ "type": "every_n_weeks", "interval": 2, "start_date": "2026-01-05", "days": ["mon", "thu"], "time": "17:00" }
+```
+
+### `quarterly`
+
+One occurrence every quarter, at `time`, using `month` as the month within each
+quarter. `month: 1` means Jan/Apr/Jul/Oct, `2` means Feb/May/Aug/Nov, and `3`
+means Mar/Jun/Sep/Dec. A nonexistent [MonthDay](#monthday) is skipped for that
+quarter.
+
+| Field   | Type                  | Description                   |
+| ------- | --------------------- | ----------------------------- |
+| `type`  | `"quarterly"`         |                               |
+| `month` | integer 1-3           | Month within each quarter.    |
+| `day`   | [MonthDay](#monthday) | Day within the quarter month. |
+| `time`  | string `"HH:MM"`      | Time of day.                  |
+
+```json
+{ "type": "quarterly", "month": 1, "day": { "type": "day", "value": 15 }, "time": "12:00" }
+```
+
+### `custom_cron`
+
+One occurrence for every local minute matching a five-field cron expression:
+`minute hour day-of-month month day-of-week`.
+
+| Field  | Type            | Description       |
+| ------ | --------------- | ----------------- |
+| `type` | `"custom_cron"` |                   |
+| `expr` | string          | Five cron fields. |
+
+Fields support `*`, comma lists, ranges, and step syntax such as `*/15` or
+`1-5/2`. Day-of-week accepts `0`-`6`, where `0` is Sunday. When both
+day-of-month and day-of-week are constrained, both must match.
+
+```json
+{ "type": "custom_cron", "expr": "30 9 * * 1-5" }
+```
+
 (monthday)=
 
 ## MonthDay
@@ -356,6 +424,9 @@ not treat the open search horizon after the last returned occurrence as a gap.
 - `skip_if_consecutive_excluded` must be `null`, absent, or an integer at least
   `1`.
 - `max_skip_gap` must be `null`, absent, or an integer at least `1`.
+- `every_n_days.interval` and `every_n_weeks.interval` must be at least `1`.
+- `quarterly.month` must be `1`, `2`, or `3`.
+- `custom_cron.expr` must be a valid five-field expression.
 - `union` and `diff` calendar groups must have at least one child calendar.
 - `custom` calendar names must be non-empty strings.
 
@@ -371,6 +442,9 @@ not treat the open search horizon after the last returned occurrence as a gap.
 | Empty `days` / `weekdays` selection               | selection is empty          |
 | A `MonthDay` `value` outside 1–31                 | month day out of range      |
 | `yearly.month` outside 1–12                       | month out of range          |
+| `every_n_days` / `every_n_weeks` interval below 1 | interval out of range       |
+| `quarterly.month` outside 1–3                     | quarter month out of range  |
+| Invalid five-field cron expression                | invalid cron expression     |
 | `skip_if_consecutive_excluded` less than 1        | skip threshold out of range |
 | `max_skip_gap` less than 1                        | max skip gap out of range   |
 | Empty overlay `any` group                         | overlay group is empty      |
