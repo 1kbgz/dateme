@@ -10,7 +10,7 @@ use dateme_core::{
 };
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::types::PyDict;
+use pyo3::types::{PyDict, PyList};
 
 /// A recurrence schedule built from its JSON representation.
 ///
@@ -284,6 +284,54 @@ impl Schedule {
     /// Human-readable summary.
     fn describe(&self) -> String {
         self.inner.describe()
+    }
+
+    /// Iterate occurrences from `start` (or now) until the schedule `end` bound.
+    fn __iter__<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyAny>> {
+        let before = self
+            .inner
+            .end
+            .ok_or_else(|| PyValueError::new_err("schedule iteration requires an end bound"))?;
+        let after = self.inner.start.unwrap_or_else(Utc::now);
+        let values = self
+            .inner
+            .try_until(before, after, &self.calendars)
+            .map_err(|e| PyValueError::new_err(e.to_string()))?;
+        PyList::new(py, values)?.call_method0("__iter__")
+    }
+
+    /// Iterate occurrences in `(after, before)`, ascending.
+    fn iter_between<'py>(
+        &self,
+        py: Python<'py>,
+        after: DateTime<Utc>,
+        before: DateTime<Utc>,
+    ) -> PyResult<Bound<'py, PyAny>> {
+        let values = self
+            .inner
+            .try_until(before, after, &self.calendars)
+            .map_err(|e| PyValueError::new_err(e.to_string()))?;
+        PyList::new(py, values)?.call_method0("__iter__")
+    }
+
+    /// Iterate the next `n` occurrences strictly after `after` (default: now).
+    #[pyo3(signature = (n, after=None))]
+    fn iter_upcoming<'py>(
+        &self,
+        py: Python<'py>,
+        n: usize,
+        after: Option<DateTime<Utc>>,
+    ) -> PyResult<Bound<'py, PyAny>> {
+        let values = self
+            .inner
+            .try_upcoming(n, after.unwrap_or_else(Utc::now), &self.calendars)
+            .map_err(|e| PyValueError::new_err(e.to_string()))?;
+        PyList::new(py, values)?.call_method0("__iter__")
+    }
+
+    /// Syntactic sugar for `is_occurrence`: `instant in schedule`.
+    fn __contains__(&self, instant: DateTime<Utc>) -> PyResult<bool> {
+        self.is_occurrence(instant)
     }
 
     fn __repr__(&self) -> String {

@@ -460,4 +460,52 @@ test.describe("Schedule", () => {
     });
     expect(res.upcomingTrace).toEqual([res.trace]);
   });
+
+  test("supports bounded iteration helpers", async ({ page }) => {
+    const res = await run(
+      page,
+      `const s = new mod.Schedule({
+         freq: { type: "daily", time: "12:00" },
+         timezone: "UTC",
+         start: "2025-12-31T23:59:00Z",
+         end: "2026-01-04T00:00:00Z",
+       });
+       const unbounded = new mod.Schedule({
+         freq: { type: "daily", time: "12:00" },
+         timezone: "UTC",
+       });
+       let error = "";
+       try {
+         Array.from(unbounded);
+       } catch (err) {
+         error = err.message;
+       }
+       return {
+         all: Array.from(s, d => d.toISOString()),
+         between: Array.from(
+           s.iterBetween(new Date(Date.UTC(2026, 0, 1, 13)), new Date(Date.UTC(2026, 0, 4))),
+           d => d.toISOString(),
+         ),
+         upcoming: Array.from(
+           s.iterUpcoming(2, new Date(Date.UTC(2026, 0, 1))),
+           d => d.toISOString(),
+         ),
+         error,
+       };`,
+    );
+    expect(res.all).toEqual([
+      "2026-01-01T12:00:00.000Z",
+      "2026-01-02T12:00:00.000Z",
+      "2026-01-03T12:00:00.000Z",
+    ]);
+    expect(res.between).toEqual([
+      "2026-01-02T12:00:00.000Z",
+      "2026-01-03T12:00:00.000Z",
+    ]);
+    expect(res.upcoming).toEqual([
+      "2026-01-01T12:00:00.000Z",
+      "2026-01-02T12:00:00.000Z",
+    ]);
+    expect(res.error).toContain("end bound");
+  });
 });

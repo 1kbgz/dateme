@@ -93,3 +93,48 @@ def test_roundtrip_json():
     s = make(NYSE_MONDAY)
     again = Schedule.from_json(s.to_json())
     assert again.to_json() == s.to_json()
+
+
+def test_python_iteration_and_contains():
+    s = make(
+        {
+            "freq": {"type": "daily", "time": "12:00"},
+            "timezone": "UTC",
+            "overlays": [],
+            "makeup": "none",
+            "start": "2025-12-31T23:59:00Z",
+            "end": "2026-01-04T00:00:00Z",
+        }
+    )
+
+    assert list(s) == [
+        utc(2026, 1, 1, 12),
+        utc(2026, 1, 2, 12),
+        utc(2026, 1, 3, 12),
+    ]
+    assert utc(2026, 1, 2, 12) in s
+    assert utc(2026, 1, 2, 13) not in s
+    assert list(s.iter_between(utc(2026, 1, 1, 13), utc(2026, 1, 4))) == [
+        utc(2026, 1, 2, 12),
+        utc(2026, 1, 3, 12),
+    ]
+    assert list(s.iter_upcoming(2, utc(2026, 1, 1))) == [
+        utc(2026, 1, 1, 12),
+        utc(2026, 1, 2, 12),
+    ]
+
+
+def test_python_iteration_requires_end_bound():
+    s = make(
+        {
+            "freq": {"type": "daily", "time": "12:00"},
+            "timezone": "UTC",
+            "overlays": [],
+            "makeup": "none",
+            "start": None,
+            "end": None,
+        }
+    )
+
+    with pytest.raises(ValueError, match="end bound"):
+        list(s)
