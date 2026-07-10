@@ -16,3 +16,4 @@ dateme = { path = "../rust", version = "*", features = ["calendars"] }
 wasm-bindgen = "=0.2.126"
 chrono = { version = "0.4", default-features = false }
 serde_json = "1.0"
+js-sys = "0.3"

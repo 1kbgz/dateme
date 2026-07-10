@@ -67,6 +67,12 @@ export const CalendarId = {
   NyseTradingDay: "nyse_trading_day",
 } as const;
 export type CalendarId = (typeof CalendarId)[keyof typeof CalendarId];
+export type CalendarSpec =
+  | CalendarId
+  | { dates: string[] }
+  | { union: CalendarSpec[] }
+  | { diff: CalendarSpec[] }
+  | { custom: string };
 
 export type MonthDay = { type: "day"; value: number } | { type: "last" };
 
@@ -76,7 +82,7 @@ export interface NthWeekday {
 }
 
 export interface Overlay {
-  calendar: CalendarId;
+  calendar: CalendarSpec;
   rule: OverlayRule;
   makeup?: Makeup | WeekdayMakeup | Array<Makeup | MakeupStep> | null;
 }

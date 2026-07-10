@@ -164,11 +164,11 @@ passes every overlay.
 
 Calendar overlay fields:
 
-| Field      | Type                     | Description                                            |
-| ---------- | ------------------------ | ------------------------------------------------------ |
-| `calendar` | [CalendarId](#calendars) | Which calendar set.                                    |
-| `rule`     | `"exclude"` or `"only"`  | How to apply it.                                       |
-| `makeup`   | [Makeup](#makeup)        | Optional makeup override when this overlay drops date. |
+| Field      | Type                    | Description                                            |
+| ---------- | ----------------------- | ------------------------------------------------------ |
+| `calendar` | [Calendar](#calendars)  | Which calendar set.                                    |
+| `rule`     | `"exclude"` or `"only"` | How to apply it.                                       |
+| `makeup`   | [Makeup](#makeup)       | Optional makeup override when this overlay drops date. |
 
 | Rule      | Effect                                                            |
 | --------- | ----------------------------------------------------------------- |
@@ -200,7 +200,8 @@ the schedule-level `makeup` field is used.
 
 ## Calendars
 
-Built-in calendar identifiers for the `calendar` field, backed by the
+The `calendar` field accepts built-in identifiers or inline calendar specs.
+Built-in calendars are backed by the
 [`finance-dates`](https://crates.io/crates/finance-dates) dataset.
 
 | Identifier           | Date set                                                                                                     |
@@ -209,6 +210,33 @@ Built-in calendar identifiers for the `calendar` field, backed by the
 | `us_business_day`    | Weekdays that are not US federal holidays.                                                                   |
 | `nyse_holiday`       | NYSE full-day market closures.                                                                               |
 | `nyse_trading_day`   | NYSE session days (a weekday that is not an NYSE holiday). An early-close day still counts as a trading day. |
+
+Inline date sets:
+
+```json
+{ "dates": ["2026-07-03", "2026-07-04", "2026-12-25"] }
+```
+
+Calendar set algebra:
+
+```json
+{ "union": ["nyse_holiday", "us_federal_holiday"] }
+{ "diff": ["us_federal_holiday", "nyse_holiday"] }
+```
+
+`union` contains dates present in any child calendar. `diff` contains dates in
+the first child calendar, minus dates present in every following child calendar.
+Children can be built-ins or nested calendar specs.
+
+Custom provider calendars:
+
+```json
+{ "custom": "company_shutdown" }
+```
+
+Python and JavaScript constructors accept an optional provider used to resolve
+`custom` calendars at query time. Missing custom calendars are treated as not in
+the set.
 
 (makeup)=
 
@@ -328,6 +356,8 @@ not treat the open search horizon after the last returned occurrence as a gap.
 - `skip_if_consecutive_excluded` must be `null`, absent, or an integer at least
   `1`.
 - `max_skip_gap` must be `null`, absent, or an integer at least `1`.
+- `union` and `diff` calendar groups must have at least one child calendar.
+- `custom` calendar names must be non-empty strings.
 
 (validation)=
 
@@ -344,6 +374,8 @@ not treat the open search horizon after the last returned occurrence as a gap.
 | `skip_if_consecutive_excluded` less than 1        | skip threshold out of range |
 | `max_skip_gap` less than 1                        | max skip gap out of range   |
 | Empty overlay `any` group                         | overlay group is empty      |
+| Empty `union` / `diff` calendar group             | calendar group is empty     |
+| Empty `custom` calendar name                      | custom calendar name empty  |
 | `start` not strictly before `end` (when both set) | start must be before end    |
 
 Duplicate entries in `days` / `weekdays` are removed rather than rejected.

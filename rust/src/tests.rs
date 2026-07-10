@@ -42,7 +42,7 @@ fn weekly_monday_nyse_exclude_after() {
         },
         timezone: ny(),
         overlays: vec![Overlay::Calendar(OverlayCalendar {
-            calendar: CalendarId::NyseHoliday,
+            calendar: CalendarSpec::BuiltIn(CalendarId::NyseHoliday),
             rule: OverlayRule::Exclude,
             makeup: None,
         })],
@@ -83,7 +83,7 @@ fn makeup_hops_cap_drops_when_next_day_is_excluded() {
         },
         timezone: ny(),
         overlays: vec![Overlay::Calendar(OverlayCalendar {
-            calendar: CalendarId::NyseHoliday,
+            calendar: CalendarSpec::BuiltIn(CalendarId::NyseHoliday),
             rule: OverlayRule::Exclude,
             makeup: None,
         })],
@@ -131,7 +131,7 @@ fn makeup_failure_can_keep_original_excluded_date() {
         },
         timezone: ny(),
         overlays: vec![Overlay::Calendar(OverlayCalendar {
-            calendar: CalendarId::NyseHoliday,
+            calendar: CalendarSpec::BuiltIn(CalendarId::NyseHoliday),
             rule: OverlayRule::Exclude,
             makeup: None,
         })],
@@ -173,7 +173,7 @@ fn makeup_failure_can_return_query_error() {
         },
         timezone: ny(),
         overlays: vec![Overlay::Calendar(OverlayCalendar {
-            calendar: CalendarId::NyseHoliday,
+            calendar: CalendarSpec::BuiltIn(CalendarId::NyseHoliday),
             rule: OverlayRule::Exclude,
             makeup: None,
         })],
@@ -211,7 +211,7 @@ fn consecutive_excluded_base_occurrences_skip_before_makeup() {
         },
         timezone: Tz::UTC,
         overlays: vec![Overlay::Calendar(OverlayCalendar {
-            calendar: CalendarId::UsFederalHoliday,
+            calendar: CalendarSpec::BuiltIn(CalendarId::UsFederalHoliday),
             rule: OverlayRule::Exclude,
             makeup: None,
         })],
@@ -258,7 +258,7 @@ fn consecutive_excluded_threshold_keeps_short_runs() {
         freq: Frequency::Daily { time: hm(9, 0) },
         timezone: Tz::UTC,
         overlays: vec![Overlay::Calendar(OverlayCalendar {
-            calendar: CalendarId::UsFederalHoliday,
+            calendar: CalendarSpec::BuiltIn(CalendarId::UsFederalHoliday),
             rule: OverlayRule::Exclude,
             makeup: None,
         })],
@@ -293,7 +293,7 @@ fn max_skip_gap_errors_when_query_window_has_large_gap() {
         freq: Frequency::Daily { time: hm(9, 0) },
         timezone: Tz::UTC,
         overlays: vec![Overlay::Calendar(OverlayCalendar {
-            calendar: CalendarId::UsFederalHoliday,
+            calendar: CalendarSpec::BuiltIn(CalendarId::UsFederalHoliday),
             rule: OverlayRule::Exclude,
             makeup: None,
         })],
@@ -333,12 +333,12 @@ fn overlay_any_groups_pass_when_any_child_passes() {
         overlays: vec![Overlay::Any(OverlayAny {
             any: vec![
                 Overlay::Calendar(OverlayCalendar {
-                    calendar: CalendarId::UsFederalHoliday,
+                    calendar: CalendarSpec::BuiltIn(CalendarId::UsFederalHoliday),
                     rule: OverlayRule::Exclude,
                     makeup: None,
                 }),
                 Overlay::Calendar(OverlayCalendar {
-                    calendar: CalendarId::NyseHoliday,
+                    calendar: CalendarSpec::BuiltIn(CalendarId::NyseHoliday),
                     rule: OverlayRule::Exclude,
                     makeup: None,
                 }),
@@ -381,7 +381,7 @@ fn per_overlay_makeup_overrides_schedule_makeup() {
         },
         timezone: Tz::UTC,
         overlays: vec![Overlay::Calendar(OverlayCalendar {
-            calendar: CalendarId::NyseHoliday,
+            calendar: CalendarSpec::BuiltIn(CalendarId::NyseHoliday),
             rule: OverlayRule::Exclude,
             makeup: Some(Makeup::Before),
         })],
@@ -405,6 +405,165 @@ fn per_overlay_makeup_overrides_schedule_makeup() {
 }
 
 #[test]
+fn inline_date_set_calendar_excludes_dates() {
+    let s = Schedule {
+        freq: Frequency::Daily { time: hm(9, 0) },
+        timezone: Tz::UTC,
+        overlays: vec![Overlay::Calendar(OverlayCalendar {
+            calendar: CalendarSpec::Dates {
+                dates: vec![date(2026, 7, 3), date(2026, 7, 4)],
+            },
+            rule: OverlayRule::Exclude,
+            makeup: None,
+        })],
+        makeup: Makeup::None,
+        max_makeup_hops: None,
+        makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
+        makeup_within_week: false,
+        makeup_exclude_weekends: false,
+        makeup_before_next: false,
+        skip_if_consecutive_excluded: None,
+        max_skip_gap: None,
+        start: None,
+        end: None,
+    };
+
+    assert_eq!(
+        s.until(
+            utc("2026-07-06T00:00:00Z"),
+            utc("2026-07-02T00:00:00Z"),
+            &NoCalendars,
+        ),
+        vec![utc("2026-07-02T09:00:00Z"), utc("2026-07-05T09:00:00Z")]
+    );
+}
+
+#[test]
+fn calendar_union_and_diff_combine_sets() {
+    let cal = |id: CalendarId, d: NaiveDate| match id {
+        CalendarId::UsFederalHoliday => Some(d == date(2026, 7, 3) || d == date(2026, 7, 6)),
+        CalendarId::NyseHoliday => Some(d == date(2026, 7, 3)),
+        _ => Some(false),
+    };
+    let mut s = Schedule {
+        freq: Frequency::Daily { time: hm(9, 0) },
+        timezone: Tz::UTC,
+        overlays: vec![Overlay::Calendar(OverlayCalendar {
+            calendar: CalendarSpec::Union {
+                union: vec![
+                    CalendarSpec::BuiltIn(CalendarId::UsFederalHoliday),
+                    CalendarSpec::Dates {
+                        dates: vec![date(2026, 7, 7)],
+                    },
+                ],
+            },
+            rule: OverlayRule::Exclude,
+            makeup: None,
+        })],
+        makeup: Makeup::None,
+        max_makeup_hops: None,
+        makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
+        makeup_within_week: false,
+        makeup_exclude_weekends: false,
+        makeup_before_next: false,
+        skip_if_consecutive_excluded: None,
+        max_skip_gap: None,
+        start: None,
+        end: None,
+    };
+
+    assert_eq!(
+        s.until(
+            utc("2026-07-09T00:00:00Z"),
+            utc("2026-07-02T00:00:00Z"),
+            &cal,
+        ),
+        vec![
+            utc("2026-07-02T09:00:00Z"),
+            utc("2026-07-04T09:00:00Z"),
+            utc("2026-07-05T09:00:00Z"),
+            utc("2026-07-08T09:00:00Z"),
+        ]
+    );
+
+    s.overlays = vec![Overlay::Calendar(OverlayCalendar {
+        calendar: CalendarSpec::Diff {
+            diff: vec![
+                CalendarSpec::BuiltIn(CalendarId::UsFederalHoliday),
+                CalendarSpec::BuiltIn(CalendarId::NyseHoliday),
+            ],
+        },
+        rule: OverlayRule::Exclude,
+        makeup: None,
+    })];
+
+    assert_eq!(
+        s.until(
+            utc("2026-07-09T00:00:00Z"),
+            utc("2026-07-02T00:00:00Z"),
+            &cal,
+        ),
+        vec![
+            utc("2026-07-02T09:00:00Z"),
+            utc("2026-07-03T09:00:00Z"),
+            utc("2026-07-04T09:00:00Z"),
+            utc("2026-07-05T09:00:00Z"),
+            utc("2026-07-07T09:00:00Z"),
+            utc("2026-07-08T09:00:00Z"),
+        ]
+    );
+}
+
+struct CustomCalendarProvider;
+
+impl crate::calendar::CalendarProvider for CustomCalendarProvider {
+    fn contains(&self, _id: CalendarId, _date: NaiveDate) -> Option<bool> {
+        None
+    }
+
+    fn contains_custom(&self, name: &str, d: NaiveDate) -> Option<bool> {
+        Some(name == "shutdown" && d == date(2026, 8, 14))
+    }
+}
+
+#[test]
+fn custom_calendar_provider_resolves_named_calendar() {
+    let s = Schedule {
+        freq: Frequency::Daily { time: hm(9, 0) },
+        timezone: Tz::UTC,
+        overlays: vec![Overlay::Calendar(OverlayCalendar {
+            calendar: CalendarSpec::Custom {
+                custom: "shutdown".to_string(),
+            },
+            rule: OverlayRule::Exclude,
+            makeup: None,
+        })],
+        makeup: Makeup::None,
+        max_makeup_hops: None,
+        makeup_failure: MakeupFailure::Skip,
+        makeup_only_on: None,
+        makeup_within_week: false,
+        makeup_exclude_weekends: false,
+        makeup_before_next: false,
+        skip_if_consecutive_excluded: None,
+        max_skip_gap: None,
+        start: None,
+        end: None,
+    };
+
+    assert_eq!(
+        s.until(
+            utc("2026-08-16T00:00:00Z"),
+            utc("2026-08-13T00:00:00Z"),
+            &CustomCalendarProvider,
+        ),
+        vec![utc("2026-08-13T09:00:00Z"), utc("2026-08-15T09:00:00Z")]
+    );
+}
+
+#[test]
 fn makeup_can_vary_by_excluded_weekday() {
     let cal = |id: CalendarId, d: NaiveDate| match id {
         CalendarId::NyseHoliday => Some(d == date(2026, 1, 19) || d == date(2026, 1, 23)),
@@ -417,7 +576,7 @@ fn makeup_can_vary_by_excluded_weekday() {
         },
         timezone: ny(),
         overlays: vec![Overlay::Calendar(OverlayCalendar {
-            calendar: CalendarId::NyseHoliday,
+            calendar: CalendarSpec::BuiltIn(CalendarId::NyseHoliday),
             rule: OverlayRule::Exclude,
             makeup: None,
         })],
@@ -463,7 +622,7 @@ fn nearest_makeup_prefers_after_then_nearest_survivor() {
         freq: Frequency::Daily { time: hm(9, 0) },
         timezone: Tz::UTC,
         overlays: vec![Overlay::Calendar(OverlayCalendar {
-            calendar: CalendarId::UsFederalHoliday,
+            calendar: CalendarSpec::BuiltIn(CalendarId::UsFederalHoliday),
             rule: OverlayRule::Exclude,
             makeup: None,
         })],
@@ -516,7 +675,7 @@ fn makeup_only_on_restricts_destination_weekdays() {
         },
         timezone: ny(),
         overlays: vec![Overlay::Calendar(OverlayCalendar {
-            calendar: CalendarId::NyseHoliday,
+            calendar: CalendarSpec::BuiltIn(CalendarId::NyseHoliday),
             rule: OverlayRule::Exclude,
             makeup: None,
         })],
@@ -552,7 +711,7 @@ fn makeup_can_be_bounded_by_adjacent_base_occurrences() {
         },
         timezone: Tz::UTC,
         overlays: vec![Overlay::Calendar(OverlayCalendar {
-            calendar: CalendarId::NyseHoliday,
+            calendar: CalendarSpec::BuiltIn(CalendarId::NyseHoliday),
             rule: OverlayRule::Exclude,
             makeup: None,
         })],
@@ -606,7 +765,7 @@ fn makeup_can_be_restricted_to_original_week() {
         },
         timezone: Tz::UTC,
         overlays: vec![Overlay::Calendar(OverlayCalendar {
-            calendar: CalendarId::NyseHoliday,
+            calendar: CalendarSpec::BuiltIn(CalendarId::NyseHoliday),
             rule: OverlayRule::Exclude,
             makeup: None,
         })],
@@ -648,7 +807,7 @@ fn makeup_can_exclude_weekends() {
         },
         timezone: Tz::UTC,
         overlays: vec![Overlay::Calendar(OverlayCalendar {
-            calendar: CalendarId::NyseHoliday,
+            calendar: CalendarSpec::BuiltIn(CalendarId::NyseHoliday),
             rule: OverlayRule::Exclude,
             makeup: None,
         })],
@@ -690,7 +849,7 @@ fn cascade_makeup_tries_fallback_steps() {
         },
         timezone: Tz::UTC,
         overlays: vec![Overlay::Calendar(OverlayCalendar {
-            calendar: CalendarId::NyseHoliday,
+            calendar: CalendarSpec::BuiltIn(CalendarId::NyseHoliday),
             rule: OverlayRule::Exclude,
             makeup: None,
         })],
@@ -732,7 +891,7 @@ fn daily_exclude_before_dedup() {
         freq: Frequency::Daily { time: hm(9, 0) },
         timezone: Tz::UTC,
         overlays: vec![Overlay::Calendar(OverlayCalendar {
-            calendar: CalendarId::UsFederalHoliday,
+            calendar: CalendarSpec::BuiltIn(CalendarId::UsFederalHoliday),
             rule: OverlayRule::Exclude,
             makeup: None,
         })],
@@ -845,7 +1004,7 @@ fn last_business_day_before() {
         },
         timezone: Tz::UTC,
         overlays: vec![Overlay::Calendar(OverlayCalendar {
-            calendar: CalendarId::UsBusinessDay,
+            calendar: CalendarSpec::BuiltIn(CalendarId::UsBusinessDay),
             rule: OverlayRule::Only,
             makeup: None,
         })],
@@ -1248,7 +1407,7 @@ fn overlay_removes_everything_terminates() {
         freq: Frequency::Daily { time: hm(12, 0) },
         timezone: Tz::UTC,
         overlays: vec![Overlay::Calendar(OverlayCalendar {
-            calendar: CalendarId::NyseTradingDay,
+            calendar: CalendarSpec::BuiltIn(CalendarId::NyseTradingDay),
             rule: OverlayRule::Only,
             makeup: None,
         })],
@@ -1351,6 +1510,24 @@ fn serde_cascade_makeup_form() {
             MakeupStep::Direction(MakeupDirection::None),
         ])
     );
+
+    let out = serde_json::to_string(&s).unwrap();
+    let s2: Schedule = serde_json::from_str(&out).unwrap();
+    assert_eq!(s, s2);
+}
+
+#[test]
+fn serde_calendar_spec_forms() {
+    let json = r#"{ "freq": { "type": "daily", "time": "09:00" },
+        "timezone": "UTC",
+        "overlays": [
+            { "calendar": { "dates": ["2026-07-03", "2026-07-04"] }, "rule": "exclude" },
+            { "calendar": { "union": ["nyse_holiday", { "custom": "shutdown" }] }, "rule": "exclude" },
+            { "calendar": { "diff": ["us_federal_holiday", "nyse_holiday"] }, "rule": "exclude" }
+        ],
+        "start": null, "end": null }"#;
+    let s: Schedule = serde_json::from_str(json).unwrap();
+    assert_eq!(s.overlays.len(), 3);
 
     let out = serde_json::to_string(&s).unwrap();
     let s2: Schedule = serde_json::from_str(&out).unwrap();

@@ -4,7 +4,11 @@ import pytest
 
 from dateme import (
     AnyOverlay,
+    CalendarDates,
+    CalendarDiff,
     CalendarId,
+    CalendarUnion,
+    CustomCalendar,
     Makeup,
     MakeupFailure,
     MakeupStep,
@@ -228,6 +232,54 @@ def test_typed_model_serializes_overlay_any_and_overlay_makeup():
     ]
     assert spec.to_dict()["overlays"] == expected
     assert Schedule(spec).to_dict()["overlays"] == expected
+
+
+def test_typed_model_serializes_custom_calendar_specs():
+    overlay = Overlay(
+        CalendarUnion(
+            [
+                CalendarDates(["2026-07-03", utc(2026, 7, 4)]),
+                CalendarDiff([CalendarId.US_FEDERAL_HOLIDAY, CalendarId.NYSE_HOLIDAY]),
+                CustomCalendar("shutdown"),
+            ]
+        ),
+        OverlayRule.EXCLUDE,
+    )
+    spec = model.Schedule(
+        freq=model.Daily("09:00"),
+        timezone="UTC",
+        overlays=[overlay],
+    )
+    expected = [
+        {
+            "calendar": {
+                "union": [
+                    {"dates": ["2026-07-03", "2026-07-04"]},
+                    {"diff": ["us_federal_holiday", "nyse_holiday"]},
+                    {"custom": "shutdown"},
+                ]
+            },
+            "rule": "exclude",
+        }
+    ]
+    assert spec.to_dict()["overlays"] == expected
+    assert Schedule(spec).to_dict()["overlays"] == expected
+
+
+def test_custom_calendar_provider_excludes_dates():
+    spec = model.Schedule(
+        freq=model.Daily("09:00"),
+        timezone="UTC",
+        overlays=[Overlay(CustomCalendar("shutdown"), OverlayRule.EXCLUDE)],
+    )
+
+    def provider(name, date):
+        return name == "shutdown" and date == "2026-08-14"
+
+    assert Schedule(spec, provider).until(utc(2026, 8, 16), utc(2026, 8, 13)) == [
+        utc(2026, 8, 13, 9),
+        utc(2026, 8, 15, 9),
+    ]
 
 
 def test_host_validation_skip_if_consecutive_excluded():

@@ -343,4 +343,57 @@ test.describe("Schedule", () => {
       },
     ]);
   });
+
+  test("round-trips custom calendar specs from typed specs", async ({
+    page,
+  }) => {
+    const res = await run(
+      page,
+      `const spec = {
+         freq: { type: "daily", time: "09:00" },
+         timezone: "UTC",
+         overlays: [{
+           calendar: {
+             union: [
+               { dates: ["2026-07-03", "2026-07-04"] },
+               { diff: [mod.CalendarId.UsFederalHoliday, mod.CalendarId.NyseHoliday] },
+               { custom: "shutdown" },
+             ],
+           },
+           rule: mod.OverlayRule.Exclude,
+         }],
+       };
+       const s = new mod.Schedule(spec);
+       return s.toObject().overlays;`,
+    );
+    expect(res).toEqual([
+      {
+        calendar: {
+          union: [
+            { dates: ["2026-07-03", "2026-07-04"] },
+            { diff: ["us_federal_holiday", "nyse_holiday"] },
+            { custom: "shutdown" },
+          ],
+        },
+        rule: "exclude",
+      },
+    ]);
+  });
+
+  test("uses custom calendar provider callbacks", async ({ page }) => {
+    const res = await run(
+      page,
+      `const spec = {
+         freq: { type: "daily", time: "09:00" },
+         timezone: "UTC",
+         overlays: [{ calendar: { custom: "shutdown" }, rule: mod.OverlayRule.Exclude }],
+       };
+       const s = new mod.Schedule(spec, (name, date) => name === "shutdown" && date === "2026-08-14");
+       return s.until(new Date(Date.UTC(2026, 7, 16)), new Date(Date.UTC(2026, 7, 13))).map(d => d.toISOString());`,
+    );
+    expect(res).toEqual([
+      "2026-08-13T09:00:00.000Z",
+      "2026-08-15T09:00:00.000Z",
+    ]);
+  });
 });

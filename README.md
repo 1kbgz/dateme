@@ -75,7 +75,8 @@ Supported frequencies: `hourly`, `daily`, `weekly`, `monthly_by_day` (fixed day
 or `last`), `monthly_by_weekday` (nth / last weekday), and `yearly`. Overlays
 filter occurrences against built-in calendars (`us_federal_holiday`,
 `us_business_day`, `nyse_holiday`, `nyse_trading_day`, backed by
-[`finance-dates`](https://crates.io/crates/finance-dates)); `makeup` shifts a
+[`finance-dates`](https://crates.io/crates/finance-dates)), inline date sets,
+calendar unions/differences, and custom provider callbacks; `makeup` shifts a
 dropped occurrence to the nearest surviving day (`before` / `after`), or drops
 it (`none`). `nearest` makeup chooses the closest surviving day. `max_makeup_hops`
 can cap that search, and `makeup_failure` can keep the original date when makeup
