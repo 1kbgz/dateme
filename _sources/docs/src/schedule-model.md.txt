@@ -20,6 +20,10 @@ native objects instead of hand-writing JSON.
 | `makeup`                       | [Makeup](#makeup)                 | no       | `"none"` | What to do when an overlay drops an occurrence.                   |
 | `max_makeup_hops`              | integer or null                   | no       | `null`   | Maximum days to scan for makeup; `null` uses the built-in limit.  |
 | `makeup_failure`               | [Makeup failure](#makeup-failure) | no       | `"skip"` | What to do when makeup cannot find a surviving date.              |
+| `makeup_only_on`               | array of weekdays or null         | no       | `null`   | Allowed makeup destination weekdays.                              |
+| `makeup_within_week`           | boolean                           | no       | `false`  | Keep makeup within the original ISO week.                         |
+| `makeup_exclude_weekends`      | boolean                           | no       | `false`  | Reject Saturday/Sunday makeup destinations.                       |
+| `makeup_before_next`           | boolean                           | no       | `false`  | Reject makeup on or across adjacent base occurrences.             |
 | `skip_if_consecutive_excluded` | integer or null                   | no       | `null`   | Skip excluded base-occurrence runs at or above this length.       |
 | `max_skip_gap`                 | integer or null                   | no       | `null`   | Error if a query window has a gap longer than this many days.     |
 | `start`                        | RFC 3339 datetime or null         | no       | `null`   | No occurrence before this instant.                                |
@@ -368,7 +372,7 @@ Additional target constraints:
 
 A made-up occurrence that coincides with another occurrence already produced by
 the schedule is dropped rather than duplicated. See
-[Overlays and makeup](#overlays-and-makeup).
+[How the engine works](explanation.md).
 
 (makeup-failure)=
 
@@ -424,6 +428,7 @@ not treat the open search horizon after the last returned occurrence as a gap.
 - `skip_if_consecutive_excluded` must be `null`, absent, or an integer at least
   `1`.
 - `max_skip_gap` must be `null`, absent, or an integer at least `1`.
+- `makeup_only_on` must be `null`, absent, or an array of weekday strings.
 - `every_n_days.interval` and `every_n_weeks.interval` must be at least `1`.
 - `quarterly.month` must be `1`, `2`, or `3`.
 - `custom_cron.expr` must be a valid five-field expression.

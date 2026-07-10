@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="prev" title="JavaScript API" href="api-javascript.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>How the engine works - dateme v0.1.0</title>
+        <title>How the engine works - dateme v0.2.0</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -167,7 +167,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></div></a>
+      <a href="../../index.html"><div class="brand">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.2.0</code></div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -188,7 +188,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
-  <span class="sidebar-brand-text">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></span>
+  <span class="sidebar-brand-text">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.2.0</code></span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -198,7 +198,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="how-to.html">How-to guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to.html">How-to Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schedule-model.html">Schedule model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api-python.html">Python API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api-javascript.html">JavaScript API</a></li>
@@ -270,11 +270,25 @@ at different resolutions.</p>
 <h2>Generation, then transformation<a class="headerlink" href="#generation-then-transformation" title="Link to this heading">¶</a></h2>
 <p>Occurrences are produced in two stages. First the <strong>base occurrences</strong> come
 purely from the frequency and timezone — every Monday, every 1st and 15th, every
-hour, and so on. Then each base occurrence is <strong>transformed</strong> by the overlays and
-makeup rule: kept, dropped, or moved to a nearby day.</p>
+third day from an anchor, every matching cron minute, and so on. Then each base
+occurrence is <strong>transformed</strong> by the overlays and makeup rule: kept, dropped, or
+moved to a nearby day.</p>
 <p>Keeping these stages separate is what lets the calendar rules stay simple. The
 frequency knows nothing about holidays; the overlays know nothing about
 weekdays-versus-month-days. They compose.</p>
+</section>
+<section id="anchors-and-calendar-shape">
+<h2>Anchors and calendar shape<a class="headerlink" href="#anchors-and-calendar-shape" title="Link to this heading">¶</a></h2>
+<p>Some frequencies are anchored to calendar structure: monthly rules are anchored
+to months, yearly rules to years, and quarterly rules to the three-month rhythm
+of quarters. <code class="docutils literal notranslate"><span class="pre">every_n_days</span></code> and <code class="docutils literal notranslate"><span class="pre">every_n_weeks</span></code> need an explicit <code class="docutils literal notranslate"><span class="pre">start_date</span></code>
+because their rhythm is relative rather than intrinsic to the calendar. Without
+that anchor, “every 3 days” is underspecified: there are three equally valid
+series depending on which date starts the cycle.</p>
+<p>Cron is different again. It describes a set of matching local minutes rather
+than a human calendar unit. <code class="docutils literal notranslate"><span class="pre">dateme</span></code> keeps it in the same pipeline as other
+frequencies: cron creates base local datetimes, and overlays and makeup transform
+them afterward.</p>
 </section>
 <section id="timezones-and-dst">
 <span id="id1"></span><h2>Timezones and DST<a class="headerlink" href="#timezones-and-dst" title="Link to this heading">¶</a></h2>
@@ -309,6 +323,9 @@ on trading days” are just two overlays that must both pass.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">before</span></code> / <code class="docutils literal notranslate"><span class="pre">after</span></code> search outward day by day — up to 14 days — for the nearest
 day that passes <em>all</em> overlays, and move the occurrence there at the same
 time-of-day.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nearest</span></code> searches both directions and prefers the later date on ties.</p></li>
+<li><p>Weekday maps and cascades choose a direction based on context or try fallback
+strategies in order.</p></li>
 </ul>
 <p>The 14-day bound is a safety valve. A pathological overlay set could in principle
 remove every nearby day; rather than search forever, the engine gives up and drops
@@ -331,6 +348,28 @@ up a Monday holiday to Tuesday keeps it, because Tuesday was not otherwise
 scheduled.</p>
 </section>
 </section>
+<section id="why-skip-thresholds-and-gap-checks-are-query-rules">
+<h2>Why skip thresholds and gap checks are query rules<a class="headerlink" href="#why-skip-thresholds-and-gap-checks-are-query-rules" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">skip_if_consecutive_excluded</span></code> looks at the base recurrence before makeup. It is
+about the meaning of a cycle: if enough consecutive base cycles are excluded,
+the whole run is intentionally skipped rather than compressed into nearby makeup
+dates. This belongs before makeup because it decides whether the cycle should be
+attempted at all.</p>
+<p><code class="docutils literal notranslate"><span class="pre">max_skip_gap</span></code> is different. It is a monitoring rule over the returned stream:
+after overlays, makeup, deduplication, and bounds, is the resulting series too
+sparse? That is why it raises during queries instead of changing the schedule
+model itself.</p>
+</section>
+<section id="why-traces-are-separate-from-ordinary-queries">
+<h2>Why traces are separate from ordinary queries<a class="headerlink" href="#why-traces-are-separate-from-ordinary-queries" title="Link to this heading">¶</a></h2>
+<p>Most callers only need instants. Returning metadata every time would make the
+simple path noisier and would force every binding to expose a heavier result
+type. Trace queries preserve the original datetime-returning API while giving
+UIs and audit workflows a richer stream when they need it.</p>
+<p>The trace reason is intentionally compact. It records whether the occurrence was
+base or made up from a local date, plus whether DST shifted the local time. It is
+not a full proof tree of every overlay decision.</p>
+</section>
 <section id="bounds-and-termination">
 <h2>Bounds and termination<a class="headerlink" href="#bounds-and-termination" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code> clip the series to a half-open interval: no occurrence before
@@ -338,12 +377,16 @@ scheduled.</p>
 post-makeup instant, a made-up occurrence that lands outside the interval is
 dropped just like a base one.</p>
 <p><code class="docutils literal notranslate"><span class="pre">end</span></code> also gives the series a definite tail: once the next occurrence would reach
-it, <code class="docutils literal notranslate"><span class="pre">next</span></code> returns nothing. For unbounded schedules the engine expands its search
-window outward until it either finds enough occurrences or reaches a large
-absolute horizon (about 50 years), after which it reports what it found. This is
-what guarantees that even a schedule which can <em>never</em> fire — say, “only on NYSE
-trading days” applied to a Sunday-only weekly rule — terminates and returns an
-empty result instead of looping.</p>
+it, <code class="docutils literal notranslate"><span class="pre">next</span></code> returns nothing. Binding-level iteration uses that property. A
+<code class="docutils literal notranslate"><span class="pre">for...of</span></code> loop or Python <code class="docutils literal notranslate"><span class="pre">for</span></code> loop must have a finite end, so default iteration
+requires <code class="docutils literal notranslate"><span class="pre">end</span></code>; explicit helpers such as <code class="docutils literal notranslate"><span class="pre">iter_upcoming</span></code> and <code class="docutils literal notranslate"><span class="pre">iterBetween</span></code> carry
+their own count or window.</p>
+<p>For unbounded schedules the engine expands its search window outward until it
+either finds enough occurrences or reaches a large absolute horizon (about 50
+years), after which it reports what it found. This is what guarantees that even a
+schedule which can <em>never</em> fire — say, “only on NYSE trading days” applied to a
+Sunday-only weekly rule — terminates and returns an empty result instead of
+looping.</p>
 </section>
 <section id="the-window-in-brief">
 <h2>The window, in brief<a class="headerlink" href="#the-window-in-brief" title="Link to this heading">¶</a></h2>
@@ -419,11 +462,14 @@ and ships to the browser.</p>
 <li><a class="reference internal" href="#">How the engine works</a><ul>
 <li><a class="reference internal" href="#occurrences-and-the-series-model">Occurrences and the series model</a></li>
 <li><a class="reference internal" href="#generation-then-transformation">Generation, then transformation</a></li>
+<li><a class="reference internal" href="#anchors-and-calendar-shape">Anchors and calendar shape</a></li>
 <li><a class="reference internal" href="#timezones-and-dst">Timezones and DST</a></li>
 <li><a class="reference internal" href="#overlays-and-makeup">Overlays and makeup</a><ul>
 <li><a class="reference internal" href="#why-makeup-needs-care">Why makeup needs care</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#why-skip-thresholds-and-gap-checks-are-query-rules">Why skip thresholds and gap checks are query rules</a></li>
+<li><a class="reference internal" href="#why-traces-are-separate-from-ordinary-queries">Why traces are separate from ordinary queries</a></li>
 <li><a class="reference internal" href="#bounds-and-termination">Bounds and termination</a></li>
 <li><a class="reference internal" href="#the-window-in-brief">The window, in brief</a></li>
 <li><a class="reference internal" href="#why-calendars-are-pluggable">Why calendars are pluggable</a></li>
@@ -438,7 +484,7 @@ and ships to the browser.</p>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=01f34227"></script>
+</div><script src="../../_static/documentation_options.js?v=938c9ccc"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="How the engine works" href="explanation.html"><link rel="prev" title="Python API" href="api-python.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>JavaScript API - dateme v0.1.0</title>
+        <title>JavaScript API - dateme v0.2.0</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -167,7 +167,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></div></a>
+      <a href="../../index.html"><div class="brand">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.2.0</code></div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -188,7 +188,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
-  <span class="sidebar-brand-text">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></span>
+  <span class="sidebar-brand-text">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.2.0</code></span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -198,7 +198,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="how-to.html">How-to guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to.html">How-to Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schedule-model.html">Schedule model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api-python.html">Python API</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">JavaScript API</a></li>
@@ -243,40 +243,117 @@
         <article role="main" id="furo-main-content">
           <section class="tex2jax_ignore mathjax_ignore" id="javascript-api">
 <h1>JavaScript API<a class="headerlink" href="#javascript-api" title="Link to this heading">¶</a></h1>
-<p>The JavaScript package is a WebAssembly build of the same engine. It exposes an
-<code class="docutils literal notranslate"><span class="pre">init</span></code> function and a <code class="docutils literal notranslate"><span class="pre">Schedule</span></code> class. Build a schedule from the JSON
-<a class="reference internal" href="schedule-model.html"><span class="std std-doc">Schedule model</span></a> (as a string or a plain object); every method
-takes and returns <code class="docutils literal notranslate"><span class="pre">Date</span></code> objects.</p>
+<p>Reference for the JavaScript and TypeScript package.</p>
+<p>The JavaScript package wraps the same Rust engine through WebAssembly. Public
+methods take and return <code class="docutils literal notranslate"><span class="pre">Date</span></code> objects. Schedule specs use the same JSON shape
+as every other binding.</p>
+<section id="exports">
+<h2>Exports<a class="headerlink" href="#exports" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">init</span></code></p></td>
+<td><p>WebAssembly initialization function.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Schedule</span></code></p></td>
+<td><p>Query engine class.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">wasm</span></code></p></td>
+<td><p>Raw generated WebAssembly module exports.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Weekday</span></code></p></td>
+<td><p>Runtime weekday enum object.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Nth</span></code></p></td>
+<td><p>Runtime nth-weekday enum object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Makeup</span></code></p></td>
+<td><p>Runtime makeup enum object.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MakeupFailure</span></code></p></td>
+<td><p>Runtime makeup-failure enum object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">OverlayRule</span></code></p></td>
+<td><p>Runtime overlay-rule enum object.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CalendarId</span></code></p></td>
+<td><p>Runtime built-in calendar enum object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ScheduleSpec</span></code></p></td>
+<td><p>TypeScript schedule model type.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Frequency</span></code></p></td>
+<td><p>TypeScript frequency union type.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">CalendarSpec</span></code></p></td>
+<td><p>TypeScript calendar spec union type.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Overlay</span></code>, <code class="docutils literal notranslate"><span class="pre">AnyOverlay</span></code></p></td>
+<td><p>TypeScript overlay types.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">OccurrenceTrace</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">instant:</span> <span class="pre">Date,</span> <span class="pre">reason:</span> <span class="pre">string</span> <span class="pre">}</span></code>.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
 <section id="initialization">
 <h2>Initialization<a class="headerlink" href="#initialization" title="Link to this heading">¶</a></h2>
-<p>The WebAssembly module must be initialized once before use:</p>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="nx">init</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Schedule</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;dateme&quot;</span><span class="p">;</span>
 
 <span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">();</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">init</span></code> loads and instantiates the <code class="docutils literal notranslate"><span class="pre">.wasm</span></code> binary. Call it once at startup and
-await it before constructing any <code class="docutils literal notranslate"><span class="pre">Schedule</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">init()</span></code> must resolve before constructing <code class="docutils literal notranslate"><span class="pre">Schedule</span></code>.</p>
 </section>
-<section id="constructing-a-schedule">
-<h2>Constructing a schedule<a class="headerlink" href="#constructing-a-schedule" title="Link to this heading">¶</a></h2>
-<p>The constructor accepts either a native spec object or a JSON string; an object
-is serialized for you. It validates the schedule and throws on malformed input,
-an unknown timezone/enum value, or a structurally invalid schedule — so a
-<code class="docutils literal notranslate"><span class="pre">Schedule</span></code> you hold is always well-formed. <code class="docutils literal notranslate"><span class="pre">validate()</span></code> re-runs the check on
-demand.</p>
+<section id="schedule">
+<h2><code class="docutils literal notranslate"><span class="pre">Schedule</span></code><a class="headerlink" href="#schedule" title="Link to this heading">¶</a></h2>
+<section id="constructor">
+<h3>Constructor<a class="headerlink" href="#constructor" title="Link to this heading">¶</a></h3>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">(</span><span class="nx">spec</span><span class="o">:</span><span class="w"> </span><span class="kt">ScheduleSpec</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">calendarProvider?</span><span class="o">:</span><span class="w"> </span><span class="kt">CalendarProvider</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Parameters:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">spec</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ScheduleSpec</span></code> or JSON string</p></td>
+<td><p>Schedule model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">calendarProvider</span></code></p></td>
+<td><p>function or object, optional</p></td>
+<td><p>Provider for <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">custom:</span> <span class="pre">&quot;name&quot;</span> <span class="pre">}</span></code> calendars.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The constructor validates the schedule. Malformed JSON, invalid enum values,
+invalid timezone names, and structural validation failures throw.</p>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">schedule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">({</span>
-<span class="w">  </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;weekly&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">days</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">],</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;17:30&quot;</span><span class="w"> </span><span class="p">},</span>
-<span class="w">  </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">overlays</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">calendar</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;nyse_holiday&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">rule</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;exclude&quot;</span><span class="w"> </span><span class="p">}],</span>
-<span class="w">  </span><span class="nx">makeup</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;after&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;daily&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;09:00&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
 <span class="p">});</span>
 </pre></div>
 </div>
-<p>Pass an optional custom calendar provider as the second constructor argument
-when the spec uses <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">custom:</span> <span class="pre">&quot;name&quot;</span> <span class="pre">}</span></code> calendar refs. The provider can be a
-function or an object with <code class="docutils literal notranslate"><span class="pre">contains(name,</span> <span class="pre">date)</span></code>, where <code class="docutils literal notranslate"><span class="pre">date</span></code> is a
-<code class="docutils literal notranslate"><span class="pre">&quot;YYYY-MM-DD&quot;</span></code> string:</p>
+</section>
+<section id="custom-calendar-providers">
+<h3>Custom Calendar Providers<a class="headerlink" href="#custom-calendar-providers" title="Link to this heading">¶</a></h3>
+<p>Custom calendars are referenced in a schedule with <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">custom:</span> <span class="pre">&quot;name&quot;</span> <span class="pre">}</span></code>.
+Providers receive <code class="docutils literal notranslate"><span class="pre">(name,</span> <span class="pre">date)</span></code> where <code class="docutils literal notranslate"><span class="pre">date</span></code> is a <code class="docutils literal notranslate"><span class="pre">YYYY-MM-DD</span></code> string.</p>
+<p>A function provider:</p>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">schedule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">(</span>
 <span class="w">  </span><span class="p">{</span>
 <span class="w">    </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;daily&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;09:00&quot;</span><span class="w"> </span><span class="p">},</span>
@@ -287,14 +364,257 @@ function or an object with <code class="docutils literal notranslate"><span clas
 <span class="p">);</span>
 </pre></div>
 </div>
+<p>An object provider:</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">contains</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">date</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;shutdown&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">date</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;2026-08-14&quot;</span><span class="p">;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="p">};</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">schedule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">(</span><span class="nx">spec</span><span class="p">,</span><span class="w"> </span><span class="nx">provider</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Missing custom calendar values are treated as absent from the set.</p>
 </section>
-<section id="typed-model">
-<h2>Typed model<a class="headerlink" href="#typed-model" title="Link to this heading">¶</a></h2>
-<p>The package exports TypeScript types mirroring the <a class="reference internal" href="schedule-model.html"><span class="std std-doc">Schedule model</span></a>
-— <code class="docutils literal notranslate"><span class="pre">ScheduleSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">Frequency</span></code>, <code class="docutils literal notranslate"><span class="pre">CalendarSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">MonthDay</span></code>, <code class="docutils literal notranslate"><span class="pre">NthWeekday</span></code>,
-<code class="docutils literal notranslate"><span class="pre">Overlay</span></code> — so the spec object is checked at compile time. It also exports runtime enum objects
-(<code class="docutils literal notranslate"><span class="pre">Weekday</span></code>, <code class="docutils literal notranslate"><span class="pre">Nth</span></code>, <code class="docutils literal notranslate"><span class="pre">Makeup</span></code>, <code class="docutils literal notranslate"><span class="pre">OverlayRule</span></code>, <code class="docutils literal notranslate"><span class="pre">CalendarId</span></code>) for plain JavaScript:</p>
-<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="nx">init</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">,</span><span class="w"> </span><span class="nx">Weekday</span><span class="p">,</span><span class="w"> </span><span class="nx">CalendarId</span><span class="p">,</span><span class="w"> </span><span class="nx">OverlayRule</span><span class="p">,</span><span class="w"> </span><span class="nx">Makeup</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;dateme&quot;</span><span class="p">;</span>
+</section>
+<section id="date-handling">
+<h2>Date Handling<a class="headerlink" href="#date-handling" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Rule</p></th>
+<th class="head"><p>Behavior</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Input dates</p></td>
+<td><p>JavaScript <code class="docutils literal notranslate"><span class="pre">Date</span></code> objects.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Returned values</p></td>
+<td><p>JavaScript <code class="docutils literal notranslate"><span class="pre">Date</span></code> objects.</p></td>
+</tr>
+<tr class="row-even"><td><p>Optional anchors</p></td>
+<td><p>Default to <code class="docutils literal notranslate"><span class="pre">new</span> <span class="pre">Date()</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Query bounds</p></td>
+<td><p>Strict: occurrences exactly at <code class="docutils literal notranslate"><span class="pre">after</span></code> or <code class="docutils literal notranslate"><span class="pre">before</span></code> are excluded.</p></td>
+</tr>
+<tr class="row-even"><td><p>WASM bridge</p></td>
+<td><p>The wrapper converts <code class="docutils literal notranslate"><span class="pre">Date</span></code> values to epoch milliseconds.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Link to this heading">¶</a></h2>
+<section id="validate">
+<h3><code class="docutils literal notranslate"><span class="pre">validate</span></code><a class="headerlink" href="#validate" title="Link to this heading">¶</a></h3>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">validate</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="ow">void</span>
+</pre></div>
+</div>
+<p>Re-runs structural validation. Throws on failure.</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">validate</span><span class="p">();</span>
+</pre></div>
+</div>
+</section>
+<section id="toobject">
+<h3><code class="docutils literal notranslate"><span class="pre">toObject</span></code><a class="headerlink" href="#toobject" title="Link to this heading">¶</a></h3>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">toObject</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nx">ScheduleSpec</span>
+</pre></div>
+</div>
+<p>Returns the schedule as a plain object.</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">spec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">schedule</span><span class="p">.</span><span class="nx">toObject</span><span class="p">();</span>
+</pre></div>
+</div>
+</section>
+<section id="tojson">
+<h3><code class="docutils literal notranslate"><span class="pre">toJSON</span></code><a class="headerlink" href="#tojson" title="Link to this heading">¶</a></h3>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">toJSON</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nx">ScheduleSpec</span>
+</pre></div>
+</div>
+<p>Returns the schedule as a plain object for <code class="docutils literal notranslate"><span class="pre">JSON.stringify</span></code>.</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">schedule</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="next">
+<h3><code class="docutils literal notranslate"><span class="pre">next</span></code><a class="headerlink" href="#next" title="Link to this heading">¶</a></h3>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">next</span><span class="p">(</span><span class="nx">after</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">())</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span>
+</pre></div>
+</div>
+<p>Returns the first occurrence strictly after <code class="docutils literal notranslate"><span class="pre">after</span></code>.</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">after</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">&quot;2026-01-13T00:00:00Z&quot;</span><span class="p">);</span>
+<span class="nx">schedule</span><span class="p">.</span><span class="nx">next</span><span class="p">(</span><span class="nx">after</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="previous">
+<h3><code class="docutils literal notranslate"><span class="pre">previous</span></code><a class="headerlink" href="#previous" title="Link to this heading">¶</a></h3>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">previous</span><span class="p">(</span><span class="nx">before</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">())</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span>
+</pre></div>
+</div>
+<p>Returns the last occurrence strictly before <code class="docutils literal notranslate"><span class="pre">before</span></code>.</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">previous</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">&quot;2026-01-13T00:00:00Z&quot;</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+<section id="until">
+<h3><code class="docutils literal notranslate"><span class="pre">until</span></code><a class="headerlink" href="#until" title="Link to this heading">¶</a></h3>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">until</span><span class="p">(</span><span class="nx">before</span><span class="o">:</span><span class="w"> </span><span class="kt">Date</span><span class="p">,</span><span class="w"> </span><span class="nx">after</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">())</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">[]</span>
+</pre></div>
+</div>
+<p>Returns occurrences in <code class="docutils literal notranslate"><span class="pre">(after,</span> <span class="pre">before)</span></code>, ascending.</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">until</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">&quot;2026-02-01T00:00:00Z&quot;</span><span class="p">),</span><span class="w"> </span><span class="nx">after</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="since">
+<h3><code class="docutils literal notranslate"><span class="pre">since</span></code><a class="headerlink" href="#since" title="Link to this heading">¶</a></h3>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">since</span><span class="p">(</span><span class="nx">after</span><span class="o">:</span><span class="w"> </span><span class="kt">Date</span><span class="p">,</span><span class="w"> </span><span class="nx">before</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">())</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">[]</span>
+</pre></div>
+</div>
+<p>Returns occurrences in <code class="docutils literal notranslate"><span class="pre">(after,</span> <span class="pre">before)</span></code>, descending.</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">since</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">&quot;2026-01-01T00:00:00Z&quot;</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+<section id="upcoming">
+<h3><code class="docutils literal notranslate"><span class="pre">upcoming</span></code><a class="headerlink" href="#upcoming" title="Link to this heading">¶</a></h3>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">upcoming</span><span class="p">(</span><span class="nx">n</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">,</span><span class="w"> </span><span class="nx">after</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">())</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">[]</span>
+</pre></div>
+</div>
+<p>Returns the next <code class="docutils literal notranslate"><span class="pre">n</span></code> occurrences strictly after <code class="docutils literal notranslate"><span class="pre">after</span></code>, ascending.</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">upcoming</span><span class="p">(</span><span class="mf">5</span><span class="p">,</span><span class="w"> </span><span class="nx">after</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="trace-methods">
+<h3>Trace Methods<a class="headerlink" href="#trace-methods" title="Link to this heading">¶</a></h3>
+<p>Trace methods return <code class="docutils literal notranslate"><span class="pre">OccurrenceTrace</span></code> values.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Return type</p></th>
+<th class="head"><p>Order</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">nextTrace(after</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">OccurrenceTrace</span> <span class="pre">|</span> <span class="pre">null</span></code></p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">previousTrace(before</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">OccurrenceTrace</span> <span class="pre">|</span> <span class="pre">null</span></code></p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">untilTrace(before,</span> <span class="pre">after</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">OccurrenceTrace[]</span></code></p></td>
+<td><p>ascending</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sinceTrace(after,</span> <span class="pre">before</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">OccurrenceTrace[]</span></code></p></td>
+<td><p>descending</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">upcomingTrace(n,</span> <span class="pre">after</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">OccurrenceTrace[]</span></code></p></td>
+<td><p>ascending</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Reason strings include:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Reason form</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">base</span></code></p></td>
+<td><p>Base occurrence was kept.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">makeup_from(YYYY-MM-DD)</span></code></p></td>
+<td><p>Occurrence was moved from the local date.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">base,shifted_dst</span></code></p></td>
+<td><p>Base occurrence was shifted through DST gap.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">makeup_from(...),shifted_dst</span></code></p></td>
+<td><p>Made-up occurrence was shifted through DST gap.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">trace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">schedule</span><span class="p">.</span><span class="nx">nextTrace</span><span class="p">(</span><span class="nx">after</span><span class="p">);</span>
+<span class="c1">// { instant: Date, reason: &quot;base&quot; }</span>
+</pre></div>
+</div>
+</section>
+<section id="isoccurrence">
+<h3><code class="docutils literal notranslate"><span class="pre">isOccurrence</span></code><a class="headerlink" href="#isoccurrence" title="Link to this heading">¶</a></h3>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">isOccurrence</span><span class="p">(</span><span class="nx">instant</span><span class="o">:</span><span class="w"> </span><span class="kt">Date</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span>
+</pre></div>
+</div>
+<p>Returns whether <code class="docutils literal notranslate"><span class="pre">instant</span></code> is an occurrence of the schedule.</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">isOccurrence</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">&quot;2026-01-20T22:30:00Z&quot;</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+<section id="countbetween">
+<h3><code class="docutils literal notranslate"><span class="pre">countBetween</span></code><a class="headerlink" href="#countbetween" title="Link to this heading">¶</a></h3>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">countBetween</span><span class="p">(</span><span class="nx">after</span><span class="o">:</span><span class="w"> </span><span class="kt">Date</span><span class="p">,</span><span class="w"> </span><span class="nx">before</span><span class="o">:</span><span class="w"> </span><span class="kt">Date</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span>
+</pre></div>
+</div>
+<p>Returns the number of occurrences strictly in <code class="docutils literal notranslate"><span class="pre">(after,</span> <span class="pre">before)</span></code>.</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">countBetween</span><span class="p">(</span><span class="nx">after</span><span class="p">,</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">&quot;2026-02-01T00:00:00Z&quot;</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+<section id="describe">
+<h3><code class="docutils literal notranslate"><span class="pre">describe</span></code><a class="headerlink" href="#describe" title="Link to this heading">¶</a></h3>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">describe</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span>
+</pre></div>
+</div>
+<p>Returns a human-readable summary of the base recurrence, timezone, overlay
+count, and makeup presence.</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">describe</span><span class="p">();</span>
+<span class="c1">// &quot;Every Monday at 17:30 America/New_York, with 1 overlay(s), with makeup&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="iteration">
+<h3>Iteration<a class="headerlink" href="#iteration" title="Link to this heading">¶</a></h3>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">[</span><span class="nb">Symbol</span><span class="p">.</span><span class="nx">iterator</span><span class="p">]()</span><span class="o">:</span><span class="w"> </span><span class="nx">IterableIterator</span><span class="o">&lt;</span><span class="nb">Date</span><span class="o">&gt;</span>
+<span class="nx">schedule</span><span class="p">.</span><span class="nx">iterBetween</span><span class="p">(</span><span class="nx">after</span><span class="o">:</span><span class="w"> </span><span class="kt">Date</span><span class="p">,</span><span class="w"> </span><span class="nx">before</span><span class="o">:</span><span class="w"> </span><span class="kt">Date</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">IterableIterator</span><span class="o">&lt;</span><span class="nb">Date</span><span class="o">&gt;</span>
+<span class="nx">schedule</span><span class="p">.</span><span class="nx">iterUpcoming</span><span class="p">(</span><span class="nx">n</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">,</span><span class="w"> </span><span class="nx">after</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">())</span><span class="o">:</span><span class="w"> </span><span class="nx">IterableIterator</span><span class="o">&lt;</span><span class="nb">Date</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">for...of</span></code> requires the schedule to have an <code class="docutils literal notranslate"><span class="pre">end</span></code> bound. It starts from <code class="docutils literal notranslate"><span class="pre">start</span></code>,
+or from the current time when <code class="docutils literal notranslate"><span class="pre">start</span></code> is absent.</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">instant</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">boundedSchedule</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">instant</span><span class="p">.</span><span class="nx">toISOString</span><span class="p">());</span>
+<span class="p">}</span>
+
+<span class="nb">Array</span><span class="p">.</span><span class="kr">from</span><span class="p">(</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">iterBetween</span><span class="p">(</span><span class="nx">after</span><span class="p">,</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">&quot;2026-02-01T00:00:00Z&quot;</span><span class="p">)));</span>
+<span class="nb">Array</span><span class="p">.</span><span class="kr">from</span><span class="p">(</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">iterUpcoming</span><span class="p">(</span><span class="mf">3</span><span class="p">,</span><span class="w"> </span><span class="nx">after</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="typescript-model">
+<h2>TypeScript Model<a class="headerlink" href="#typescript-model" title="Link to this heading">¶</a></h2>
+<p>The package exports TypeScript types that mirror the
+<a class="reference internal" href="schedule-model.html"><span class="std std-doc">Schedule model</span></a>.</p>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="nx">init</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">Schedule</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">Weekday</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">CalendarId</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">OverlayRule</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">Makeup</span><span class="p">,</span>
+<span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;dateme&quot;</span><span class="p">;</span>
 <span class="k">import</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ScheduleSpec</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;dateme&quot;</span><span class="p">;</span>
 
 <span class="kd">const</span><span class="w"> </span><span class="nx">spec</span><span class="o">:</span><span class="w"> </span><span class="kt">ScheduleSpec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
@@ -308,123 +628,33 @@ function or an object with <code class="docutils literal notranslate"><span clas
 <span class="kd">const</span><span class="w"> </span><span class="nx">schedule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">(</span><span class="nx">spec</span><span class="p">);</span>
 </pre></div>
 </div>
-</section>
-<section id="methods">
-<h2>Methods<a class="headerlink" href="#methods" title="Link to this heading">¶</a></h2>
+<p>Type families:</p>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
 <thead>
-<tr class="row-odd"><th class="head"><p>Method</p></th>
-<th class="head"><p>Returns</p></th>
-<th class="head"><p>Order</p></th>
+<tr class="row-odd"><th class="head"><p>Family</p></th>
+<th class="head"><p>Types or values</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">next(after</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">Date</span></code> or <code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
-<td><p>—</p></td>
+<tr class="row-even"><td><p>Frequencies</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Frequency</span></code> union with all schedule frequency variants.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">previous(before</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">Date</span></code> or <code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
-<td><p>—</p></td>
+<tr class="row-odd"><td><p>Calendar specs</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">CalendarSpec</span></code>, <code class="docutils literal notranslate"><span class="pre">CalendarId</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">until(before,</span> <span class="pre">after</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">Date[]</span></code></p></td>
-<td><p>ascending</p></td>
+<tr class="row-even"><td><p>Overlays</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Overlay</span></code>, <code class="docutils literal notranslate"><span class="pre">AnyOverlay</span></code>, <code class="docutils literal notranslate"><span class="pre">OverlayRule</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">since(after,</span> <span class="pre">before</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">Date[]</span></code></p></td>
-<td><p>descending</p></td>
+<tr class="row-odd"><td><p>Makeup</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Makeup</span></code>, <code class="docutils literal notranslate"><span class="pre">MakeupFailure</span></code>, <code class="docutils literal notranslate"><span class="pre">MakeupStep</span></code>, <code class="docutils literal notranslate"><span class="pre">WeekdayMakeup</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">upcoming(n,</span> <span class="pre">after</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">Date[]</span></code></p></td>
-<td><p>ascending</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nextTrace(after</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">OccurrenceTrace</span></code> or <code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">previousTrace(before</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">OccurrenceTrace</span></code> or <code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">untilTrace(before,</span> <span class="pre">after</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">OccurrenceTrace[]</span></code></p></td>
-<td><p>ascending</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sinceTrace(after,</span> <span class="pre">before</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">OccurrenceTrace[]</span></code></p></td>
-<td><p>descending</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">upcomingTrace(n,</span> <span class="pre">after</span> <span class="pre">=</span> <span class="pre">new</span> <span class="pre">Date())</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">OccurrenceTrace[]</span></code></p></td>
-<td><p>ascending</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">isOccurrence(instant)</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">boolean</span></code></p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">countBetween(after,</span> <span class="pre">before)</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">number</span></code></p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">describe()</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">string</span></code></p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">validate()</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">void</span></code> (throws on error)</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">toObject()</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ScheduleSpec</span></code></p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">toJSON()</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">ScheduleSpec</span></code></p></td>
-<td><p>—</p></td>
+<tr class="row-even"><td><p>Date helpers</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MonthDay</span></code>, <code class="docutils literal notranslate"><span class="pre">NthWeekday</span></code>, <code class="docutils literal notranslate"><span class="pre">Nth</span></code>, <code class="docutils literal notranslate"><span class="pre">Weekday</span></code>.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<ul class="simple">
-<li><p>Every optional reference instant defaults to <code class="docutils literal notranslate"><span class="pre">new</span> <span class="pre">Date()</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">until(end)[0]</span></code> equals <code class="docutils literal notranslate"><span class="pre">next()</span></code>; <code class="docutils literal notranslate"><span class="pre">since(start)[0]</span></code> equals <code class="docutils literal notranslate"><span class="pre">previous()</span></code>.</p></li>
-<li><p>Results are strictly between the two bounds and deduplicated by instant.</p></li>
-<li><p>Trace methods return <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">instant:</span> <span class="pre">Date,</span> <span class="pre">reason:</span> <span class="pre">string</span> <span class="pre">}</span></code>. Reasons include
-<code class="docutils literal notranslate"><span class="pre">base</span></code>, <code class="docutils literal notranslate"><span class="pre">makeup_from(YYYY-MM-DD)</span></code>, and <code class="docutils literal notranslate"><span class="pre">shifted_dst</span></code>.</p></li>
-</ul>
-</section>
-<section id="example">
-<h2>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h2>
-<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">();</span>
-
-<span class="kd">const</span><span class="w"> </span><span class="nx">schedule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">({</span>
-<span class="w">  </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;weekly&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">days</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">],</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;17:30&quot;</span><span class="w"> </span><span class="p">},</span>
-<span class="w">  </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">overlays</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">calendar</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;nyse_holiday&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">rule</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;exclude&quot;</span><span class="w"> </span><span class="p">}],</span>
-<span class="w">  </span><span class="nx">makeup</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;after&quot;</span><span class="p">,</span>
-<span class="p">});</span>
-
-<span class="nx">schedule</span><span class="p">.</span><span class="nx">validate</span><span class="p">();</span>
-
-<span class="kd">const</span><span class="w"> </span><span class="nx">after</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">&quot;2026-01-13T00:00:00Z&quot;</span><span class="p">);</span>
-<span class="nx">schedule</span><span class="p">.</span><span class="nx">next</span><span class="p">(</span><span class="nx">after</span><span class="p">);</span><span class="w">          </span><span class="c1">// 2026-01-20T22:30:00.000Z (MLK Day made up to Tuesday)</span>
-<span class="nx">schedule</span><span class="p">.</span><span class="nx">upcoming</span><span class="p">(</span><span class="mf">3</span><span class="p">,</span><span class="w"> </span><span class="nx">after</span><span class="p">);</span><span class="w">   </span><span class="c1">// three Dates, ascending</span>
-<span class="nx">schedule</span><span class="p">.</span><span class="nx">previous</span><span class="p">(</span><span class="nx">after</span><span class="p">);</span><span class="w">      </span><span class="c1">// 2026-01-12T22:30:00.000Z</span>
-</pre></div>
-</div>
-</section>
-<section id="notes">
-<h2>Notes<a class="headerlink" href="#notes" title="Link to this heading">¶</a></h2>
-<ul class="simple">
-<li><p>Internally the WebAssembly layer exchanges epoch milliseconds; the <code class="docutils literal notranslate"><span class="pre">Schedule</span></code>
-wrapper converts to and from <code class="docutils literal notranslate"><span class="pre">Date</span></code> for you.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">null</span></code> (JavaScript) corresponds to <code class="docutils literal notranslate"><span class="pre">None</span></code> (Python) for <code class="docutils literal notranslate"><span class="pre">next</span></code> / <code class="docutils literal notranslate"><span class="pre">previous</span></code> when
-no occurrence exists in range.</p></li>
-<li><p>The same built-in calendars ship in the WebAssembly build, so market-holiday
-overlays work in the browser without any additional data.</p></li>
-</ul>
 </section>
 </section>
 
@@ -484,12 +714,31 @@ overlays work in the browser without any additional data.</p></li>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">JavaScript API</a><ul>
+<li><a class="reference internal" href="#exports">Exports</a></li>
 <li><a class="reference internal" href="#initialization">Initialization</a></li>
-<li><a class="reference internal" href="#constructing-a-schedule">Constructing a schedule</a></li>
-<li><a class="reference internal" href="#typed-model">Typed model</a></li>
-<li><a class="reference internal" href="#methods">Methods</a></li>
-<li><a class="reference internal" href="#example">Example</a></li>
-<li><a class="reference internal" href="#notes">Notes</a></li>
+<li><a class="reference internal" href="#schedule"><code class="docutils literal notranslate"><span class="pre">Schedule</span></code></a><ul>
+<li><a class="reference internal" href="#constructor">Constructor</a></li>
+<li><a class="reference internal" href="#custom-calendar-providers">Custom Calendar Providers</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#date-handling">Date Handling</a></li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#validate"><code class="docutils literal notranslate"><span class="pre">validate</span></code></a></li>
+<li><a class="reference internal" href="#toobject"><code class="docutils literal notranslate"><span class="pre">toObject</span></code></a></li>
+<li><a class="reference internal" href="#tojson"><code class="docutils literal notranslate"><span class="pre">toJSON</span></code></a></li>
+<li><a class="reference internal" href="#next"><code class="docutils literal notranslate"><span class="pre">next</span></code></a></li>
+<li><a class="reference internal" href="#previous"><code class="docutils literal notranslate"><span class="pre">previous</span></code></a></li>
+<li><a class="reference internal" href="#until"><code class="docutils literal notranslate"><span class="pre">until</span></code></a></li>
+<li><a class="reference internal" href="#since"><code class="docutils literal notranslate"><span class="pre">since</span></code></a></li>
+<li><a class="reference internal" href="#upcoming"><code class="docutils literal notranslate"><span class="pre">upcoming</span></code></a></li>
+<li><a class="reference internal" href="#trace-methods">Trace Methods</a></li>
+<li><a class="reference internal" href="#isoccurrence"><code class="docutils literal notranslate"><span class="pre">isOccurrence</span></code></a></li>
+<li><a class="reference internal" href="#countbetween"><code class="docutils literal notranslate"><span class="pre">countBetween</span></code></a></li>
+<li><a class="reference internal" href="#describe"><code class="docutils literal notranslate"><span class="pre">describe</span></code></a></li>
+<li><a class="reference internal" href="#iteration">Iteration</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#typescript-model">TypeScript Model</a></li>
 </ul>
 </li>
 </ul>
@@ -501,7 +750,7 @@ overlays work in the browser without any additional data.</p></li>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=01f34227"></script>
+</div><script src="../../_static/documentation_options.js?v=938c9ccc"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

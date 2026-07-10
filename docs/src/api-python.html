@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="JavaScript API" href="api-javascript.html"><link rel="prev" title="Schedule model" href="schedule-model.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>Python API - dateme v0.1.0</title>
+        <title>Python API - dateme v0.2.0</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -167,7 +167,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></div></a>
+      <a href="../../index.html"><div class="brand">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.2.0</code></div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -188,7 +188,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
-  <span class="sidebar-brand-text">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></span>
+  <span class="sidebar-brand-text">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.2.0</code></span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -198,7 +198,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="how-to.html">How-to guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to.html">How-to Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schedule-model.html">Schedule model</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Python API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api-javascript.html">JavaScript API</a></li>
@@ -243,18 +243,92 @@
         <article role="main" id="furo-main-content">
           <section class="tex2jax_ignore mathjax_ignore" id="python-api">
 <h1>Python API<a class="headerlink" href="#python-api" title="Link to this heading">¶</a></h1>
-<p>The Python package exposes the <code class="docutils literal notranslate"><span class="pre">dateme.Schedule</span></code> engine plus a typed
-<a class="reference internal" href="#typed-model"><code class="docutils literal notranslate"><span class="pre">dateme.model</span></code></a> builder layer. Every query method takes and
-returns timezone-aware <code class="docutils literal notranslate"><span class="pre">datetime</span></code> objects (UTC); where a reference instant is
-optional it defaults to the current time.</p>
-<section id="constructing-a-schedule">
-<h2>Constructing a schedule<a class="headerlink" href="#constructing-a-schedule" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">Schedule(spec)</span></code> accepts any of three forms, so you can construct from a native
-object as well as JSON:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span><span class="p">,</span> <span class="n">model</span> <span class="k">as</span> <span class="n">m</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Weekly</span><span class="p">,</span> <span class="n">Overlay</span><span class="p">,</span> <span class="n">Makeup</span><span class="p">,</span> <span class="n">CalendarId</span><span class="p">,</span> <span class="n">OverlayRule</span><span class="p">,</span> <span class="n">Weekday</span>
+<p>Reference for the <code class="docutils literal notranslate"><span class="pre">dateme</span></code> Python package.</p>
+<section id="exports">
+<h2>Exports<a class="headerlink" href="#exports" title="Link to this heading">¶</a></h2>
+<p>Top-level package exports:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Schedule</span></code></p></td>
+<td><p>Query engine class.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">model</span></code></p></td>
+<td><p>Typed builder module.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Weekday</span></code>, <code class="docutils literal notranslate"><span class="pre">Nth</span></code>, <code class="docutils literal notranslate"><span class="pre">Makeup</span></code>, <code class="docutils literal notranslate"><span class="pre">MakeupFailure</span></code>, <code class="docutils literal notranslate"><span class="pre">OverlayRule</span></code>, <code class="docutils literal notranslate"><span class="pre">CalendarId</span></code></p></td>
+<td><p>Enum values for typed builders.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MonthDay</span></code>, <code class="docutils literal notranslate"><span class="pre">NthWeekday</span></code></p></td>
+<td><p>Date-position builder types.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Overlay</span></code>, <code class="docutils literal notranslate"><span class="pre">AnyOverlay</span></code></p></td>
+<td><p>Overlay builder types.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">CalendarDates</span></code>, <code class="docutils literal notranslate"><span class="pre">CalendarUnion</span></code>, <code class="docutils literal notranslate"><span class="pre">CalendarDiff</span></code>, <code class="docutils literal notranslate"><span class="pre">CustomCalendar</span></code></p></td>
+<td><p>Calendar spec builder types.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">Daily</span></code>, <code class="docutils literal notranslate"><span class="pre">Weekly</span></code>, <code class="docutils literal notranslate"><span class="pre">EveryNDays</span></code>, <code class="docutils literal notranslate"><span class="pre">EveryNWeeks</span></code></p></td>
+<td><p>Frequency builder types.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MonthlyByDay</span></code>, <code class="docutils literal notranslate"><span class="pre">MonthlyByWeekday</span></code>, <code class="docutils literal notranslate"><span class="pre">Yearly</span></code>, <code class="docutils literal notranslate"><span class="pre">Quarterly</span></code>, <code class="docutils literal notranslate"><span class="pre">CustomCron</span></code></p></td>
+<td><p>Frequency builder types.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MakeupStep</span></code>, <code class="docutils literal notranslate"><span class="pre">WeekdayMakeup</span></code></p></td>
+<td><p>Makeup builder types.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="schedule">
+<h2><code class="docutils literal notranslate"><span class="pre">Schedule</span></code><a class="headerlink" href="#schedule" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Schedule</span></code> is the Python wrapper around the Rust recurrence engine.</p>
+<section id="constructor">
+<h3>Constructor<a class="headerlink" href="#constructor" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Schedule</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">calendar_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Parameters:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">spec</span></code></p></td>
+<td><p>JSON <code class="docutils literal notranslate"><span class="pre">str</span></code>, <code class="docutils literal notranslate"><span class="pre">dict</span></code>, or object <code class="docutils literal notranslate"><span class="pre">to_dict()</span></code></p></td>
+<td><p>Schedule model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">calendar_provider</span></code></p></td>
+<td><p>callable or object, optional</p></td>
+<td><p>Provider for <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">&quot;custom&quot;:</span> <span class="pre">&quot;name&quot;</span> <span class="pre">}</span></code> calendars.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The constructor validates the schedule. Invalid JSON, invalid enum values,
+invalid timezone names, and structural validation failures raise <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p>
+<p>Examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span>
 
-<span class="c1"># 1. Typed builder (validated as you build it)</span>
+<span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span><span class="p">,</span> <span class="n">Weekly</span><span class="p">,</span> <span class="n">Weekday</span><span class="p">,</span> <span class="n">Overlay</span><span class="p">,</span> <span class="n">CalendarId</span><span class="p">,</span> <span class="n">OverlayRule</span><span class="p">,</span> <span class="n">Makeup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">model</span> <span class="k">as</span> <span class="n">m</span>
+
 <span class="n">spec</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">Schedule</span><span class="p">(</span>
     <span class="n">freq</span><span class="o">=</span><span class="n">Weekly</span><span class="p">([</span><span class="n">Weekday</span><span class="o">.</span><span class="n">MON</span><span class="p">],</span> <span class="s2">&quot;17:30&quot;</span><span class="p">),</span>
     <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
@@ -262,28 +336,343 @@ object as well as JSON:</p>
     <span class="n">makeup</span><span class="o">=</span><span class="n">Makeup</span><span class="o">.</span><span class="n">AFTER</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
-
-<span class="c1"># 2. A plain dict</span>
-<span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
-
-<span class="c1"># 3. A JSON string</span>
-<span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
 </pre></div>
 </div>
-<p>Any object with a <code class="docutils literal notranslate"><span class="pre">to_dict()</span></code> method is accepted, which is what makes the typed
-builders work directly. <code class="docutils literal notranslate"><span class="pre">Schedule.from_json(str)</span></code> and <code class="docutils literal notranslate"><span class="pre">Schedule.from_dict(obj)</span></code>
-are explicit alternatives to the constructor.</p>
-<p>Pass an optional custom calendar provider as the second argument when the spec
-uses <code class="docutils literal notranslate"><span class="pre">{&quot;custom&quot;:</span> <span class="pre">&quot;name&quot;}</span></code> calendar refs. The provider can be a callable or an
-object with <code class="docutils literal notranslate"><span class="pre">contains(name,</span> <span class="pre">date)</span></code>, where <code class="docutils literal notranslate"><span class="pre">date</span></code> is a <code class="docutils literal notranslate"><span class="pre">&quot;YYYY-MM-DD&quot;</span></code> string:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">spec</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span>
-    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;custom&quot;</span><span class="p">:</span> <span class="s2">&quot;shutdown&quot;</span><span class="p">},</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;exclude&quot;</span><span class="p">}],</span>
-<span class="p">}</span>
-
-<span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">name</span><span class="p">,</span> <span class="n">date</span><span class="p">:</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;shutdown&quot;</span> <span class="ow">and</span> <span class="n">date</span> <span class="o">==</span> <span class="s2">&quot;2026-08-14&quot;</span><span class="p">)</span>
+</section>
+<section id="custom-calendar-providers">
+<h3>Custom Calendar Providers<a class="headerlink" href="#custom-calendar-providers" title="Link to this heading">¶</a></h3>
+<p>Custom calendars are referenced in a schedule with <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">&quot;custom&quot;:</span> <span class="pre">&quot;name&quot;</span> <span class="pre">}</span></code>.
+Providers receive <code class="docutils literal notranslate"><span class="pre">(name,</span> <span class="pre">date)</span></code> where <code class="docutils literal notranslate"><span class="pre">date</span></code> is a <code class="docutils literal notranslate"><span class="pre">YYYY-MM-DD</span></code> string.</p>
+<p>A callable provider:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;custom&quot;</span><span class="p">:</span> <span class="s2">&quot;shutdown&quot;</span><span class="p">},</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;exclude&quot;</span><span class="p">}],</span>
+    <span class="p">},</span>
+    <span class="k">lambda</span> <span class="n">name</span><span class="p">,</span> <span class="n">date</span><span class="p">:</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;shutdown&quot;</span> <span class="ow">and</span> <span class="n">date</span> <span class="o">==</span> <span class="s2">&quot;2026-08-14&quot;</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
+</div>
+<p>An object provider:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Calendars</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;shutdown&quot;</span> <span class="ow">and</span> <span class="n">date</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;2026-08-14&quot;</span><span class="p">,</span> <span class="s2">&quot;2026-08-15&quot;</span><span class="p">}</span>
+
+
+<span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">Calendars</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Missing custom calendar values are treated as absent from the set.</p>
+</section>
+</section>
+<section id="datetime-handling">
+<h2>Datetime Handling<a class="headerlink" href="#datetime-handling" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Rule</p></th>
+<th class="head"><p>Behavior</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Input datetimes</p></td>
+<td><p>Timezone-aware <code class="docutils literal notranslate"><span class="pre">datetime</span></code> values are expected.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Naive inputs</p></td>
+<td><p>Interpreted as UTC by PyO3 datetime conversion.</p></td>
+</tr>
+<tr class="row-even"><td><p>Returned values</p></td>
+<td><p>Timezone-aware UTC <code class="docutils literal notranslate"><span class="pre">datetime</span></code> values.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Optional anchors</p></td>
+<td><p>Default to the current UTC time.</p></td>
+</tr>
+<tr class="row-even"><td><p>Query bounds</p></td>
+<td><p>Strict: occurrences exactly at <code class="docutils literal notranslate"><span class="pre">after</span></code> or <code class="docutils literal notranslate"><span class="pre">before</span></code> are excluded.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Link to this heading">¶</a></h2>
+<section id="schedule-from-json">
+<h3><code class="docutils literal notranslate"><span class="pre">Schedule.from_json</span></code><a class="headerlink" href="#schedule-from-json" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Schedule</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">json</span><span class="p">,</span> <span class="n">calendar_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Schedule</span>
+</pre></div>
+</div>
+<p>Builds a schedule from a JSON string.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="s1">&#39;{&quot;freq&quot;:{&quot;type&quot;:&quot;daily&quot;,&quot;time&quot;:&quot;09:00&quot;},&quot;timezone&quot;:&quot;UTC&quot;}&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="schedule-from-dict">
+<h3><code class="docutils literal notranslate"><span class="pre">Schedule.from_dict</span></code><a class="headerlink" href="#schedule-from-dict" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Schedule</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">calendar_provider</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Schedule</span>
+</pre></div>
+</div>
+<p>Builds a schedule from a <code class="docutils literal notranslate"><span class="pre">dict</span></code> or typed builder object.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span><span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span> <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+</section>
+<section id="to-json">
+<h3><code class="docutils literal notranslate"><span class="pre">to_json</span></code><a class="headerlink" href="#to-json" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+</div>
+<p>Returns the JSON representation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">blob</span> <span class="o">=</span> <span class="n">schedule</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
+<span class="n">again</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="to-dict">
+<h3><code class="docutils literal notranslate"><span class="pre">to_dict</span></code><a class="headerlink" href="#to-dict" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span>
+</pre></div>
+</div>
+<p>Returns the schedule model as a Python dictionary.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">spec</span> <span class="o">=</span> <span class="n">schedule</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="validate">
+<h3><code class="docutils literal notranslate"><span class="pre">validate</span></code><a class="headerlink" href="#validate" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</pre></div>
+</div>
+<p>Re-runs structural validation. Raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> on failure.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="next">
+<h3><code class="docutils literal notranslate"><span class="pre">next</span></code><a class="headerlink" href="#next" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">after</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span>
+</pre></div>
+</div>
+<p>Returns the first occurrence strictly after <code class="docutils literal notranslate"><span class="pre">after</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
+
+<span class="n">after</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+<span class="n">schedule</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">after</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="previous">
+<h3><code class="docutils literal notranslate"><span class="pre">previous</span></code><a class="headerlink" href="#previous" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">previous</span><span class="p">(</span><span class="n">before</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span>
+</pre></div>
+</div>
+<p>Returns the last occurrence strictly before <code class="docutils literal notranslate"><span class="pre">before</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">before</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+<span class="n">schedule</span><span class="o">.</span><span class="n">previous</span><span class="p">(</span><span class="n">before</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="until">
+<h3><code class="docutils literal notranslate"><span class="pre">until</span></code><a class="headerlink" href="#until" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">until</span><span class="p">(</span><span class="n">before</span><span class="p">,</span> <span class="n">after</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Returns occurrences in <code class="docutils literal notranslate"><span class="pre">(after,</span> <span class="pre">before)</span></code>, ascending.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">end</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+<span class="n">schedule</span><span class="o">.</span><span class="n">until</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">after</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="since">
+<h3><code class="docutils literal notranslate"><span class="pre">since</span></code><a class="headerlink" href="#since" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">since</span><span class="p">(</span><span class="n">after</span><span class="p">,</span> <span class="n">before</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Returns occurrences in <code class="docutils literal notranslate"><span class="pre">(after,</span> <span class="pre">before)</span></code>, descending.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+<span class="n">schedule</span><span class="o">.</span><span class="n">since</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="upcoming">
+<h3><code class="docutils literal notranslate"><span class="pre">upcoming</span></code><a class="headerlink" href="#upcoming" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">upcoming</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">after</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Returns the next <code class="docutils literal notranslate"><span class="pre">n</span></code> occurrences strictly after <code class="docutils literal notranslate"><span class="pre">after</span></code>, ascending.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">upcoming</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">after</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="trace-methods">
+<h3>Trace Methods<a class="headerlink" href="#trace-methods" title="Link to this heading">¶</a></h3>
+<p>Trace methods return dictionaries with <code class="docutils literal notranslate"><span class="pre">instant</span></code> and <code class="docutils literal notranslate"><span class="pre">reason</span></code>.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Return type</p></th>
+<th class="head"><p>Order</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">next_trace(after=None)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">dict</span> <span class="pre">|</span> <span class="pre">None</span></code></p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">previous_trace(before=None)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">dict</span> <span class="pre">|</span> <span class="pre">None</span></code></p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">until_trace(before,</span> <span class="pre">after=None)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">list[dict]</span></code></p></td>
+<td><p>ascending</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">since_trace(after,</span> <span class="pre">before=None)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">list[dict]</span></code></p></td>
+<td><p>descending</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">upcoming_trace(n,</span> <span class="pre">after=None)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">list[dict]</span></code></p></td>
+<td><p>ascending</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Reason strings include:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Reason form</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">base</span></code></p></td>
+<td><p>Base occurrence was kept.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">makeup_from(YYYY-MM-DD)</span></code></p></td>
+<td><p>Occurrence was moved from the local date.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">base,shifted_dst</span></code></p></td>
+<td><p>Base occurrence was shifted through DST gap.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">makeup_from(...),shifted_dst</span></code></p></td>
+<td><p>Made-up occurrence was shifted through DST gap.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">trace</span> <span class="o">=</span> <span class="n">schedule</span><span class="o">.</span><span class="n">next_trace</span><span class="p">(</span><span class="n">after</span><span class="p">)</span>
+<span class="c1"># {&quot;instant&quot;: datetime(..., tzinfo=timezone.utc), &quot;reason&quot;: &quot;base&quot;}</span>
+</pre></div>
+</div>
+</section>
+<section id="is-occurrence">
+<h3><code class="docutils literal notranslate"><span class="pre">is_occurrence</span></code><a class="headerlink" href="#is-occurrence" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">is_occurrence</span><span class="p">(</span><span class="n">instant</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+</div>
+<p>Returns whether <code class="docutils literal notranslate"><span class="pre">instant</span></code> is an occurrence of the schedule.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">is_occurrence</span><span class="p">(</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+<section id="count-between">
+<h3><code class="docutils literal notranslate"><span class="pre">count_between</span></code><a class="headerlink" href="#count-between" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">count_between</span><span class="p">(</span><span class="n">after</span><span class="p">,</span> <span class="n">before</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span>
+</pre></div>
+</div>
+<p>Returns the number of occurrences strictly in <code class="docutils literal notranslate"><span class="pre">(after,</span> <span class="pre">before)</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">count_between</span><span class="p">(</span><span class="n">after</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="describe">
+<h3><code class="docutils literal notranslate"><span class="pre">describe</span></code><a class="headerlink" href="#describe" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span>
+</pre></div>
+</div>
+<p>Returns a human-readable summary of the base recurrence, timezone, overlay
+count, and makeup presence.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+<span class="c1"># &quot;Every Monday at 17:30 America/New_York, with 1 overlay(s), with makeup&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="iteration">
+<h3>Iteration<a class="headerlink" href="#iteration" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">iter</span><span class="p">(</span><span class="n">schedule</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iterator</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span>
+<span class="n">schedule</span><span class="o">.</span><span class="n">iter_between</span><span class="p">(</span><span class="n">after</span><span class="p">,</span> <span class="n">before</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iterator</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span>
+<span class="n">schedule</span><span class="o">.</span><span class="n">iter_upcoming</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">after</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">iterator</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span>
+<span class="n">instant</span> <span class="ow">in</span> <span class="n">schedule</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">iter(schedule)</span></code> requires the schedule to have an <code class="docutils literal notranslate"><span class="pre">end</span></code> bound. It starts from
+<code class="docutils literal notranslate"><span class="pre">start</span></code>, or from the current UTC time when <code class="docutils literal notranslate"><span class="pre">start</span></code> is absent.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">instant</span> <span class="ow">in</span> <span class="n">bounded_schedule</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">instant</span><span class="p">)</span>
+
+<span class="nb">list</span><span class="p">(</span><span class="n">schedule</span><span class="o">.</span><span class="n">iter_between</span><span class="p">(</span><span class="n">after</span><span class="p">,</span> <span class="n">end</span><span class="p">))</span>
+<span class="nb">list</span><span class="p">(</span><span class="n">schedule</span><span class="o">.</span><span class="n">iter_upcoming</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">after</span><span class="p">))</span>
+<span class="n">instant</span> <span class="ow">in</span> <span class="n">schedule</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="typed-model">
+<h2>Typed Model<a class="headerlink" href="#typed-model" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">dateme.model</span></code> mirrors the <a class="reference internal" href="schedule-model.html"><span class="std std-doc">Schedule model</span></a> as dataclasses
+and enums. Builders expose <code class="docutils literal notranslate"><span class="pre">to_dict()</span></code> and schedules expose <code class="docutils literal notranslate"><span class="pre">to_json()</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Schedule</span><span class="p">,</span>
+    <span class="n">MonthlyByWeekday</span><span class="p">,</span>
+    <span class="n">NthWeekday</span><span class="p">,</span>
+    <span class="n">Nth</span><span class="p">,</span>
+    <span class="n">Weekday</span><span class="p">,</span>
+    <span class="n">MonthDay</span><span class="p">,</span>
+    <span class="n">Overlay</span><span class="p">,</span>
+    <span class="n">CalendarId</span><span class="p">,</span>
+    <span class="n">OverlayRule</span><span class="p">,</span>
+    <span class="n">Makeup</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">model</span> <span class="k">as</span> <span class="n">m</span>
+
+<span class="n">spec</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">Schedule</span><span class="p">(</span>
+    <span class="n">freq</span><span class="o">=</span><span class="n">MonthlyByWeekday</span><span class="p">([</span><span class="n">NthWeekday</span><span class="p">(</span><span class="n">Nth</span><span class="o">.</span><span class="n">THIRD</span><span class="p">,</span> <span class="n">Weekday</span><span class="o">.</span><span class="n">FRI</span><span class="p">)],</span> <span class="s2">&quot;16:00&quot;</span><span class="p">),</span>
+    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
+    <span class="n">overlays</span><span class="o">=</span><span class="p">[</span><span class="n">Overlay</span><span class="p">(</span><span class="n">CalendarId</span><span class="o">.</span><span class="n">NYSE_TRADING_DAY</span><span class="p">,</span> <span class="n">OverlayRule</span><span class="o">.</span><span class="n">ONLY</span><span class="p">)],</span>
+    <span class="n">makeup</span><span class="o">=</span><span class="n">Makeup</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Builder families:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Family</p></th>
+<th class="head"><p>Builders</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Frequencies</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">Daily</span></code>, <code class="docutils literal notranslate"><span class="pre">Weekly</span></code>, <code class="docutils literal notranslate"><span class="pre">EveryNDays</span></code>, <code class="docutils literal notranslate"><span class="pre">EveryNWeeks</span></code>, <code class="docutils literal notranslate"><span class="pre">MonthlyByDay</span></code>, <code class="docutils literal notranslate"><span class="pre">MonthlyByWeekday</span></code>, <code class="docutils literal notranslate"><span class="pre">Yearly</span></code>, <code class="docutils literal notranslate"><span class="pre">Quarterly</span></code>, <code class="docutils literal notranslate"><span class="pre">CustomCron</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Calendar specs</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">CalendarId</span></code>, <code class="docutils literal notranslate"><span class="pre">CalendarDates</span></code>, <code class="docutils literal notranslate"><span class="pre">CalendarUnion</span></code>, <code class="docutils literal notranslate"><span class="pre">CalendarDiff</span></code>, <code class="docutils literal notranslate"><span class="pre">CustomCalendar</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Overlays</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Overlay</span></code>, <code class="docutils literal notranslate"><span class="pre">AnyOverlay</span></code>, <code class="docutils literal notranslate"><span class="pre">OverlayRule</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Makeup</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Makeup</span></code>, <code class="docutils literal notranslate"><span class="pre">MakeupFailure</span></code>, <code class="docutils literal notranslate"><span class="pre">MakeupStep</span></code>, <code class="docutils literal notranslate"><span class="pre">WeekdayMakeup</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Date helpers</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MonthDay</span></code>, <code class="docutils literal notranslate"><span class="pre">NthWeekday</span></code>, <code class="docutils literal notranslate"><span class="pre">Nth</span></code>, <code class="docutils literal notranslate"><span class="pre">Weekday</span></code></p></td>
+</tr>
+</tbody>
+</table>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="dateme.Schedule">
@@ -294,6 +683,18 @@ object with <code class="docutils literal notranslate"><span class="pre">contain
 overlays, a makeup strategy, and start/end bounds. Its methods compute the
 instants the schedule fires. Reference instants are timezone-aware
 <code class="docutils literal notranslate"><span class="pre">datetime</span></code> objects; when omitted they default to the current time (UTC).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="dateme.Schedule.__contains__">
+<span class="sig-name descname"><span class="pre">__contains__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dateme.Schedule.__contains__" title="Link to this definition">¶</a></dt>
+<dd><p>Return key in self.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dateme.Schedule.__iter__">
+<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dateme.Schedule.__iter__" title="Link to this definition">¶</a></dt>
+<dd><p>Implement iter(self).</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="dateme.Schedule.count_between">
 <span class="sig-name descname"><span class="pre">count_between</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">before</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dateme.Schedule.count_between" title="Link to this definition">¶</a></dt>
@@ -322,6 +723,18 @@ instants the schedule fires. Reference instants are timezone-aware
 <dt class="sig sig-object py" id="dateme.Schedule.is_occurrence">
 <span class="sig-name descname"><span class="pre">is_occurrence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instant</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dateme.Schedule.is_occurrence" title="Link to this definition">¶</a></dt>
 <dd><p>Whether <cite>instant</cite> is an occurrence of this schedule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dateme.Schedule.iter_between">
+<span class="sig-name descname"><span class="pre">iter_between</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">before</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dateme.Schedule.iter_between" title="Link to this definition">¶</a></dt>
+<dd><p>Iterate occurrences in <cite>(after, before)</cite>, ascending.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dateme.Schedule.iter_upcoming">
+<span class="sig-name descname"><span class="pre">iter_upcoming</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">after</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#dateme.Schedule.iter_upcoming" title="Link to this definition">¶</a></dt>
+<dd><p>Iterate the next <cite>n</cite> occurrences strictly after <cite>after</cite> (default: now).</p>
 </dd></dl>
 
 <dl class="py method">
@@ -404,126 +817,6 @@ instants the schedule fires. Reference instants are timezone-aware
 
 </dd></dl>
 
-</section>
-<section id="datetime-handling">
-<h2>Datetime handling<a class="headerlink" href="#datetime-handling" title="Link to this heading">¶</a></h2>
-<ul class="simple">
-<li><p>Inputs should be timezone-aware <code class="docutils literal notranslate"><span class="pre">datetime</span></code> objects. Naive datetimes are
-interpreted as UTC.</p></li>
-<li><p>Returned datetimes are always timezone-aware and in UTC.</p></li>
-<li><p>Methods whose reference instant is optional (<code class="docutils literal notranslate"><span class="pre">next</span></code>, <code class="docutils literal notranslate"><span class="pre">previous</span></code>, <code class="docutils literal notranslate"><span class="pre">upcoming</span></code>,
-and the near bound of <code class="docutils literal notranslate"><span class="pre">until</span></code> / <code class="docutils literal notranslate"><span class="pre">since</span></code>) default it to the current UTC time.</p></li>
-</ul>
-</section>
-<section id="errors">
-<h2>Errors<a class="headerlink" href="#errors" title="Link to this heading">¶</a></h2>
-<p>The constructor validates the schedule and raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> for malformed
-JSON/dict input, an unknown timezone/enum value, or a structurally invalid
-schedule (see <a class="reference internal" href="schedule-model.html#validation"><span class="std std-ref">Validation</span></a>) — so a <code class="docutils literal notranslate"><span class="pre">Schedule</span></code> you hold is always
-well-formed. <code class="docutils literal notranslate"><span class="pre">validate()</span></code> re-runs the same check on demand. The typed builders
-additionally raise <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> at build time for out-of-range values (see
-below).</p>
-</section>
-<section id="method-summary">
-<h2>Method summary<a class="headerlink" href="#method-summary" title="Link to this heading">¶</a></h2>
-<div class="table-wrapper colwidths-auto docutils container">
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Method</p></th>
-<th class="head"><p>Returns</p></th>
-<th class="head"><p>Order</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">next(after=now)</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">datetime</span></code> or <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">previous(before=now)</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">datetime</span></code> or <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">until(before,</span> <span class="pre">after=now)</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">list[datetime]</span></code></p></td>
-<td><p>ascending</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">since(after,</span> <span class="pre">before=now)</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">list[datetime]</span></code></p></td>
-<td><p>descending</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">upcoming(n,</span> <span class="pre">after=now)</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">list[datetime]</span></code></p></td>
-<td><p>ascending</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">next_trace(after=now)</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">dict</span></code> or <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">previous_trace(before=now)</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">dict</span></code> or <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">until_trace(before,</span> <span class="pre">after=now)</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">list[dict]</span></code></p></td>
-<td><p>ascending</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">since_trace(after,</span> <span class="pre">before=now)</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">list[dict]</span></code></p></td>
-<td><p>descending</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">upcoming_trace(n,</span> <span class="pre">after=now)</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">list[dict]</span></code></p></td>
-<td><p>ascending</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">is_occurrence(instant)</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">count_between(after,</span> <span class="pre">before)</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">int</span></code></p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">describe()</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">validate()</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">None</span></code> (raises on error)</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">to_json()</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">str</span></code></p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">to_dict()</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">dict</span></code></p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">from_json(json)</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">Schedule</span></code> (static)</p></td>
-<td><p>—</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">from_dict(obj)</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">Schedule</span></code> (static)</p></td>
-<td><p>—</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">until(end)[0]</span></code> equals <code class="docutils literal notranslate"><span class="pre">next()</span></code>; <code class="docutils literal notranslate"><span class="pre">since(start)[0]</span></code> equals <code class="docutils literal notranslate"><span class="pre">previous()</span></code>. All
-results are strictly between the two bounds and deduplicated by instant.
-Trace methods return dictionaries with <code class="docutils literal notranslate"><span class="pre">instant</span></code> and <code class="docutils literal notranslate"><span class="pre">reason</span></code>. Reasons include
-<code class="docutils literal notranslate"><span class="pre">base</span></code>, <code class="docutils literal notranslate"><span class="pre">makeup_from(YYYY-MM-DD)</span></code>, and <code class="docutils literal notranslate"><span class="pre">shifted_dst</span></code>.</p>
-</section>
-<section id="typed-model">
-<span id="id1"></span><h2>Typed model<a class="headerlink" href="#typed-model" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">dateme.model</span></code> mirrors the <a class="reference internal" href="schedule-model.html"><span class="std std-doc">Schedule model</span></a> as dataclasses and
-enums. Build a structure from them and pass it to <code class="docutils literal notranslate"><span class="pre">Schedule</span></code> (or call <code class="docutils literal notranslate"><span class="pre">to_dict()</span></code>
-/ <code class="docutils literal notranslate"><span class="pre">to_json()</span></code>). Construction performs light validation — an out-of-range minute,
-an empty weekday list, or a month day outside 1–31 raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>
-immediately. The enums (<code class="docutils literal notranslate"><span class="pre">Makeup</span></code>, <code class="docutils literal notranslate"><span class="pre">OverlayRule</span></code>, <code class="docutils literal notranslate"><span class="pre">CalendarId</span></code>, <code class="docutils literal notranslate"><span class="pre">Nth</span></code>, <code class="docutils literal notranslate"><span class="pre">Weekday</span></code>)
-and the frequency/<code class="docutils literal notranslate"><span class="pre">MonthDay</span></code>/<code class="docutils literal notranslate"><span class="pre">NthWeekday</span></code>/<code class="docutils literal notranslate"><span class="pre">Overlay</span></code>/calendar builders are
-re-exported at the package top level for convenience.</p>
 <p id="module-dateme.model">Typed builders for the dateme schedule model.</p>
 <p>These dataclasses and enums mirror the JSON schedule model. Build a structure
 from them and pass it to <a class="reference internal" href="#dateme.Schedule" title="dateme.Schedule"><code class="xref py py-class docutils literal notranslate"><span class="pre">dateme.Schedule</span></code></a> (or call <code class="docutils literal notranslate"><span class="pre">to_dict()</span></code> /
@@ -780,13 +1073,42 @@ structural check remains <a class="reference internal" href="#dateme.Schedule.va
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Python API</a><ul>
-<li><a class="reference internal" href="#constructing-a-schedule">Constructing a schedule</a><ul>
+<li><a class="reference internal" href="#exports">Exports</a></li>
+<li><a class="reference internal" href="#schedule"><code class="docutils literal notranslate"><span class="pre">Schedule</span></code></a><ul>
+<li><a class="reference internal" href="#constructor">Constructor</a></li>
+<li><a class="reference internal" href="#custom-calendar-providers">Custom Calendar Providers</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#datetime-handling">Datetime Handling</a></li>
+<li><a class="reference internal" href="#methods">Methods</a><ul>
+<li><a class="reference internal" href="#schedule-from-json"><code class="docutils literal notranslate"><span class="pre">Schedule.from_json</span></code></a></li>
+<li><a class="reference internal" href="#schedule-from-dict"><code class="docutils literal notranslate"><span class="pre">Schedule.from_dict</span></code></a></li>
+<li><a class="reference internal" href="#to-json"><code class="docutils literal notranslate"><span class="pre">to_json</span></code></a></li>
+<li><a class="reference internal" href="#to-dict"><code class="docutils literal notranslate"><span class="pre">to_dict</span></code></a></li>
+<li><a class="reference internal" href="#validate"><code class="docutils literal notranslate"><span class="pre">validate</span></code></a></li>
+<li><a class="reference internal" href="#next"><code class="docutils literal notranslate"><span class="pre">next</span></code></a></li>
+<li><a class="reference internal" href="#previous"><code class="docutils literal notranslate"><span class="pre">previous</span></code></a></li>
+<li><a class="reference internal" href="#until"><code class="docutils literal notranslate"><span class="pre">until</span></code></a></li>
+<li><a class="reference internal" href="#since"><code class="docutils literal notranslate"><span class="pre">since</span></code></a></li>
+<li><a class="reference internal" href="#upcoming"><code class="docutils literal notranslate"><span class="pre">upcoming</span></code></a></li>
+<li><a class="reference internal" href="#trace-methods">Trace Methods</a></li>
+<li><a class="reference internal" href="#is-occurrence"><code class="docutils literal notranslate"><span class="pre">is_occurrence</span></code></a></li>
+<li><a class="reference internal" href="#count-between"><code class="docutils literal notranslate"><span class="pre">count_between</span></code></a></li>
+<li><a class="reference internal" href="#describe"><code class="docutils literal notranslate"><span class="pre">describe</span></code></a></li>
+<li><a class="reference internal" href="#iteration">Iteration</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#typed-model">Typed Model</a><ul>
 <li><a class="reference internal" href="#dateme.Schedule"><code class="docutils literal notranslate"><span class="pre">Schedule</span></code></a><ul>
+<li><a class="reference internal" href="#dateme.Schedule.__contains__"><code class="docutils literal notranslate"><span class="pre">Schedule.__contains__()</span></code></a></li>
+<li><a class="reference internal" href="#dateme.Schedule.__iter__"><code class="docutils literal notranslate"><span class="pre">Schedule.__iter__()</span></code></a></li>
 <li><a class="reference internal" href="#dateme.Schedule.count_between"><code class="docutils literal notranslate"><span class="pre">Schedule.count_between()</span></code></a></li>
 <li><a class="reference internal" href="#dateme.Schedule.describe"><code class="docutils literal notranslate"><span class="pre">Schedule.describe()</span></code></a></li>
 <li><a class="reference internal" href="#dateme.Schedule.from_dict"><code class="docutils literal notranslate"><span class="pre">Schedule.from_dict()</span></code></a></li>
 <li><a class="reference internal" href="#dateme.Schedule.from_json"><code class="docutils literal notranslate"><span class="pre">Schedule.from_json()</span></code></a></li>
 <li><a class="reference internal" href="#dateme.Schedule.is_occurrence"><code class="docutils literal notranslate"><span class="pre">Schedule.is_occurrence()</span></code></a></li>
+<li><a class="reference internal" href="#dateme.Schedule.iter_between"><code class="docutils literal notranslate"><span class="pre">Schedule.iter_between()</span></code></a></li>
+<li><a class="reference internal" href="#dateme.Schedule.iter_upcoming"><code class="docutils literal notranslate"><span class="pre">Schedule.iter_upcoming()</span></code></a></li>
 <li><a class="reference internal" href="#dateme.Schedule.next"><code class="docutils literal notranslate"><span class="pre">Schedule.next()</span></code></a></li>
 <li><a class="reference internal" href="#dateme.Schedule.next_trace"><code class="docutils literal notranslate"><span class="pre">Schedule.next_trace()</span></code></a></li>
 <li><a class="reference internal" href="#dateme.Schedule.previous"><code class="docutils literal notranslate"><span class="pre">Schedule.previous()</span></code></a></li>
@@ -802,12 +1124,6 @@ structural check remains <a class="reference internal" href="#dateme.Schedule.va
 <li><a class="reference internal" href="#dateme.Schedule.validate"><code class="docutils literal notranslate"><span class="pre">Schedule.validate()</span></code></a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li><a class="reference internal" href="#datetime-handling">Datetime handling</a></li>
-<li><a class="reference internal" href="#errors">Errors</a></li>
-<li><a class="reference internal" href="#method-summary">Method summary</a></li>
-<li><a class="reference internal" href="#typed-model">Typed model</a><ul>
 <li><a class="reference internal" href="#dateme.model.Weekday"><code class="docutils literal notranslate"><span class="pre">Weekday</span></code></a></li>
 <li><a class="reference internal" href="#dateme.model.Nth"><code class="docutils literal notranslate"><span class="pre">Nth</span></code></a></li>
 <li><a class="reference internal" href="#dateme.model.Makeup"><code class="docutils literal notranslate"><span class="pre">Makeup</span></code></a></li>
@@ -849,7 +1165,7 @@ structural check remains <a class="reference internal" href="#dateme.Schedule.va
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=01f34227"></script>
+</div><script src="../../_static/documentation_options.js?v=938c9ccc"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

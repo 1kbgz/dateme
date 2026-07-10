@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Schedule model" href="schedule-model.html"><link rel="prev" title="Getting started" href="tutorial.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>How-to guides - dateme v0.1.0</title>
+        <title>How-to Guides - dateme v0.2.0</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -167,7 +167,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></div></a>
+      <a href="../../index.html"><div class="brand">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.2.0</code></div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -188,7 +188,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
-  <span class="sidebar-brand-text">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></span>
+  <span class="sidebar-brand-text">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.2.0</code></span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -198,7 +198,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Getting started</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">How-to guides</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">How-to Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="schedule-model.html">Schedule model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api-python.html">Python API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api-javascript.html">JavaScript API</a></li>
@@ -242,158 +242,372 @@
         </div>
         <article role="main" id="furo-main-content">
           <section class="tex2jax_ignore mathjax_ignore" id="how-to-guides">
-<h1>How-to guides<a class="headerlink" href="#how-to-guides" title="Link to this heading">¶</a></h1>
-<p>Practical recipes for common scheduling goals. Each assumes you already know the
-basics (<a class="reference internal" href="tutorial.html"><span class="std std-doc">Getting started</span></a>) and can build a <code class="docutils literal notranslate"><span class="pre">Schedule</span></code> from JSON.
-For the meaning of every field, see the <a class="reference internal" href="schedule-model.html"><span class="std std-doc">Schedule model</span></a>.</p>
-<p>The examples use Python. The same JSON and method names work in
-<a class="reference internal" href="api-javascript.html"><span class="std std-doc">JavaScript</span></a>; only the datetime type differs (<code class="docutils literal notranslate"><span class="pre">Date</span></code> instead
-of <code class="docutils literal notranslate"><span class="pre">datetime</span></code>).</p>
-<section id="skip-market-holidays-moving-the-cycle-to-the-next-open-day">
-<h2>Skip market holidays, moving the cycle to the next open day<a class="headerlink" href="#skip-market-holidays-moving-the-cycle-to-the-next-open-day" title="Link to this heading">¶</a></h2>
-<p>Add an <code class="docutils literal notranslate"><span class="pre">exclude</span></code> overlay against the market’s holiday calendar and set <code class="docutils literal notranslate"><span class="pre">makeup</span></code>
-to <code class="docutils literal notranslate"><span class="pre">after</span></code> so a dropped cycle moves forward to the next surviving day:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;freq&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;weekly&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;days&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;17:30&quot;</span><span class="w"> </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;timezone&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;overlays&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;calendar&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nyse_holiday&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;rule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;exclude&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;makeup&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;after&quot;</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p>Use <code class="docutils literal notranslate"><span class="pre">&quot;makeup&quot;:</span> <span class="pre">&quot;before&quot;</span></code> to move to the previous open day instead, or
-<code class="docutils literal notranslate"><span class="pre">&quot;makeup&quot;:</span> <span class="pre">&quot;none&quot;</span></code> to simply skip the cycle.</p>
-</section>
-<section id="run-only-on-trading-days">
-<h2>Run only on trading days<a class="headerlink" href="#run-only-on-trading-days" title="Link to this heading">¶</a></h2>
-<p>To fire <em>only</em> when the market is open, use an <code class="docutils literal notranslate"><span class="pre">only</span></code> overlay against the trading
-calendar. This drops weekends and holidays in one rule:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;freq&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;daily&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;16:00&quot;</span><span class="w"> </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;timezone&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;overlays&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;calendar&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nyse_trading_day&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;rule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;only&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;makeup&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">only</span></code> keeps a date when the calendar <em>contains</em> it; <code class="docutils literal notranslate"><span class="pre">exclude</span></code> drops a date when
-the calendar contains it. See <a class="reference internal" href="schedule-model.html#overlays"><span class="std std-ref">Calendars and overlays</span></a>.</p>
-</section>
-<section id="fire-on-the-last-business-day-of-the-month">
-<h2>Fire on the last business day of the month<a class="headerlink" href="#fire-on-the-last-business-day-of-the-month" title="Link to this heading">¶</a></h2>
-<p>Combine the <code class="docutils literal notranslate"><span class="pre">last</span></code> day-of-month with an <code class="docutils literal notranslate"><span class="pre">only</span></code> business-day overlay and
-<code class="docutils literal notranslate"><span class="pre">makeup:</span> <span class="pre">before</span></code>, so a month that ends on a weekend or holiday rolls back to the
-last business day:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;freq&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;monthly_by_day&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;days&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;last&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;16:00&quot;</span><span class="w"> </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;timezone&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;overlays&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;calendar&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;us_business_day&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;rule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;only&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;makeup&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;before&quot;</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p>For example May 31 2026 is a Sunday, so the May cycle fires on Friday May 29.</p>
-</section>
-<section id="fire-on-the-first-and-third-tuesday-of-the-month">
-<h2>Fire on the first and third Tuesday of the month<a class="headerlink" href="#fire-on-the-first-and-third-tuesday-of-the-month" title="Link to this heading">¶</a></h2>
-<p>List several slots; the engine emits each, in ascending order:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;freq&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;monthly_by_weekday&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;weekdays&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;nth&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;first&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;weekday&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tue&quot;</span><span class="w"> </span><span class="p">},</span>
-<span class="w">      </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;nth&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;third&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;weekday&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tue&quot;</span><span class="w"> </span><span class="p">}</span>
-<span class="w">    </span><span class="p">],</span>
-<span class="w">    </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;09:00&quot;</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;timezone&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;America/New_York&quot;</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p>The same applies to weekly <code class="docutils literal notranslate"><span class="pre">days</span></code> (<code class="docutils literal notranslate"><span class="pre">[&quot;mon&quot;,</span> <span class="pre">&quot;wed&quot;,</span> <span class="pre">&quot;fri&quot;]</span></code>) and monthly
-<code class="docutils literal notranslate"><span class="pre">monthly_by_day</span></code> (<code class="docutils literal notranslate"><span class="pre">[{&quot;type&quot;:&quot;day&quot;,&quot;value&quot;:1},</span> <span class="pre">{&quot;type&quot;:&quot;day&quot;,&quot;value&quot;:15}]</span></code>).</p>
-</section>
-<section id="start-a-series-in-the-future">
-<h2>Start a series in the future<a class="headerlink" href="#start-a-series-in-the-future" title="Link to this heading">¶</a></h2>
-<p>Set <code class="docutils literal notranslate"><span class="pre">start</span></code> to the earliest allowed instant. No occurrence is returned before it —
-useful for a competition created now that should not open until later:</p>
+<h1>How-to Guides<a class="headerlink" href="#how-to-guides" title="Link to this heading">¶</a></h1>
+<p>Practical recipes for common scheduling tasks. The examples use Python unless a
+JavaScript call is the point of the recipe. The same schedule JSON works in all
+bindings.</p>
+<p>For field-level details, see the <a class="reference internal" href="schedule-model.html"><span class="std std-doc">Schedule model</span></a>. For API
+signatures, see the <a class="reference internal" href="api-python.html"><span class="std std-doc">Python API</span></a> and
+<a class="reference internal" href="api-javascript.html"><span class="std std-doc">JavaScript API</span></a>.</p>
+<section id="how-to-skip-market-holidays-and-move-to-the-next-open-day">
+<h2>How to Skip Market Holidays and Move to the Next Open Day<a class="headerlink" href="#how-to-skip-market-holidays-and-move-to-the-next-open-day" title="Link to this heading">¶</a></h2>
+<p>Use an <code class="docutils literal notranslate"><span class="pre">exclude</span></code> overlay and <code class="docutils literal notranslate"><span class="pre">makeup:</span> <span class="pre">&quot;after&quot;</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span>
 
-<span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">{</span>
-<span class="s2">  &quot;freq&quot;: { &quot;type&quot;: &quot;daily&quot;, &quot;time&quot;: &quot;12:00&quot; },</span>
-<span class="s2">  &quot;timezone&quot;: &quot;UTC&quot;,</span>
-<span class="s2">  &quot;start&quot;: &quot;2026-06-01T00:00:00Z&quot;</span>
-<span class="s2">}</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;weekly&quot;</span><span class="p">,</span> <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">],</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;17:30&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="s2">&quot;nyse_holiday&quot;</span><span class="p">,</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;exclude&quot;</span><span class="p">}],</span>
+    <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="s2">&quot;after&quot;</span><span class="p">,</span>
+<span class="p">})</span>
 
-<span class="n">schedule</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">))</span>
-<span class="c1"># -&gt; 2026-06-01 12:00:00+00:00</span>
+<span class="n">after</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+<span class="n">schedule</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">after</span><span class="p">)</span>
+<span class="c1"># datetime.datetime(2026, 1, 20, 22, 30, tzinfo=datetime.timezone.utc)</span>
+</pre></div>
+</div>
+<p>Use <code class="docutils literal notranslate"><span class="pre">&quot;makeup&quot;:</span> <span class="pre">&quot;before&quot;</span></code> to move backward. Use <code class="docutils literal notranslate"><span class="pre">&quot;makeup&quot;:</span> <span class="pre">&quot;none&quot;</span></code> to drop the
+cycle.</p>
+</section>
+<section id="how-to-run-only-on-trading-days">
+<h2>How to Run Only on Trading Days<a class="headerlink" href="#how-to-run-only-on-trading-days" title="Link to this heading">¶</a></h2>
+<p>Use an <code class="docutils literal notranslate"><span class="pre">only</span></code> overlay against <code class="docutils literal notranslate"><span class="pre">nyse_trading_day</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;16:00&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="s2">&quot;nyse_trading_day&quot;</span><span class="p">,</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;only&quot;</span><span class="p">}],</span>
+    <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+<span class="p">})</span>
 </pre></div>
 </div>
 </section>
-<section id="end-a-series-on-a-date">
-<h2>End a series on a date<a class="headerlink" href="#end-a-series-on-a-date" title="Link to this heading">¶</a></h2>
-<p>Set <code class="docutils literal notranslate"><span class="pre">end</span></code> to the exclusive upper bound. <code class="docutils literal notranslate"><span class="pre">next</span></code> returns <code class="docutils literal notranslate"><span class="pre">None</span></code> once the following
-occurrence would fall at or after it:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">{</span>
-<span class="s2">  &quot;freq&quot;: { &quot;type&quot;: &quot;daily&quot;, &quot;time&quot;: &quot;12:00&quot; },</span>
-<span class="s2">  &quot;timezone&quot;: &quot;UTC&quot;,</span>
-<span class="s2">  &quot;end&quot;: &quot;2026-01-03T00:00:00Z&quot;</span>
-<span class="s2">}</span>
-<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+<section id="how-to-run-on-the-last-business-day-of-each-month">
+<h2>How to Run on the Last Business Day of Each Month<a class="headerlink" href="#how-to-run-on-the-last-business-day-of-each-month" title="Link to this heading">¶</a></h2>
+<p>Use the last day of the month, require US business days, and roll back when the
+last calendar day is not a business day.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;monthly_by_day&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;last&quot;</span><span class="p">}],</span>
+        <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;16:00&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="s2">&quot;us_business_day&quot;</span><span class="p">,</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;only&quot;</span><span class="p">}],</span>
+    <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="s2">&quot;before&quot;</span><span class="p">,</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-schedule-multiple-days-in-one-rule">
+<h2>How to Schedule Multiple Days in One Rule<a class="headerlink" href="#how-to-schedule-multiple-days-in-one-rule" title="Link to this heading">¶</a></h2>
+<p>Put every selected slot in the frequency object.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;weekly&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">,</span> <span class="s2">&quot;wed&quot;</span><span class="p">,</span> <span class="s2">&quot;fri&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+<p>For monthly slots:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;monthly_by_weekday&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;weekdays&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s2">&quot;nth&quot;</span><span class="p">:</span> <span class="s2">&quot;first&quot;</span><span class="p">,</span> <span class="s2">&quot;weekday&quot;</span><span class="p">:</span> <span class="s2">&quot;tue&quot;</span><span class="p">},</span>
+            <span class="p">{</span><span class="s2">&quot;nth&quot;</span><span class="p">:</span> <span class="s2">&quot;third&quot;</span><span class="p">,</span> <span class="s2">&quot;weekday&quot;</span><span class="p">:</span> <span class="s2">&quot;tue&quot;</span><span class="p">},</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-create-biweekly-or-every-n-day-schedules">
+<h2>How to Create Biweekly or Every-N-Day Schedules<a class="headerlink" href="#how-to-create-biweekly-or-every-n-day-schedules" title="Link to this heading">¶</a></h2>
+<p>Use <code class="docutils literal notranslate"><span class="pre">every_n_weeks</span></code> when the schedule repeats by week.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;every_n_weeks&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;interval&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s2">&quot;start_date&quot;</span><span class="p">:</span> <span class="s2">&quot;2026-01-05&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">,</span> <span class="s2">&quot;thu&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;17:00&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+<p>Use <code class="docutils literal notranslate"><span class="pre">every_n_days</span></code> when the schedule repeats by elapsed calendar days.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;every_n_days&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;interval&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s2">&quot;start_date&quot;</span><span class="p">:</span> <span class="s2">&quot;2026-01-01&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-schedule-quarterly-events">
+<h2>How to Schedule Quarterly Events<a class="headerlink" href="#how-to-schedule-quarterly-events" title="Link to this heading">¶</a></h2>
+<p>Use <code class="docutils literal notranslate"><span class="pre">quarterly</span></code>. <code class="docutils literal notranslate"><span class="pre">month</span></code> is the month within each quarter: <code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">2</span></code>, or <code class="docutils literal notranslate"><span class="pre">3</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;quarterly&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;month&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;day&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;day&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">},</span>
+        <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;12:00&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-use-a-cron-expression">
+<h2>How to Use a Cron Expression<a class="headerlink" href="#how-to-use-a-cron-expression" title="Link to this heading">¶</a></h2>
+<p>Use <code class="docutils literal notranslate"><span class="pre">custom_cron</span></code> for a five-field cron expression in schedule-local time.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;custom_cron&quot;</span><span class="p">,</span> <span class="s2">&quot;expr&quot;</span><span class="p">:</span> <span class="s2">&quot;30 9 * * 1-5&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-bound-a-series">
+<h2>How to Bound a Series<a class="headerlink" href="#how-to-bound-a-series" title="Link to this heading">¶</a></h2>
+<p>Set <code class="docutils literal notranslate"><span class="pre">start</span></code> and/or <code class="docutils literal notranslate"><span class="pre">end</span></code> as UTC instants.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;12:00&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="s2">&quot;2026-06-01T00:00:00Z&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="s2">&quot;2026-07-01T00:00:00Z&quot;</span><span class="p">,</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">end</span></code> is exclusive.</p>
+</section>
+<section id="how-to-render-upcoming-occurrences">
+<h2>How to Render Upcoming Occurrences<a class="headerlink" href="#how-to-render-upcoming-occurrences" title="Link to this heading">¶</a></h2>
+<p>Use <code class="docutils literal notranslate"><span class="pre">upcoming</span></code> for a count.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rows</span> <span class="o">=</span> <span class="n">schedule</span><span class="o">.</span><span class="n">upcoming</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use <code class="docutils literal notranslate"><span class="pre">until</span></code> for a window.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
 
-<span class="n">schedule</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">None</span>
-<span class="c1"># -&gt; True   (the next 12:00 would be 2026-01-03, which is &gt;= end)</span>
+<span class="n">end</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+<span class="n">rows</span> <span class="o">=</span> <span class="n">schedule</span><span class="o">.</span><span class="n">until</span><span class="p">(</span><span class="n">end</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use <code class="docutils literal notranslate"><span class="pre">since</span></code> for a reverse-ordered history.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">start</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+<span class="n">recent</span> <span class="o">=</span> <span class="n">schedule</span><span class="o">.</span><span class="n">since</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
-<section id="project-the-next-n-cycles-for-a-ui">
-<h2>Project the next N cycles for a UI<a class="headerlink" href="#project-the-next-n-cycles-for-a-ui" title="Link to this heading">¶</a></h2>
-<p>To render an “upcoming instances” table, ask for a fixed count with <code class="docutils literal notranslate"><span class="pre">upcoming</span></code>.
-These are computed, not stored — future cycles need not exist yet:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rows</span> <span class="o">=</span> <span class="n">schedule</span><span class="o">.</span><span class="n">upcoming</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>          <span class="c1"># next 10 after now</span>
+<section id="how-to-annotate-made-up-occurrences">
+<h2>How to Annotate Made-Up Occurrences<a class="headerlink" href="#how-to-annotate-made-up-occurrences" title="Link to this heading">¶</a></h2>
+<p>Use trace methods when a UI needs to show why an occurrence exists.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">trace</span> <span class="o">=</span> <span class="n">schedule</span><span class="o">.</span><span class="n">next_trace</span><span class="p">(</span><span class="n">after</span><span class="p">)</span>
+<span class="n">trace</span><span class="p">[</span><span class="s2">&quot;instant&quot;</span><span class="p">]</span>
+<span class="n">trace</span><span class="p">[</span><span class="s2">&quot;reason&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>If you have a concrete window instead of a count, use <code class="docutils literal notranslate"><span class="pre">until</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
-<span class="n">year_end</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
-<span class="n">rows</span> <span class="o">=</span> <span class="n">schedule</span><span class="o">.</span><span class="n">until</span><span class="p">(</span><span class="n">year_end</span><span class="p">)</span>       <span class="c1"># every occurrence from now to year end</span>
-</pre></div>
-</div>
-</section>
-<section id="show-recent-cycles-most-recent-first">
-<h2>Show recent cycles, most-recent first<a class="headerlink" href="#show-recent-cycles-most-recent-first" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">since</span></code> is the backward series and returns <strong>descending</strong> order, so the first
-element is the most recent occurrence:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
-<span class="n">year_start</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
-<span class="n">recent</span> <span class="o">=</span> <span class="n">schedule</span><span class="o">.</span><span class="n">since</span><span class="p">(</span><span class="n">year_start</span><span class="p">)</span>   <span class="c1"># now back to Jan 1, newest first</span>
-<span class="n">recent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>                             <span class="c1"># == schedule.previous()</span>
+<p>For a list:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rows</span> <span class="o">=</span> <span class="n">schedule</span><span class="o">.</span><span class="n">upcoming_trace</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">after</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
-<section id="handle-daylight-saving-time-safely">
-<h2>Handle daylight-saving time safely<a class="headerlink" href="#handle-daylight-saving-time-safely" title="Link to this heading">¶</a></h2>
-<p>Just give a local <code class="docutils literal notranslate"><span class="pre">time</span></code> and an IANA <code class="docutils literal notranslate"><span class="pre">timezone</span></code>; the engine tracks DST for you. A
-daily 09:00 schedule fires at 09:00 <em>local</em> every day, so the UTC instant shifts
-by an hour across the spring and autumn transitions — you do not manage that:</p>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;freq&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;daily&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;09:00&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nt">&quot;timezone&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;America/New_York&quot;</span><span class="w"> </span><span class="p">}</span>
+<section id="how-to-check-membership-and-count-a-window">
+<h2>How to Check Membership and Count a Window<a class="headerlink" href="#how-to-check-membership-and-count-a-window" title="Link to this heading">¶</a></h2>
+<p>Use <code class="docutils literal notranslate"><span class="pre">is_occurrence</span></code> for membership and <code class="docutils literal notranslate"><span class="pre">count_between</span></code> for counts.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">instant</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+<span class="n">schedule</span><span class="o">.</span><span class="n">is_occurrence</span><span class="p">(</span><span class="n">instant</span><span class="p">)</span>
+<span class="n">schedule</span><span class="o">.</span><span class="n">count_between</span><span class="p">(</span><span class="n">after</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Two edge cases are resolved automatically (see
-<a class="reference internal" href="explanation.html#timezones-and-dst"><span class="std std-ref">Timezones and DST</span></a>): a local time that falls
-in a spring-forward gap moves to the first valid instant after the gap; a local
-time that occurs twice at an autumn fall-back uses the earlier instant.</p>
+<p>Python also supports membership syntax.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">instant</span> <span class="ow">in</span> <span class="n">schedule</span>
+</pre></div>
+</div>
 </section>
-<section id="build-a-schedule-from-typed-objects-instead-of-json">
-<h2>Build a schedule from typed objects instead of JSON<a class="headerlink" href="#build-a-schedule-from-typed-objects-instead-of-json" title="Link to this heading">¶</a></h2>
-<p>Use the <code class="docutils literal notranslate"><span class="pre">dateme.model</span></code> builders for a typed, autocomplete-friendly spec that is
-validated as you build it. Pass the result straight to <code class="docutils literal notranslate"><span class="pre">Schedule</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span><span class="p">,</span> <span class="n">model</span> <span class="k">as</span> <span class="n">m</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Weekly</span><span class="p">,</span> <span class="n">Overlay</span><span class="p">,</span> <span class="n">Makeup</span><span class="p">,</span> <span class="n">CalendarId</span><span class="p">,</span> <span class="n">OverlayRule</span><span class="p">,</span> <span class="n">Weekday</span>
+<section id="how-to-iterate-a-bounded-schedule">
+<h2>How to Iterate a Bounded Schedule<a class="headerlink" href="#how-to-iterate-a-bounded-schedule" title="Link to this heading">¶</a></h2>
+<p>Set <code class="docutils literal notranslate"><span class="pre">end</span></code>, then iterate the schedule.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;12:00&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="s2">&quot;2026-01-01T00:00:00Z&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="s2">&quot;2026-01-04T00:00:00Z&quot;</span><span class="p">,</span>
+<span class="p">})</span>
+
+<span class="k">for</span> <span class="n">instant</span> <span class="ow">in</span> <span class="n">schedule</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">instant</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use explicit helpers for caller-provided bounds.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="n">schedule</span><span class="o">.</span><span class="n">iter_between</span><span class="p">(</span><span class="n">after</span><span class="p">,</span> <span class="n">end</span><span class="p">))</span>
+<span class="nb">list</span><span class="p">(</span><span class="n">schedule</span><span class="o">.</span><span class="n">iter_upcoming</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">after</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>In JavaScript:</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">instant</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">schedule</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">instant</span><span class="p">.</span><span class="nx">toISOString</span><span class="p">());</span>
+<span class="p">}</span>
+
+<span class="nb">Array</span><span class="p">.</span><span class="kr">from</span><span class="p">(</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">iterBetween</span><span class="p">(</span><span class="nx">after</span><span class="p">,</span><span class="w"> </span><span class="nx">end</span><span class="p">));</span>
+<span class="nb">Array</span><span class="p">.</span><span class="kr">from</span><span class="p">(</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">iterUpcoming</span><span class="p">(</span><span class="mf">3</span><span class="p">,</span><span class="w"> </span><span class="nx">after</span><span class="p">));</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-restrict-makeup-destinations">
+<h2>How to Restrict Makeup Destinations<a class="headerlink" href="#how-to-restrict-makeup-destinations" title="Link to this heading">¶</a></h2>
+<p>Use destination constraints with a makeup direction.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;weekly&quot;</span><span class="p">,</span> <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">],</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="s2">&quot;us_federal_holiday&quot;</span><span class="p">,</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;exclude&quot;</span><span class="p">}],</span>
+    <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="s2">&quot;after&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;makeup_only_on&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tue&quot;</span><span class="p">,</span> <span class="s2">&quot;wed&quot;</span><span class="p">,</span> <span class="s2">&quot;thu&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;makeup_within_week&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;makeup_exclude_weekends&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;makeup_before_next&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-use-different-makeup-rules-by-weekday">
+<h2>How to Use Different Makeup Rules by Weekday<a class="headerlink" href="#how-to-use-different-makeup-rules-by-weekday" title="Link to this heading">¶</a></h2>
+<p>Use a weekday map for <code class="docutils literal notranslate"><span class="pre">makeup</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;weekly&quot;</span><span class="p">,</span> <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">,</span> <span class="s2">&quot;fri&quot;</span><span class="p">],</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="s2">&quot;us_federal_holiday&quot;</span><span class="p">,</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;exclude&quot;</span><span class="p">}],</span>
+    <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;mon&quot;</span><span class="p">:</span> <span class="s2">&quot;after&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;fri&quot;</span><span class="p">:</span> <span class="s2">&quot;before&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-try-fallback-makeup-strategies">
+<h2>How to Try Fallback Makeup Strategies<a class="headerlink" href="#how-to-try-fallback-makeup-strategies" title="Link to this heading">¶</a></h2>
+<p>Use a makeup cascade.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="s2">&quot;us_federal_holiday&quot;</span><span class="p">,</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;exclude&quot;</span><span class="p">}],</span>
+    <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s2">&quot;direction&quot;</span><span class="p">:</span> <span class="s2">&quot;after&quot;</span><span class="p">,</span> <span class="s2">&quot;max_hops&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">&quot;direction&quot;</span><span class="p">:</span> <span class="s2">&quot;before&quot;</span><span class="p">,</span> <span class="s2">&quot;max_hops&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+        <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-fail-when-makeup-cannot-find-a-date">
+<h2>How to Fail When Makeup Cannot Find a Date<a class="headerlink" href="#how-to-fail-when-makeup-cannot-find-a-date" title="Link to this heading">¶</a></h2>
+<p>Use <code class="docutils literal notranslate"><span class="pre">makeup_failure:</span> <span class="pre">&quot;error&quot;</span></code> for strict schedules.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dates&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;2026-01-02&quot;</span><span class="p">]},</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;exclude&quot;</span><span class="p">}],</span>
+    <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="s2">&quot;after&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;max_makeup_hops&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">&quot;makeup_failure&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+<p>Queries raise/throw when the failure is encountered.</p>
+</section>
+<section id="how-to-skip-runs-of-consecutive-exclusions">
+<h2>How to Skip Runs of Consecutive Exclusions<a class="headerlink" href="#how-to-skip-runs-of-consecutive-exclusions" title="Link to this heading">¶</a></h2>
+<p>Use <code class="docutils literal notranslate"><span class="pre">skip_if_consecutive_excluded</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dates&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;2026-01-05&quot;</span><span class="p">,</span> <span class="s2">&quot;2026-01-06&quot;</span><span class="p">]},</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;exclude&quot;</span><span class="p">}],</span>
+    <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="s2">&quot;after&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;skip_if_consecutive_excluded&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-alert-on-long-gaps">
+<h2>How to Alert on Long Gaps<a class="headerlink" href="#how-to-alert-on-long-gaps" title="Link to this heading">¶</a></h2>
+<p>Use <code class="docutils literal notranslate"><span class="pre">max_skip_gap</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;weekly&quot;</span><span class="p">,</span> <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">],</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;max_skip_gap&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+<p>Queries raise/throw when the returned stream has a gap longer than the limit.</p>
+</section>
+<section id="how-to-combine-calendar-sets">
+<h2>How to Combine Calendar Sets<a class="headerlink" href="#how-to-combine-calendar-sets" title="Link to this heading">¶</a></h2>
+<p>Use <code class="docutils literal notranslate"><span class="pre">dates</span></code> for inline sets, <code class="docutils literal notranslate"><span class="pre">union</span></code> for any child set, and <code class="docutils literal notranslate"><span class="pre">diff</span></code> for the first
+set minus later sets.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;union&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">&quot;us_federal_holiday&quot;</span><span class="p">,</span>
+                    <span class="p">{</span><span class="s2">&quot;dates&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;2026-12-24&quot;</span><span class="p">]},</span>
+                    <span class="p">{</span><span class="s2">&quot;custom&quot;</span><span class="p">:</span> <span class="s2">&quot;company_shutdown&quot;</span><span class="p">},</span>
+                <span class="p">]</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;exclude&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-provide-custom-calendars">
+<h2>How to Provide Custom Calendars<a class="headerlink" href="#how-to-provide-custom-calendars" title="Link to this heading">¶</a></h2>
+<p>Use <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">&quot;custom&quot;:</span> <span class="pre">&quot;name&quot;</span> <span class="pre">}</span></code> in the schedule and pass a provider to the
+constructor.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">contains</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;company_shutdown&quot;</span> <span class="ow">and</span> <span class="n">date</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;2026-12-24&quot;</span><span class="p">,</span> <span class="s2">&quot;2026-12-31&quot;</span><span class="p">}</span>
+
+
+<span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;custom&quot;</span><span class="p">:</span> <span class="s2">&quot;company_shutdown&quot;</span><span class="p">},</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;exclude&quot;</span><span class="p">}],</span>
+    <span class="p">},</span>
+    <span class="n">contains</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>JavaScript providers receive the same <code class="docutils literal notranslate"><span class="pre">(name,</span> <span class="pre">date)</span></code> arguments.</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">schedule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">(</span><span class="nx">spec</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">date</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;company_shutdown&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">date</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;2026-12-24&quot;</span><span class="p">;</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</section>
+<section id="how-to-build-schedules-with-typed-builders">
+<h2>How to Build Schedules with Typed Builders<a class="headerlink" href="#how-to-build-schedules-with-typed-builders" title="Link to this heading">¶</a></h2>
+<p>Use <code class="docutils literal notranslate"><span class="pre">dateme.model</span></code> builders in Python.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span><span class="p">,</span> <span class="n">Weekly</span><span class="p">,</span> <span class="n">Weekday</span><span class="p">,</span> <span class="n">Overlay</span><span class="p">,</span> <span class="n">CalendarId</span><span class="p">,</span> <span class="n">OverlayRule</span><span class="p">,</span> <span class="n">Makeup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">model</span> <span class="k">as</span> <span class="n">m</span>
 
 <span class="n">spec</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">Schedule</span><span class="p">(</span>
     <span class="n">freq</span><span class="o">=</span><span class="n">Weekly</span><span class="p">([</span><span class="n">Weekday</span><span class="o">.</span><span class="n">MON</span><span class="p">],</span> <span class="s2">&quot;17:30&quot;</span><span class="p">),</span>
@@ -401,34 +615,38 @@ validated as you build it. Pass the result straight to <code class="docutils lit
     <span class="n">overlays</span><span class="o">=</span><span class="p">[</span><span class="n">Overlay</span><span class="p">(</span><span class="n">CalendarId</span><span class="o">.</span><span class="n">NYSE_HOLIDAY</span><span class="p">,</span> <span class="n">OverlayRule</span><span class="o">.</span><span class="n">EXCLUDE</span><span class="p">)],</span>
     <span class="n">makeup</span><span class="o">=</span><span class="n">Makeup</span><span class="o">.</span><span class="n">AFTER</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>             <span class="c1"># or Schedule(spec.to_dict())</span>
+
+<span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>In JavaScript/TypeScript the spec object is typed by <code class="docutils literal notranslate"><span class="pre">ScheduleSpec</span></code>, with runtime
-enums for the string values:</p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">ScheduleSpec</span></code> and runtime enum objects in TypeScript.</p>
 <div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="nx">init</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">,</span><span class="w"> </span><span class="nx">Weekday</span><span class="p">,</span><span class="w"> </span><span class="nx">CalendarId</span><span class="p">,</span><span class="w"> </span><span class="nx">OverlayRule</span><span class="p">,</span><span class="w"> </span><span class="nx">Makeup</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;dateme&quot;</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ScheduleSpec</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;dateme&quot;</span><span class="p">;</span>
 
-<span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">();</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">schedule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">({</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">spec</span><span class="o">:</span><span class="w"> </span><span class="kt">ScheduleSpec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;weekly&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">days</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">Weekday</span><span class="p">.</span><span class="nx">Mon</span><span class="p">],</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;17:30&quot;</span><span class="w"> </span><span class="p">},</span>
 <span class="w">  </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">overlays</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">calendar</span><span class="o">:</span><span class="w"> </span><span class="kt">CalendarId.NyseHoliday</span><span class="p">,</span><span class="w"> </span><span class="nx">rule</span><span class="o">:</span><span class="w"> </span><span class="kt">OverlayRule.Exclude</span><span class="w"> </span><span class="p">}],</span>
 <span class="w">  </span><span class="nx">makeup</span><span class="o">:</span><span class="w"> </span><span class="kt">Makeup.After</span><span class="p">,</span>
-<span class="p">});</span>
+<span class="p">};</span>
+
+<span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">();</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">schedule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">(</span><span class="nx">spec</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
-<section id="store-and-reload-a-schedule">
-<h2>Store and reload a schedule<a class="headerlink" href="#store-and-reload-a-schedule" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">to_json</span></code> round-trips the schedule, so you can persist it (for example in a JSONB
-column) and rebuild it later:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">blob</span> <span class="o">=</span> <span class="n">schedule</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>             <span class="c1"># store this string</span>
-<span class="n">again</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span>      <span class="c1"># rebuild identically</span>
+<section id="how-to-store-and-reload-a-schedule">
+<h2>How to Store and Reload a Schedule<a class="headerlink" href="#how-to-store-and-reload-a-schedule" title="Link to this heading">¶</a></h2>
+<p>Store the JSON form.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">blob</span> <span class="o">=</span> <span class="n">schedule</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
+<span class="n">again</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The same schedule is also available as a dict via <code class="docutils literal notranslate"><span class="pre">to_dict()</span></code> /
-<code class="docutils literal notranslate"><span class="pre">Schedule.from_dict(...)</span></code> (Python) or <code class="docutils literal notranslate"><span class="pre">toObject()</span></code> / <code class="docutils literal notranslate"><span class="pre">new</span> <span class="pre">Schedule(obj)</span></code>
-(JavaScript).</p>
+<p>In JavaScript:</p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">blob</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">schedule</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">again</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">(</span><span class="nx">blob</span><span class="p">);</span>
+</pre></div>
+</div>
 </section>
 </section>
 
@@ -487,18 +705,29 @@ column) and rebuild it later:</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">How-to guides</a><ul>
-<li><a class="reference internal" href="#skip-market-holidays-moving-the-cycle-to-the-next-open-day">Skip market holidays, moving the cycle to the next open day</a></li>
-<li><a class="reference internal" href="#run-only-on-trading-days">Run only on trading days</a></li>
-<li><a class="reference internal" href="#fire-on-the-last-business-day-of-the-month">Fire on the last business day of the month</a></li>
-<li><a class="reference internal" href="#fire-on-the-first-and-third-tuesday-of-the-month">Fire on the first and third Tuesday of the month</a></li>
-<li><a class="reference internal" href="#start-a-series-in-the-future">Start a series in the future</a></li>
-<li><a class="reference internal" href="#end-a-series-on-a-date">End a series on a date</a></li>
-<li><a class="reference internal" href="#project-the-next-n-cycles-for-a-ui">Project the next N cycles for a UI</a></li>
-<li><a class="reference internal" href="#show-recent-cycles-most-recent-first">Show recent cycles, most-recent first</a></li>
-<li><a class="reference internal" href="#handle-daylight-saving-time-safely">Handle daylight-saving time safely</a></li>
-<li><a class="reference internal" href="#build-a-schedule-from-typed-objects-instead-of-json">Build a schedule from typed objects instead of JSON</a></li>
-<li><a class="reference internal" href="#store-and-reload-a-schedule">Store and reload a schedule</a></li>
+<li><a class="reference internal" href="#">How-to Guides</a><ul>
+<li><a class="reference internal" href="#how-to-skip-market-holidays-and-move-to-the-next-open-day">How to Skip Market Holidays and Move to the Next Open Day</a></li>
+<li><a class="reference internal" href="#how-to-run-only-on-trading-days">How to Run Only on Trading Days</a></li>
+<li><a class="reference internal" href="#how-to-run-on-the-last-business-day-of-each-month">How to Run on the Last Business Day of Each Month</a></li>
+<li><a class="reference internal" href="#how-to-schedule-multiple-days-in-one-rule">How to Schedule Multiple Days in One Rule</a></li>
+<li><a class="reference internal" href="#how-to-create-biweekly-or-every-n-day-schedules">How to Create Biweekly or Every-N-Day Schedules</a></li>
+<li><a class="reference internal" href="#how-to-schedule-quarterly-events">How to Schedule Quarterly Events</a></li>
+<li><a class="reference internal" href="#how-to-use-a-cron-expression">How to Use a Cron Expression</a></li>
+<li><a class="reference internal" href="#how-to-bound-a-series">How to Bound a Series</a></li>
+<li><a class="reference internal" href="#how-to-render-upcoming-occurrences">How to Render Upcoming Occurrences</a></li>
+<li><a class="reference internal" href="#how-to-annotate-made-up-occurrences">How to Annotate Made-Up Occurrences</a></li>
+<li><a class="reference internal" href="#how-to-check-membership-and-count-a-window">How to Check Membership and Count a Window</a></li>
+<li><a class="reference internal" href="#how-to-iterate-a-bounded-schedule">How to Iterate a Bounded Schedule</a></li>
+<li><a class="reference internal" href="#how-to-restrict-makeup-destinations">How to Restrict Makeup Destinations</a></li>
+<li><a class="reference internal" href="#how-to-use-different-makeup-rules-by-weekday">How to Use Different Makeup Rules by Weekday</a></li>
+<li><a class="reference internal" href="#how-to-try-fallback-makeup-strategies">How to Try Fallback Makeup Strategies</a></li>
+<li><a class="reference internal" href="#how-to-fail-when-makeup-cannot-find-a-date">How to Fail When Makeup Cannot Find a Date</a></li>
+<li><a class="reference internal" href="#how-to-skip-runs-of-consecutive-exclusions">How to Skip Runs of Consecutive Exclusions</a></li>
+<li><a class="reference internal" href="#how-to-alert-on-long-gaps">How to Alert on Long Gaps</a></li>
+<li><a class="reference internal" href="#how-to-combine-calendar-sets">How to Combine Calendar Sets</a></li>
+<li><a class="reference internal" href="#how-to-provide-custom-calendars">How to Provide Custom Calendars</a></li>
+<li><a class="reference internal" href="#how-to-build-schedules-with-typed-builders">How to Build Schedules with Typed Builders</a></li>
+<li><a class="reference internal" href="#how-to-store-and-reload-a-schedule">How to Store and Reload a Schedule</a></li>
 </ul>
 </li>
 </ul>
@@ -510,7 +739,7 @@ column) and rebuild it later:</p>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=01f34227"></script>
+</div><script src="../../_static/documentation_options.js?v=938c9ccc"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

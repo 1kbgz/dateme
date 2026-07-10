@@ -29,12 +29,27 @@ at different resolutions.
 
 Occurrences are produced in two stages. First the **base occurrences** come
 purely from the frequency and timezone — every Monday, every 1st and 15th, every
-hour, and so on. Then each base occurrence is **transformed** by the overlays and
-makeup rule: kept, dropped, or moved to a nearby day.
+third day from an anchor, every matching cron minute, and so on. Then each base
+occurrence is **transformed** by the overlays and makeup rule: kept, dropped, or
+moved to a nearby day.
 
 Keeping these stages separate is what lets the calendar rules stay simple. The
 frequency knows nothing about holidays; the overlays know nothing about
 weekdays-versus-month-days. They compose.
+
+## Anchors and calendar shape
+
+Some frequencies are anchored to calendar structure: monthly rules are anchored
+to months, yearly rules to years, and quarterly rules to the three-month rhythm
+of quarters. `every_n_days` and `every_n_weeks` need an explicit `start_date`
+because their rhythm is relative rather than intrinsic to the calendar. Without
+that anchor, "every 3 days" is underspecified: there are three equally valid
+series depending on which date starts the cycle.
+
+Cron is different again. It describes a set of matching local minutes rather
+than a human calendar unit. `dateme` keeps it in the same pipeline as other
+frequencies: cron creates base local datetimes, and overlays and makeup transform
+them afterward.
 
 (timezones-and-dst)=
 
@@ -75,6 +90,9 @@ When an overlay drops a base occurrence, the **makeup** rule decides what happen
 - `before` / `after` search outward day by day — up to 14 days — for the nearest
   day that passes *all* overlays, and move the occurrence there at the same
   time-of-day.
+- `nearest` searches both directions and prefers the later date on ties.
+- Weekday maps and cascades choose a direction based on context or try fallback
+  strategies in order.
 
 The 14-day bound is a safety valve. A pathological overlay set could in principle
 remove every nearby day; rather than search forever, the engine gives up and drops
@@ -98,6 +116,30 @@ collides with an existing one is simply dropped. A weekly-Monday schedule making
 up a Monday holiday to Tuesday keeps it, because Tuesday was not otherwise
 scheduled.
 
+## Why skip thresholds and gap checks are query rules
+
+`skip_if_consecutive_excluded` looks at the base recurrence before makeup. It is
+about the meaning of a cycle: if enough consecutive base cycles are excluded,
+the whole run is intentionally skipped rather than compressed into nearby makeup
+dates. This belongs before makeup because it decides whether the cycle should be
+attempted at all.
+
+`max_skip_gap` is different. It is a monitoring rule over the returned stream:
+after overlays, makeup, deduplication, and bounds, is the resulting series too
+sparse? That is why it raises during queries instead of changing the schedule
+model itself.
+
+## Why traces are separate from ordinary queries
+
+Most callers only need instants. Returning metadata every time would make the
+simple path noisier and would force every binding to expose a heavier result
+type. Trace queries preserve the original datetime-returning API while giving
+UIs and audit workflows a richer stream when they need it.
+
+The trace reason is intentionally compact. It records whether the occurrence was
+base or made up from a local date, plus whether DST shifted the local time. It is
+not a full proof tree of every overlay decision.
+
 ## Bounds and termination
 
 `start` and `end` clip the series to a half-open interval: no occurrence before
@@ -106,12 +148,17 @@ post-makeup instant, a made-up occurrence that lands outside the interval is
 dropped just like a base one.
 
 `end` also gives the series a definite tail: once the next occurrence would reach
-it, `next` returns nothing. For unbounded schedules the engine expands its search
-window outward until it either finds enough occurrences or reaches a large
-absolute horizon (about 50 years), after which it reports what it found. This is
-what guarantees that even a schedule which can *never* fire — say, "only on NYSE
-trading days" applied to a Sunday-only weekly rule — terminates and returns an
-empty result instead of looping.
+it, `next` returns nothing. Binding-level iteration uses that property. A
+`for...of` loop or Python `for` loop must have a finite end, so default iteration
+requires `end`; explicit helpers such as `iter_upcoming` and `iterBetween` carry
+their own count or window.
+
+For unbounded schedules the engine expands its search window outward until it
+either finds enough occurrences or reaches a large absolute horizon (about 50
+years), after which it reports what it found. This is what guarantees that even a
+schedule which can *never* fire — say, "only on NYSE trading days" applied to a
+Sunday-only weekly rule — terminates and returns an empty result instead of
+looping.
 
 ## The window, in brief
 

@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Getting started" href="docs/src/tutorial.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>dateme v0.1.0</title>
+        <title>dateme v0.2.0</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -167,7 +167,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="#"><div class="brand">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></div></a>
+      <a href="#"><div class="brand">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.2.0</code></div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -188,7 +188,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="#">
   
-  <span class="sidebar-brand-text">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></span>
+  <span class="sidebar-brand-text">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.2.0</code></span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -198,7 +198,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul>
 <li class="toctree-l1"><a class="reference internal" href="docs/src/tutorial.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docs/src/how-to.html">How-to guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docs/src/how-to.html">How-to Guides</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docs/src/schedule-model.html">Schedule model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docs/src/api-python.html">Python API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docs/src/api-javascript.html">JavaScript API</a></li>
@@ -245,96 +245,102 @@
 </div>
 <section class="tex2jax_ignore mathjax_ignore" id="dateme">
 <h1>dateme<a class="headerlink" href="#dateme" title="Link to this heading">¶</a></h1>
-<p>Dates and intervals</p>
+<p>Dates and intervals.</p>
 <p><a class="reference external" href="https://github.com/1kbgz/dateme/actions/workflows/build.yaml"><img alt="Build Status" src="https://github.com/1kbgz/dateme/actions/workflows/build.yaml/badge.svg?branch=main&amp;event=push" /></a>
 <a class="reference external" href="https://codecov.io/gh/1kbgz/dateme"><img alt="codecov" src="https://codecov.io/gh/1kbgz/dateme/branch/main/graph/badge.svg" /></a>
 <a class="reference external" href="https://github.com/1kbgz/dateme"><img alt="License" src="https://img.shields.io/github/license/1kbgz/dateme" /></a>
 <a class="reference external" href="https://pypi.python.org/pypi/dateme"><img alt="PyPI" src="https://img.shields.io/pypi/v/dateme.svg" /></a></p>
-<section id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
-<p>A recurrence / scheduling engine: pure datetime math that, given a <strong>schedule</strong>
-(a frequency in an IANA timezone, plus optional calendar overlays, a makeup
-strategy, and start/end bounds), computes when a recurring event fires. Written
-in Rust with bindings for Python (pyo3) and JavaScript (WebAssembly).</p>
-<p>A schedule is described as JSON:</p>
+<p><code class="docutils literal notranslate"><span class="pre">dateme</span></code> is a recurrence and scheduling engine. Given a schedule JSON object,
+it computes occurrence instants with timezone handling, calendar overlays,
+makeup rules, bounds, traces, and bindings for Python and JavaScript.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;freq&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;weekly&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;days&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">],</span><span class="w"> </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;17:30&quot;</span><span class="w"> </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">&quot;timezone&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;overlays&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">&quot;calendar&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nyse_holiday&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;rule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;exclude&quot;</span><span class="w"> </span><span class="p">}],</span>
-<span class="w">  </span><span class="nt">&quot;makeup&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;after&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;end&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="w">  </span><span class="nt">&quot;makeup&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;after&quot;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Every binding exposes the same five queries over a <code class="docutils literal notranslate"><span class="pre">Schedule</span></code>:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">next(after=now)</span></code> / <code class="docutils literal notranslate"><span class="pre">previous(before=now)</span></code> — the single next/previous occurrence.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">until(before,</span> <span class="pre">after=now)</span></code> — the ascending series in <code class="docutils literal notranslate"><span class="pre">(after,</span> <span class="pre">before)</span></code>; <code class="docutils literal notranslate"><span class="pre">until(end)[0]</span> <span class="pre">==</span> <span class="pre">next()</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">since(after,</span> <span class="pre">before=now)</span></code> — the descending series in <code class="docutils literal notranslate"><span class="pre">(after,</span> <span class="pre">before)</span></code>; <code class="docutils literal notranslate"><span class="pre">since(start)[0]</span> <span class="pre">==</span> <span class="pre">previous()</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">upcoming(n,</span> <span class="pre">after=now)</span></code> — the next <code class="docutils literal notranslate"><span class="pre">n</span></code> occurrences.</p></li>
-</ul>
-<section id="python">
-<h3>Python<a class="headerlink" href="#python" title="Link to this heading">¶</a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span>
-
-<span class="n">s</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">spec_json</span><span class="p">)</span>             <span class="c1"># JSON string, dict, or a typed model object</span>
-<span class="n">s</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
-<span class="n">s</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">))</span>   <span class="c1"># -&gt; aware datetime | None</span>
-<span class="n">s</span><span class="o">.</span><span class="n">upcoming</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>                                        <span class="c1"># defaults to now</span>
+<section id="install">
+<h2>Install<a class="headerlink" href="#install" title="Link to this heading">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>dateme
 </pre></div>
 </div>
-<p>Or build the schedule from typed objects instead of JSON:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span><span class="p">,</span> <span class="n">model</span> <span class="k">as</span> <span class="n">m</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Weekly</span><span class="p">,</span> <span class="n">Overlay</span><span class="p">,</span> <span class="n">Makeup</span><span class="p">,</span> <span class="n">CalendarId</span><span class="p">,</span> <span class="n">OverlayRule</span><span class="p">,</span> <span class="n">Weekday</span>
-
-<span class="n">s</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">Schedule</span><span class="p">(</span>
-    <span class="n">freq</span><span class="o">=</span><span class="n">Weekly</span><span class="p">([</span><span class="n">Weekday</span><span class="o">.</span><span class="n">MON</span><span class="p">],</span> <span class="s2">&quot;17:30&quot;</span><span class="p">),</span>
-    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
-    <span class="n">overlays</span><span class="o">=</span><span class="p">[</span><span class="n">Overlay</span><span class="p">(</span><span class="n">CalendarId</span><span class="o">.</span><span class="n">NYSE_HOLIDAY</span><span class="p">,</span> <span class="n">OverlayRule</span><span class="o">.</span><span class="n">EXCLUDE</span><span class="p">)],</span>
-    <span class="n">makeup</span><span class="o">=</span><span class="n">Makeup</span><span class="o">.</span><span class="n">AFTER</span><span class="p">,</span>
-<span class="p">))</span>
+<p>For JavaScript development from this repository:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>js
+pnpm<span class="w"> </span>install
+pnpm<span class="w"> </span>build
 </pre></div>
 </div>
 </section>
-<section id="javascript">
-<h3>JavaScript<a class="headerlink" href="#javascript" title="Link to this heading">¶</a></h3>
-<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="nx">init</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Schedule</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;dateme&quot;</span><span class="p">;</span>
+<section id="quick-python-example">
+<h2>Quick Python Example<a class="headerlink" href="#quick-python-example" title="Link to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span>
 
-<span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">();</span><span class="w"> </span><span class="c1">// load the wasm module once</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">(</span><span class="nx">spec</span><span class="p">);</span><span class="w">              </span><span class="c1">// string or object</span>
-<span class="nx">s</span><span class="p">.</span><span class="nx">next</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">&quot;2026-01-13T00:00:00Z&quot;</span><span class="p">));</span><span class="w">  </span><span class="c1">// -&gt; Date | null</span>
-<span class="nx">s</span><span class="p">.</span><span class="nx">upcoming</span><span class="p">(</span><span class="mf">3</span><span class="p">);</span><span class="w">                             </span><span class="c1">// defaults to now</span>
+<span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
+    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;weekly&quot;</span><span class="p">,</span> <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">],</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;17:30&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="s2">&quot;nyse_holiday&quot;</span><span class="p">,</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;exclude&quot;</span><span class="p">}],</span>
+    <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="s2">&quot;after&quot;</span><span class="p">,</span>
+<span class="p">})</span>
+
+<span class="n">after</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+<span class="n">schedule</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">after</span><span class="p">)</span>
+<span class="c1"># datetime.datetime(2026, 1, 20, 22, 30, tzinfo=datetime.timezone.utc)</span>
 </pre></div>
 </div>
-<p>Supported frequencies: <code class="docutils literal notranslate"><span class="pre">hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">weekly</span></code>, <code class="docutils literal notranslate"><span class="pre">monthly_by_day</span></code> (fixed day
-or <code class="docutils literal notranslate"><span class="pre">last</span></code>), <code class="docutils literal notranslate"><span class="pre">monthly_by_weekday</span></code> (nth / last weekday), <code class="docutils literal notranslate"><span class="pre">yearly</span></code>,
-<code class="docutils literal notranslate"><span class="pre">every_n_days</span></code>, <code class="docutils literal notranslate"><span class="pre">every_n_weeks</span></code>, <code class="docutils literal notranslate"><span class="pre">quarterly</span></code>, and <code class="docutils literal notranslate"><span class="pre">custom_cron</span></code>. Overlays
-filter occurrences against built-in calendars (<code class="docutils literal notranslate"><span class="pre">us_federal_holiday</span></code>,
-<code class="docutils literal notranslate"><span class="pre">us_business_day</span></code>, <code class="docutils literal notranslate"><span class="pre">nyse_holiday</span></code>, <code class="docutils literal notranslate"><span class="pre">nyse_trading_day</span></code>, backed by
-<a class="reference external" href="https://crates.io/crates/finance-dates"><code class="docutils literal notranslate"><span class="pre">finance-dates</span></code></a>), inline date sets,
-calendar unions/differences, and custom provider callbacks; <code class="docutils literal notranslate"><span class="pre">makeup</span></code> shifts a
-dropped occurrence to the nearest surviving day (<code class="docutils literal notranslate"><span class="pre">before</span></code> / <code class="docutils literal notranslate"><span class="pre">after</span></code>), or drops
-it (<code class="docutils literal notranslate"><span class="pre">none</span></code>). <code class="docutils literal notranslate"><span class="pre">nearest</span></code> makeup chooses the closest surviving day. <code class="docutils literal notranslate"><span class="pre">max_makeup_hops</span></code>
-can cap that search, and <code class="docutils literal notranslate"><span class="pre">makeup_failure</span></code> can keep the original date when makeup
-cannot find a surviving date.
-<code class="docutils literal notranslate"><span class="pre">skip_if_consecutive_excluded</span></code> can drop runs of excluded base occurrences before
-makeup, while <code class="docutils literal notranslate"><span class="pre">max_skip_gap</span></code> can turn long occurrence gaps into query errors.
-<code class="docutils literal notranslate"><span class="pre">makeup</span></code> can also vary by excluded weekday, and <code class="docutils literal notranslate"><span class="pre">makeup_only_on</span></code> can restrict
-makeup target weekdays. Makeup can also be constrained to the same week,
-non-weekend days, or before the next base occurrence, and fallback makeup
-strategies can be tried in order. Overlay groups can express OR composition, and
-individual overlays can override makeup behavior. DST gaps and overlaps are
-resolved on conversion to UTC.</p>
-<p>For observability, schedules can answer whether an instant is an occurrence,
-count occurrences in a window, describe the rule, and return occurrence traces
-that include reasons such as <code class="docutils literal notranslate"><span class="pre">base</span></code>, <code class="docutils literal notranslate"><span class="pre">makeup_from(YYYY-MM-DD)</span></code>, or <code class="docutils literal notranslate"><span class="pre">shifted_dst</span></code>.</p>
+</section>
+<section id="quick-javascript-example">
+<h2>Quick JavaScript Example<a class="headerlink" href="#quick-javascript-example" title="Link to this heading">¶</a></h2>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="nx">init</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Schedule</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;dateme&quot;</span><span class="p">;</span>
+
+<span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">();</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">schedule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;weekly&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">days</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">],</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;17:30&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">overlays</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">calendar</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;nyse_holiday&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">rule</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;exclude&quot;</span><span class="w"> </span><span class="p">}],</span>
+<span class="w">  </span><span class="nx">makeup</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;after&quot;</span><span class="p">,</span>
+<span class="p">});</span>
+
+<span class="nx">schedule</span><span class="p">.</span><span class="nx">next</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">&quot;2026-01-13T00:00:00Z&quot;</span><span class="p">));</span>
+<span class="c1">// 2026-01-20T22:30:00.000Z</span>
+</pre></div>
+</div>
+</section>
+<section id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="docs/src/tutorial.html"><span class="std std-doc">Getting started</span></a>: a first working schedule.</p></li>
+<li><p><a class="reference internal" href="docs/src/how-to.html"><span class="std std-doc">How-to guides</span></a>: recipes for market calendars, makeup,
+custom calendars, traces, iteration, and persistence.</p></li>
+<li><p><a class="reference internal" href="docs/src/schedule-model.html"><span class="std std-doc">Schedule model</span></a>: complete JSON reference.</p></li>
+<li><p><a class="reference internal" href="docs/src/api-python.html"><span class="std std-doc">Python API</span></a>: constructors, query methods, typed
+builders, providers, traces, and iteration.</p></li>
+<li><p><a class="reference internal" href="docs/src/api-javascript.html"><span class="std std-doc">JavaScript API</span></a>: WebAssembly initialization,
+methods, TypeScript types, providers, traces, and iteration.</p></li>
+<li><p><a class="reference internal" href="docs/src/explanation.html"><span class="std std-doc">How the engine works</span></a>: background on recurrence
+generation, overlays, makeup, DST, bounds, and termination.</p></li>
+</ul>
+</section>
+<section id="supported-schedule-features">
+<h2>Supported Schedule Features<a class="headerlink" href="#supported-schedule-features" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Frequencies: <code class="docutils literal notranslate"><span class="pre">hourly</span></code>, <code class="docutils literal notranslate"><span class="pre">daily</span></code>, <code class="docutils literal notranslate"><span class="pre">weekly</span></code>, <code class="docutils literal notranslate"><span class="pre">every_n_days</span></code>, <code class="docutils literal notranslate"><span class="pre">every_n_weeks</span></code>,
+<code class="docutils literal notranslate"><span class="pre">monthly_by_day</span></code>, <code class="docutils literal notranslate"><span class="pre">monthly_by_weekday</span></code>, <code class="docutils literal notranslate"><span class="pre">yearly</span></code>, <code class="docutils literal notranslate"><span class="pre">quarterly</span></code>, <code class="docutils literal notranslate"><span class="pre">custom_cron</span></code>.</p></li>
+<li><p>Calendars: US federal holidays/business days, NYSE holidays/trading days,
+inline date sets, unions, differences, and custom providers.</p></li>
+<li><p>Makeup rules: <code class="docutils literal notranslate"><span class="pre">none</span></code>, <code class="docutils literal notranslate"><span class="pre">before</span></code>, <code class="docutils literal notranslate"><span class="pre">after</span></code>, <code class="docutils literal notranslate"><span class="pre">nearest</span></code>, weekday maps, cascades,
+hop limits, failure modes, weekday constraints, same-week constraints,
+weekend exclusion, and next-occurrence bounds.</p></li>
+<li><p>Queries: <code class="docutils literal notranslate"><span class="pre">next</span></code>, <code class="docutils literal notranslate"><span class="pre">previous</span></code>, <code class="docutils literal notranslate"><span class="pre">until</span></code>, <code class="docutils literal notranslate"><span class="pre">since</span></code>, <code class="docutils literal notranslate"><span class="pre">upcoming</span></code>, trace variants,
+occurrence membership, counts, descriptions, and bounded iteration.</p></li>
+</ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This library was generated using <a class="reference external" href="https://copier.readthedocs.io/en/stable/">copier</a> from the <a class="reference external" href="https://github.com/python-project-templates/base">Base Python Project Template repository</a>.</p>
 </div>
-</section>
 </section>
 </section>
 
@@ -377,7 +383,7 @@ that include reasons such as <code class="docutils literal notranslate"><span cl
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=01f34227"></script>
+</div><script src="_static/documentation_options.js?v=938c9ccc"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

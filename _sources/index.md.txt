@@ -23,100 +23,100 @@ docs/src/explanation.md
 
 # dateme
 
-Dates and intervals
+Dates and intervals.
 
 [![Build Status](https://github.com/1kbgz/dateme/actions/workflows/build.yaml/badge.svg?branch=main&event=push)](https://github.com/1kbgz/dateme/actions/workflows/build.yaml)
 [![codecov](https://codecov.io/gh/1kbgz/dateme/branch/main/graph/badge.svg)](https://codecov.io/gh/1kbgz/dateme)
 [![License](https://img.shields.io/github/license/1kbgz/dateme)](https://github.com/1kbgz/dateme)
 [![PyPI](https://img.shields.io/pypi/v/dateme.svg)](https://pypi.python.org/pypi/dateme)
 
-## Overview
-
-A recurrence / scheduling engine: pure datetime math that, given a **schedule**
-(a frequency in an IANA timezone, plus optional calendar overlays, a makeup
-strategy, and start/end bounds), computes when a recurring event fires. Written
-in Rust with bindings for Python (pyo3) and JavaScript (WebAssembly).
-
-A schedule is described as JSON:
+`dateme` is a recurrence and scheduling engine. Given a schedule JSON object,
+it computes occurrence instants with timezone handling, calendar overlays,
+makeup rules, bounds, traces, and bindings for Python and JavaScript.
 
 ```json
 {
   "freq": { "type": "weekly", "days": ["mon"], "time": "17:30" },
   "timezone": "America/New_York",
   "overlays": [{ "calendar": "nyse_holiday", "rule": "exclude" }],
-  "makeup": "after",
-  "start": null,
-  "end": null
+  "makeup": "after"
 }
 ```
 
-Every binding exposes the same five queries over a `Schedule`:
+## Install
 
-- `next(after=now)` / `previous(before=now)` — the single next/previous occurrence.
-- `until(before, after=now)` — the ascending series in `(after, before)`; `until(end)[0] == next()`.
-- `since(after, before=now)` — the descending series in `(after, before)`; `since(start)[0] == previous()`.
-- `upcoming(n, after=now)` — the next `n` occurrences.
+```bash
+pip install dateme
+```
 
-### Python
+For JavaScript development from this repository:
+
+```bash
+cd js
+pnpm install
+pnpm build
+```
+
+## Quick Python Example
 
 ```python
 from datetime import datetime, timezone
 from dateme import Schedule
 
-s = Schedule(spec_json)             # JSON string, dict, or a typed model object
-s.validate()
-s.next(datetime(2026, 1, 13, tzinfo=timezone.utc))   # -> aware datetime | None
-s.upcoming(3)                                        # defaults to now
+schedule = Schedule({
+    "freq": {"type": "weekly", "days": ["mon"], "time": "17:30"},
+    "timezone": "America/New_York",
+    "overlays": [{"calendar": "nyse_holiday", "rule": "exclude"}],
+    "makeup": "after",
+})
+
+after = datetime(2026, 1, 13, tzinfo=timezone.utc)
+schedule.next(after)
+# datetime.datetime(2026, 1, 20, 22, 30, tzinfo=datetime.timezone.utc)
 ```
 
-Or build the schedule from typed objects instead of JSON:
-
-```python
-from dateme import Schedule, model as m
-from dateme import Weekly, Overlay, Makeup, CalendarId, OverlayRule, Weekday
-
-s = Schedule(m.Schedule(
-    freq=Weekly([Weekday.MON], "17:30"),
-    timezone="America/New_York",
-    overlays=[Overlay(CalendarId.NYSE_HOLIDAY, OverlayRule.EXCLUDE)],
-    makeup=Makeup.AFTER,
-))
-```
-
-### JavaScript
+## Quick JavaScript Example
 
 ```js
 import init, { Schedule } from "dateme";
 
-await init(); // load the wasm module once
-const s = new Schedule(spec);              // string or object
-s.next(new Date("2026-01-13T00:00:00Z"));  // -> Date | null
-s.upcoming(3);                             // defaults to now
+await init();
+
+const schedule = new Schedule({
+  freq: { type: "weekly", days: ["mon"], time: "17:30" },
+  timezone: "America/New_York",
+  overlays: [{ calendar: "nyse_holiday", rule: "exclude" }],
+  makeup: "after",
+});
+
+schedule.next(new Date("2026-01-13T00:00:00Z"));
+// 2026-01-20T22:30:00.000Z
 ```
 
-Supported frequencies: `hourly`, `daily`, `weekly`, `monthly_by_day` (fixed day
-or `last`), `monthly_by_weekday` (nth / last weekday), `yearly`,
-`every_n_days`, `every_n_weeks`, `quarterly`, and `custom_cron`. Overlays
-filter occurrences against built-in calendars (`us_federal_holiday`,
-`us_business_day`, `nyse_holiday`, `nyse_trading_day`, backed by
-[`finance-dates`](https://crates.io/crates/finance-dates)), inline date sets,
-calendar unions/differences, and custom provider callbacks; `makeup` shifts a
-dropped occurrence to the nearest surviving day (`before` / `after`), or drops
-it (`none`). `nearest` makeup chooses the closest surviving day. `max_makeup_hops`
-can cap that search, and `makeup_failure` can keep the original date when makeup
-cannot find a surviving date.
-`skip_if_consecutive_excluded` can drop runs of excluded base occurrences before
-makeup, while `max_skip_gap` can turn long occurrence gaps into query errors.
-`makeup` can also vary by excluded weekday, and `makeup_only_on` can restrict
-makeup target weekdays. Makeup can also be constrained to the same week,
-non-weekend days, or before the next base occurrence, and fallback makeup
-strategies can be tried in order. Overlay groups can express OR composition, and
-individual overlays can override makeup behavior. DST gaps and overlaps are
-resolved on conversion to UTC.
+## Documentation
 
-For observability, schedules can answer whether an instant is an occurrence,
-count occurrences in a window, describe the rule, and return occurrence traces
-that include reasons such as `base`, `makeup_from(YYYY-MM-DD)`, or `shifted_dst`.
+- [Getting started](docs/src/tutorial.md): a first working schedule.
+- [How-to guides](docs/src/how-to.md): recipes for market calendars, makeup,
+  custom calendars, traces, iteration, and persistence.
+- [Schedule model](docs/src/schedule-model.md): complete JSON reference.
+- [Python API](docs/src/api-python.md): constructors, query methods, typed
+  builders, providers, traces, and iteration.
+- [JavaScript API](docs/src/api-javascript.md): WebAssembly initialization,
+  methods, TypeScript types, providers, traces, and iteration.
+- [How the engine works](docs/src/explanation.md): background on recurrence
+  generation, overlays, makeup, DST, bounds, and termination.
+
+## Supported Schedule Features
+
+- Frequencies: `hourly`, `daily`, `weekly`, `every_n_days`, `every_n_weeks`,
+  `monthly_by_day`, `monthly_by_weekday`, `yearly`, `quarterly`, `custom_cron`.
+- Calendars: US federal holidays/business days, NYSE holidays/trading days,
+  inline date sets, unions, differences, and custom providers.
+- Makeup rules: `none`, `before`, `after`, `nearest`, weekday maps, cascades,
+  hop limits, failure modes, weekday constraints, same-week constraints,
+  weekend exclusion, and next-occurrence bounds.
+- Queries: `next`, `previous`, `until`, `since`, `upcoming`, trace variants,
+  occurrence membership, counts, descriptions, and bounded iteration.
 
 > [!NOTE]
 > This library was generated using [copier](https://copier.readthedocs.io/en/stable/) from the [Base Python Project Template repository](https://github.com/python-project-templates/base).

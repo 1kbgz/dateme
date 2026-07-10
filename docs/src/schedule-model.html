@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Python API" href="api-python.html"><link rel="prev" title="How-to guides" href="how-to.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Python API" href="api-python.html"><link rel="prev" title="How-to Guides" href="how-to.html">
 
     <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
-        <title>Schedule model - dateme v0.1.0</title>
+        <title>Schedule model - dateme v0.2.0</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -167,7 +167,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../index.html"><div class="brand">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></div></a>
+      <a href="../../index.html"><div class="brand">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.2.0</code></div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -188,7 +188,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
-  <span class="sidebar-brand-text">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.1.0</code></span>
+  <span class="sidebar-brand-text">dateme <code style='font-size: var(--font-size--small--4);color: var(--sd-color-primary);'>v0.2.0</code></span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -198,7 +198,7 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="how-to.html">How-to guides</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how-to.html">How-to Guides</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Schedule model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api-python.html">Python API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api-javascript.html">JavaScript API</a></li>
@@ -299,6 +299,30 @@ native objects instead of hand-writing JSON.</p>
 <td><p>no</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&quot;skip&quot;</span></code></p></td>
 <td><p>What to do when makeup cannot find a surviving date.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">makeup_only_on</span></code></p></td>
+<td><p>array of weekdays or null</p></td>
+<td><p>no</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
+<td><p>Allowed makeup destination weekdays.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">makeup_within_week</span></code></p></td>
+<td><p>boolean</p></td>
+<td><p>no</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+<td><p>Keep makeup within the original ISO week.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">makeup_exclude_weekends</span></code></p></td>
+<td><p>boolean</p></td>
+<td><p>no</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+<td><p>Reject Saturday/Sunday makeup destinations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">makeup_before_next</span></code></p></td>
+<td><p>boolean</p></td>
+<td><p>no</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+<td><p>Reject makeup on or across adjacent base occurrences.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">skip_if_consecutive_excluded</span></code></p></td>
 <td><p>integer or null</p></td>
@@ -908,7 +932,7 @@ limit.</p>
 </div>
 <p>A made-up occurrence that coincides with another occurrence already produced by
 the schedule is dropped rather than duplicated. See
-<a class="reference internal" href="explanation.html#overlays-and-makeup"><span class="std std-ref">Overlays and makeup</span></a>.</p>
+<a class="reference internal" href="explanation.html"><span class="std std-doc">How the engine works</span></a>.</p>
 </section>
 <section id="makeup-failure">
 <span id="id8"></span><h2>Makeup Failure<a class="headerlink" href="#makeup-failure" title="Link to this heading">¶</a></h2>
@@ -969,6 +993,7 @@ above.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">skip_if_consecutive_excluded</span></code> must be <code class="docutils literal notranslate"><span class="pre">null</span></code>, absent, or an integer at least
 <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">max_skip_gap</span></code> must be <code class="docutils literal notranslate"><span class="pre">null</span></code>, absent, or an integer at least <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">makeup_only_on</span></code> must be <code class="docutils literal notranslate"><span class="pre">null</span></code>, absent, or an array of weekday strings.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">every_n_days.interval</span></code> and <code class="docutils literal notranslate"><span class="pre">every_n_weeks.interval</span></code> must be at least <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">quarterly.month</span></code> must be <code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">2</span></code>, or <code class="docutils literal notranslate"><span class="pre">3</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">custom_cron.expr</span></code> must be a valid five-field expression.</p></li>
@@ -1054,7 +1079,7 @@ above.</p></li>
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">How-to guides</div>
+                <div class="title">How-to Guides</div>
                 
               </div>
             </a>
@@ -1126,7 +1151,7 @@ above.</p></li>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=01f34227"></script>
+</div><script src="../../_static/documentation_options.js?v=938c9ccc"></script>
     <script src="../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
