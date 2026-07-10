@@ -19,7 +19,7 @@ mod engine;
 mod schedule;
 
 pub use calendar::{Calendar, CalendarProvider, NoCalendars};
-pub use engine::QueryError;
+pub use engine::{OccurrenceTrace, QueryError};
 pub use schedule::{
     CalendarId, CalendarSpec, Frequency, Makeup, MakeupDirection, MakeupFailure, MonthDay, Nth,
     NthWeekday, Overlay, OverlayAny, OverlayCalendar, OverlayRule, Schedule, ScheduleError,

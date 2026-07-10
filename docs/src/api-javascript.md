@@ -75,20 +75,30 @@ const schedule = new Schedule(spec);
 
 ## Methods
 
-| Method                              | Returns                  | Order      |
-| ----------------------------------- | ------------------------ | ---------- |
-| `next(after = new Date())`          | `Date` or `null`         | —          |
-| `previous(before = new Date())`     | `Date` or `null`         | —          |
-| `until(before, after = new Date())` | `Date[]`                 | ascending  |
-| `since(after, before = new Date())` | `Date[]`                 | descending |
-| `upcoming(n, after = new Date())`   | `Date[]`                 | ascending  |
-| `validate()`                        | `void` (throws on error) | —          |
-| `toObject()`                        | `ScheduleSpec`           | —          |
-| `toJSON()`                          | `ScheduleSpec`           | —          |
+| Method                                   | Returns                     | Order      |
+| ---------------------------------------- | --------------------------- | ---------- |
+| `next(after = new Date())`               | `Date` or `null`            | —          |
+| `previous(before = new Date())`          | `Date` or `null`            | —          |
+| `until(before, after = new Date())`      | `Date[]`                    | ascending  |
+| `since(after, before = new Date())`      | `Date[]`                    | descending |
+| `upcoming(n, after = new Date())`        | `Date[]`                    | ascending  |
+| `nextTrace(after = new Date())`          | `OccurrenceTrace` or `null` | —          |
+| `previousTrace(before = new Date())`     | `OccurrenceTrace` or `null` | —          |
+| `untilTrace(before, after = new Date())` | `OccurrenceTrace[]`         | ascending  |
+| `sinceTrace(after, before = new Date())` | `OccurrenceTrace[]`         | descending |
+| `upcomingTrace(n, after = new Date())`   | `OccurrenceTrace[]`         | ascending  |
+| `isOccurrence(instant)`                  | `boolean`                   | —          |
+| `countBetween(after, before)`            | `number`                    | —          |
+| `describe()`                             | `string`                    | —          |
+| `validate()`                             | `void` (throws on error)    | —          |
+| `toObject()`                             | `ScheduleSpec`              | —          |
+| `toJSON()`                               | `ScheduleSpec`              | —          |
 
 - Every optional reference instant defaults to `new Date()`.
 - `until(end)[0]` equals `next()`; `since(start)[0]` equals `previous()`.
 - Results are strictly between the two bounds and deduplicated by instant.
+- Trace methods return `{ instant: Date, reason: string }`. Reasons include
+  `base`, `makeup_from(YYYY-MM-DD)`, and `shifted_dst`.
 
 ## Example
 

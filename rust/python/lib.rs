@@ -5,9 +5,12 @@
 //! When a reference instant is omitted it defaults to "now" (UTC).
 
 use chrono::{DateTime, NaiveDate, Utc};
-use dateme_core::{CalendarId, CalendarProvider, DefaultCalendars, Schedule as BaseSchedule};
+use dateme_core::{
+    CalendarId, CalendarProvider, DefaultCalendars, OccurrenceTrace, Schedule as BaseSchedule,
+};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 
 /// A recurrence schedule built from its JSON representation.
 ///
@@ -69,6 +72,13 @@ fn spec_to_json(spec: &Bound<'_, PyAny>) -> PyResult<String> {
     };
     let json = spec.py().import("json")?;
     json.call_method1("dumps", (value,))?.extract()
+}
+
+fn trace_to_dict<'py>(py: Python<'py>, trace: OccurrenceTrace) -> PyResult<Bound<'py, PyDict>> {
+    let out = PyDict::new(py);
+    out.set_item("instant", trace.instant)?;
+    out.set_item("reason", trace.reason)?;
+    Ok(out)
 }
 
 impl Schedule {
@@ -179,6 +189,101 @@ impl Schedule {
         self.inner
             .try_upcoming(n, after.unwrap_or_else(Utc::now), &self.calendars)
             .map_err(|e| PyValueError::new_err(e.to_string()))
+    }
+
+    /// First occurrence trace strictly after `after` (default: now).
+    #[pyo3(signature = (after=None))]
+    fn next_trace<'py>(
+        &self,
+        py: Python<'py>,
+        after: Option<DateTime<Utc>>,
+    ) -> PyResult<Option<Bound<'py, PyDict>>> {
+        self.inner
+            .try_next_trace(after.unwrap_or_else(Utc::now), &self.calendars)
+            .map_err(|e| PyValueError::new_err(e.to_string()))?
+            .map(|trace| trace_to_dict(py, trace))
+            .transpose()
+    }
+
+    /// Last occurrence trace strictly before `before` (default: now).
+    #[pyo3(signature = (before=None))]
+    fn previous_trace<'py>(
+        &self,
+        py: Python<'py>,
+        before: Option<DateTime<Utc>>,
+    ) -> PyResult<Option<Bound<'py, PyDict>>> {
+        self.inner
+            .try_previous_trace(before.unwrap_or_else(Utc::now), &self.calendars)
+            .map_err(|e| PyValueError::new_err(e.to_string()))?
+            .map(|trace| trace_to_dict(py, trace))
+            .transpose()
+    }
+
+    /// Occurrence traces in `(after, before)`, ascending.
+    #[pyo3(signature = (before, after=None))]
+    fn until_trace<'py>(
+        &self,
+        py: Python<'py>,
+        before: DateTime<Utc>,
+        after: Option<DateTime<Utc>>,
+    ) -> PyResult<Vec<Bound<'py, PyDict>>> {
+        self.inner
+            .try_until_trace(before, after.unwrap_or_else(Utc::now), &self.calendars)
+            .map_err(|e| PyValueError::new_err(e.to_string()))?
+            .into_iter()
+            .map(|trace| trace_to_dict(py, trace))
+            .collect()
+    }
+
+    /// Occurrence traces in `(after, before)`, descending.
+    #[pyo3(signature = (after, before=None))]
+    fn since_trace<'py>(
+        &self,
+        py: Python<'py>,
+        after: DateTime<Utc>,
+        before: Option<DateTime<Utc>>,
+    ) -> PyResult<Vec<Bound<'py, PyDict>>> {
+        self.inner
+            .try_since_trace(after, before.unwrap_or_else(Utc::now), &self.calendars)
+            .map_err(|e| PyValueError::new_err(e.to_string()))?
+            .into_iter()
+            .map(|trace| trace_to_dict(py, trace))
+            .collect()
+    }
+
+    /// The next `n` occurrence traces strictly after `after` (default: now), ascending.
+    #[pyo3(signature = (n, after=None))]
+    fn upcoming_trace<'py>(
+        &self,
+        py: Python<'py>,
+        n: usize,
+        after: Option<DateTime<Utc>>,
+    ) -> PyResult<Vec<Bound<'py, PyDict>>> {
+        self.inner
+            .try_upcoming_trace(n, after.unwrap_or_else(Utc::now), &self.calendars)
+            .map_err(|e| PyValueError::new_err(e.to_string()))?
+            .into_iter()
+            .map(|trace| trace_to_dict(py, trace))
+            .collect()
+    }
+
+    /// Whether `instant` is an occurrence of this schedule.
+    fn is_occurrence(&self, instant: DateTime<Utc>) -> PyResult<bool> {
+        self.inner
+            .try_is_occurrence(instant, &self.calendars)
+            .map_err(|e| PyValueError::new_err(e.to_string()))
+    }
+
+    /// Count occurrences strictly in `(after, before)`.
+    fn count_between(&self, after: DateTime<Utc>, before: DateTime<Utc>) -> PyResult<usize> {
+        self.inner
+            .try_count_between(after, before, &self.calendars)
+            .map_err(|e| PyValueError::new_err(e.to_string()))
+    }
+
+    /// Human-readable summary.
+    fn describe(&self) -> String {
+        self.inner.describe()
     }
 
     fn __repr__(&self) -> String {

@@ -564,6 +564,136 @@ fn custom_calendar_provider_resolves_named_calendar() {
 }
 
 #[test]
+fn every_n_days_and_weeks_generate_from_anchor() {
+    let daily: Schedule = serde_json::from_str(
+        r#"{ "freq": { "type": "every_n_days", "interval": 2, "start_date": "2026-01-01", "time": "09:00" },
+            "timezone": "UTC" }"#,
+    )
+    .unwrap();
+    assert_eq!(
+        daily.until(
+            utc("2026-01-08T00:00:00Z"),
+            utc("2026-01-01T00:00:00Z"),
+            &NoCalendars,
+        ),
+        vec![
+            utc("2026-01-01T09:00:00Z"),
+            utc("2026-01-03T09:00:00Z"),
+            utc("2026-01-05T09:00:00Z"),
+            utc("2026-01-07T09:00:00Z"),
+        ]
+    );
+
+    let weekly: Schedule = serde_json::from_str(
+        r#"{ "freq": { "type": "every_n_weeks", "interval": 2, "start_date": "2026-01-05",
+            "days": ["mon", "wed"], "time": "09:00" }, "timezone": "UTC" }"#,
+    )
+    .unwrap();
+    assert_eq!(
+        weekly.until(
+            utc("2026-01-22T00:00:00Z"),
+            utc("2026-01-01T00:00:00Z"),
+            &NoCalendars,
+        ),
+        vec![
+            utc("2026-01-05T09:00:00Z"),
+            utc("2026-01-07T09:00:00Z"),
+            utc("2026-01-19T09:00:00Z"),
+            utc("2026-01-21T09:00:00Z"),
+        ]
+    );
+}
+
+#[test]
+fn quarterly_and_cron_generate_occurrences() {
+    let quarterly: Schedule = serde_json::from_str(
+        r#"{ "freq": { "type": "quarterly", "month": 1, "day": {"type":"day","value":15}, "time": "12:00" },
+            "timezone": "UTC" }"#,
+    )
+    .unwrap();
+    assert_eq!(
+        quarterly.until(
+            utc("2026-08-01T00:00:00Z"),
+            utc("2026-01-01T00:00:00Z"),
+            &NoCalendars,
+        ),
+        vec![
+            utc("2026-01-15T12:00:00Z"),
+            utc("2026-04-15T12:00:00Z"),
+            utc("2026-07-15T12:00:00Z"),
+        ]
+    );
+
+    let cron: Schedule = serde_json::from_str(
+        r#"{ "freq": { "type": "custom_cron", "expr": "30 9 * * 1,3" }, "timezone": "UTC" }"#,
+    )
+    .unwrap();
+    assert_eq!(
+        cron.until(
+            utc("2026-01-08T00:00:00Z"),
+            utc("2026-01-01T00:00:00Z"),
+            &NoCalendars,
+        ),
+        vec![utc("2026-01-05T09:30:00Z"), utc("2026-01-07T09:30:00Z")]
+    );
+}
+
+#[test]
+fn introspection_checks_occurrence_count_and_description() {
+    let s: Schedule = serde_json::from_str(
+        r#"{ "freq": { "type": "weekly", "days": ["mon"], "time": "09:00" }, "timezone": "UTC" }"#,
+    )
+    .unwrap();
+    assert!(s.is_occurrence(utc("2026-01-05T09:00:00Z"), &NoCalendars));
+    assert!(!s.is_occurrence(utc("2026-01-05T10:00:00Z"), &NoCalendars));
+    assert_eq!(
+        s.count_between(
+            utc("2026-01-01T00:00:00Z"),
+            utc("2026-01-20T00:00:00Z"),
+            &NoCalendars,
+        ),
+        3
+    );
+    assert!(s.describe().contains("Every Monday at 09:00 UTC"));
+}
+
+#[test]
+fn occurrence_traces_include_base_makeup_and_dst_reasons() {
+    let cal = |id: CalendarId, d: NaiveDate| match id {
+        CalendarId::NyseHoliday => Some(d == date(2026, 1, 5)),
+        _ => Some(false),
+    };
+    let s: Schedule = serde_json::from_str(
+        r#"{ "freq": { "type": "weekly", "days": ["mon"], "time": "09:00" },
+            "timezone": "UTC",
+            "overlays": [{ "calendar": "nyse_holiday", "rule": "exclude" }],
+            "makeup": "after" }"#,
+    )
+    .unwrap();
+    let traces = s
+        .try_until_trace(
+            utc("2026-01-13T00:00:00Z"),
+            utc("2026-01-01T00:00:00Z"),
+            &cal,
+        )
+        .unwrap();
+    assert_eq!(traces[0].instant, utc("2026-01-06T09:00:00Z"));
+    assert_eq!(traces[0].reason, "makeup_from(2026-01-05)");
+    assert_eq!(traces[1].reason, "base");
+
+    let dst: Schedule = serde_json::from_str(
+        r#"{ "freq": { "type": "daily", "time": "02:30" }, "timezone": "America/New_York" }"#,
+    )
+    .unwrap();
+    let trace = dst
+        .try_next_trace(utc("2026-03-08T00:00:00Z"), &NoCalendars)
+        .unwrap()
+        .unwrap();
+    assert_eq!(trace.instant, utc("2026-03-08T07:00:00Z"));
+    assert_eq!(trace.reason, "base,shifted_dst");
+}
+
+#[test]
 fn makeup_can_vary_by_excluded_weekday() {
     let cal = |id: CalendarId, d: NaiveDate| match id {
         CalendarId::NyseHoliday => Some(d == date(2026, 1, 19) || d == date(2026, 1, 23)),

@@ -72,7 +72,8 @@ s.upcoming(3);                             // defaults to now
 ```
 
 Supported frequencies: `hourly`, `daily`, `weekly`, `monthly_by_day` (fixed day
-or `last`), `monthly_by_weekday` (nth / last weekday), and `yearly`. Overlays
+or `last`), `monthly_by_weekday` (nth / last weekday), `yearly`,
+`every_n_days`, `every_n_weeks`, `quarterly`, and `custom_cron`. Overlays
 filter occurrences against built-in calendars (`us_federal_holiday`,
 `us_business_day`, `nyse_holiday`, `nyse_trading_day`, backed by
 [`finance-dates`](https://crates.io/crates/finance-dates)), inline date sets,
@@ -89,6 +90,10 @@ non-weekend days, or before the next base occurrence, and fallback makeup
 strategies can be tried in order. Overlay groups can express OR composition, and
 individual overlays can override makeup behavior. DST gaps and overlaps are
 resolved on conversion to UTC.
+
+For observability, schedules can answer whether an instant is an occurrence,
+count occurrences in a window, describe the rule, and return occurrence traces
+that include reasons such as `base`, `makeup_from(YYYY-MM-DD)`, or `shifted_dst`.
 
 > [!NOTE]
 > This library was generated using [copier](https://copier.readthedocs.io/en/stable/) from the [Base Python Project Template repository](https://github.com/python-project-templates/base).

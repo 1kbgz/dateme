@@ -11,7 +11,7 @@ use chrono::{
     DateTime, Datelike, Duration, LocalResult, NaiveDate, NaiveTime, TimeZone, Utc, Weekday,
 };
 use chrono_tz::Tz;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 /// Maximum days a makeup search scans before giving up (spec §8).
 const MAX_MAKEUP_DAYS: i64 = 14;
@@ -41,6 +41,18 @@ enum MakeupOutcome {
     Moved(NaiveDate),
     Failed,
     Disabled,
+}
+
+struct ResolvedOccurrence {
+    instant: DateTime<Utc>,
+    shifted_dst: bool,
+}
+
+/// Occurrence with machine-readable context.
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize)]
+pub struct OccurrenceTrace {
+    pub instant: DateTime<Utc>,
+    pub reason: String,
 }
 
 /// Runtime query error.
@@ -85,11 +97,17 @@ fn resolve_local_to_utc(
     date: NaiveDate,
     time: NaiveTime,
     mode: Nonexistent,
-) -> Option<DateTime<Utc>> {
+) -> Option<ResolvedOccurrence> {
     let naive = date.and_time(time);
     match tz.from_local_datetime(&naive) {
-        LocalResult::Single(dt) => Some(dt.with_timezone(&Utc)),
-        LocalResult::Ambiguous(earliest, _latest) => Some(earliest.with_timezone(&Utc)),
+        LocalResult::Single(dt) => Some(ResolvedOccurrence {
+            instant: dt.with_timezone(&Utc),
+            shifted_dst: false,
+        }),
+        LocalResult::Ambiguous(earliest, _latest) => Some(ResolvedOccurrence {
+            instant: earliest.with_timezone(&Utc),
+            shifted_dst: false,
+        }),
         LocalResult::None => match mode {
             Nonexistent::Skip => None,
             Nonexistent::Shift => {
@@ -101,8 +119,18 @@ fn resolve_local_to_utc(
                 for _ in 0..(6 * 60) {
                     t += Duration::minutes(1);
                     match tz.from_local_datetime(&t) {
-                        LocalResult::Single(dt) => return Some(dt.with_timezone(&Utc)),
-                        LocalResult::Ambiguous(dt, _) => return Some(dt.with_timezone(&Utc)),
+                        LocalResult::Single(dt) => {
+                            return Some(ResolvedOccurrence {
+                                instant: dt.with_timezone(&Utc),
+                                shifted_dst: true,
+                            })
+                        }
+                        LocalResult::Ambiguous(dt, _) => {
+                            return Some(ResolvedOccurrence {
+                                instant: dt.with_timezone(&Utc),
+                                shifted_dst: true,
+                            })
+                        }
                         LocalResult::None => continue,
                     }
                 }
@@ -201,6 +229,88 @@ fn months_between(lo: NaiveDate, hi: NaiveDate) -> Vec<(i32, u32)> {
     out
 }
 
+fn days_since(anchor: NaiveDate, date: NaiveDate) -> i64 {
+    date.signed_duration_since(anchor).num_days()
+}
+
+fn week_start(date: NaiveDate) -> NaiveDate {
+    date - Duration::days(i64::from(date.weekday().num_days_from_monday()))
+}
+
+fn parse_cron_values(field: &str, min: u32, max: u32) -> Vec<u32> {
+    let mut values = BTreeSet::new();
+    for part in field.split(',') {
+        let (body, step) = part.split_once('/').map_or((part, 1), |(body, step)| {
+            (body, step.parse::<u32>().unwrap_or(1))
+        });
+        let (lo, hi) = if body == "*" {
+            (min, max)
+        } else if let Some((lo, hi)) = body.split_once('-') {
+            (
+                lo.parse::<u32>().unwrap_or(min),
+                hi.parse::<u32>().unwrap_or(max),
+            )
+        } else {
+            let value = body.parse::<u32>().unwrap_or(min);
+            (value, value)
+        };
+        let mut value = lo;
+        while value <= hi {
+            values.insert(value);
+            match value.checked_add(step) {
+                Some(next) if next > value => value = next,
+                _ => break,
+            }
+        }
+    }
+    values
+        .into_iter()
+        .filter(|v| *v >= min && *v <= max)
+        .collect()
+}
+
+fn cron_weekday_matches(values: &[u32], weekday: Weekday) -> bool {
+    let sunday_zero = weekday.num_days_from_sunday();
+    values
+        .iter()
+        .any(|value| *value == sunday_zero || (*value == 7 && weekday == Weekday::Sun))
+}
+
+fn occurrence_reason(original: NaiveDate, dest: NaiveDate, shifted_dst: bool) -> String {
+    let mut reason = if original == dest {
+        "base".to_string()
+    } else {
+        format!("makeup_from({original})")
+    };
+    if shifted_dst {
+        reason.push_str(",shifted_dst");
+    }
+    reason
+}
+
+fn time_label(time: NaiveTime) -> String {
+    time.format("%H:%M").to_string()
+}
+
+fn weekday_label(weekday: Weekday) -> &'static str {
+    match weekday {
+        Weekday::Mon => "Monday",
+        Weekday::Tue => "Tuesday",
+        Weekday::Wed => "Wednesday",
+        Weekday::Thu => "Thursday",
+        Weekday::Fri => "Friday",
+        Weekday::Sat => "Saturday",
+        Weekday::Sun => "Sunday",
+    }
+}
+
+fn month_day_label(day: MonthDay) -> String {
+    match day {
+        MonthDay::Day { value } => value.to_string(),
+        MonthDay::Last => "last day".to_string(),
+    }
+}
+
 impl Schedule {
     /// Base occurrences (before overlays/makeup) whose local date lies in
     /// `[lo, hi]`, as `(local date, local time-of-day)` pairs.
@@ -243,6 +353,45 @@ impl Schedule {
                     }
                 }
             }
+            Frequency::EveryNDays {
+                interval,
+                start_date,
+                time,
+            } => {
+                let mut d = lo;
+                while d <= hi {
+                    let days = days_since(*start_date, d);
+                    if days >= 0 && days % i64::from(*interval) == 0 {
+                        out.push((d, *time));
+                    }
+                    match d.succ_opt() {
+                        Some(n) => d = n,
+                        None => break,
+                    }
+                }
+            }
+            Frequency::EveryNWeeks {
+                interval,
+                start_date,
+                days,
+                time,
+            } => {
+                let anchor = week_start(*start_date);
+                let mut d = lo;
+                while d <= hi {
+                    let weeks = days_since(anchor, week_start(d)) / 7;
+                    if weeks >= 0
+                        && weeks % i64::from(*interval) == 0
+                        && days.contains(&d.weekday())
+                    {
+                        out.push((d, *time));
+                    }
+                    match d.succ_opt() {
+                        Some(n) => d = n,
+                        None => break,
+                    }
+                }
+            }
             Frequency::MonthlyByDay { days, time } => {
                 for (y, m) in months_between(lo, hi) {
                     for md in days {
@@ -271,6 +420,47 @@ impl Schedule {
                         if date >= lo && date <= hi {
                             out.push((date, *time));
                         }
+                    }
+                }
+            }
+            Frequency::Quarterly { month, day, time } => {
+                for (y, m) in months_between(lo, hi) {
+                    if ((m + 11) % 3) + 1 == u32::from(*month) {
+                        if let Some(date) = month_day_date(y, m, *day) {
+                            if date >= lo && date <= hi {
+                                out.push((date, *time));
+                            }
+                        }
+                    }
+                }
+            }
+            Frequency::CustomCron { expr } => {
+                let fields: Vec<_> = expr.split_whitespace().collect();
+                if fields.len() != 5 {
+                    return out;
+                }
+                let minutes = parse_cron_values(fields[0], 0, 59);
+                let hours = parse_cron_values(fields[1], 0, 23);
+                let month_days = parse_cron_values(fields[2], 1, 31);
+                let months = parse_cron_values(fields[3], 1, 12);
+                let weekdays = parse_cron_values(fields[4], 0, 7);
+                let mut d = lo;
+                while d <= hi {
+                    if months.contains(&d.month())
+                        && month_days.contains(&d.day())
+                        && cron_weekday_matches(&weekdays, d.weekday())
+                    {
+                        for hour in &hours {
+                            for minute in &minutes {
+                                if let Some(time) = NaiveTime::from_hms_opt(*hour, *minute, 0) {
+                                    out.push((d, time));
+                                }
+                            }
+                        }
+                    }
+                    match d.succ_opt() {
+                        Some(n) => d = n,
+                        None => break,
                     }
                 }
             }
@@ -479,19 +669,20 @@ impl Schedule {
         }
     }
 
-    /// Generate all surviving occurrences (overlays + makeup + dedup applied)
-    /// whose *base* local date lies in `[lo, hi]`, deduped by exact UTC instant.
-    fn generate(
+    /// Generate all surviving occurrence traces (overlays + makeup + dedup
+    /// applied) whose *base* local date lies in `[lo, hi]`, deduped by exact UTC
+    /// instant.
+    fn generate_traces(
         &self,
         lo: NaiveDate,
         hi: NaiveDate,
         cal: &dyn CalendarProvider,
-    ) -> Result<BTreeSet<DateTime<Utc>>, QueryError> {
+    ) -> Result<BTreeMap<DateTime<Utc>, OccurrenceTrace>, QueryError> {
         let mode = match self.freq {
             Frequency::Hourly { .. } => Nonexistent::Skip,
             _ => Nonexistent::Shift,
         };
-        let mut set = BTreeSet::new();
+        let mut traces = BTreeMap::new();
         let mut base = self.enumerate_base(lo, hi);
         base.sort_unstable();
         let skipped_base = self.skipped_excluded_runs(&base, cal);
@@ -516,14 +707,19 @@ impl Schedule {
                 }
             };
             if let Some(d) = dest {
-                if let Some(inst) = resolve_local_to_utc(self.timezone, d, time, mode) {
-                    // BTreeSet dedups by instant: a made-up occurrence that
+                if let Some(resolved) = resolve_local_to_utc(self.timezone, d, time, mode) {
+                    // BTreeMap dedups by instant: a made-up occurrence that
                     // collides with an existing one is silently dropped (§8.2).
-                    set.insert(inst);
+                    traces
+                        .entry(resolved.instant)
+                        .or_insert_with(|| OccurrenceTrace {
+                            instant: resolved.instant,
+                            reason: occurrence_reason(date, d, resolved.shifted_dst),
+                        });
                 }
             }
         }
-        Ok(set)
+        Ok(traces)
     }
 
     fn check_max_skip_gap(
@@ -555,8 +751,41 @@ impl Schedule {
         Ok(())
     }
 
-    /// Occurrences with instant strictly in `(lower, upper)`, ascending, with
-    /// start/end bounds applied.
+    /// Occurrence traces with instant strictly in `(lower, upper)`, ascending,
+    /// with start/end bounds applied.
+    fn try_collect_traces(
+        &self,
+        lower: DateTime<Utc>,
+        upper: DateTime<Utc>,
+        gap_check: GapCheck,
+        cal: &dyn CalendarProvider,
+    ) -> Result<Vec<OccurrenceTrace>, QueryError> {
+        if upper <= lower {
+            return Ok(Vec::new());
+        }
+        let margin = Duration::days(WINDOW_MARGIN_DAYS);
+        let lo_date = lower.with_timezone(&self.timezone).date_naive() - margin;
+        let hi_date = upper.with_timezone(&self.timezone).date_naive() + margin;
+        let traces: Vec<_> = self
+            .generate_traces(lo_date, hi_date, cal)?
+            .into_iter()
+            .filter_map(|(instant, trace)| {
+                if instant > lower
+                    && instant < upper
+                    && self.start.is_none_or(|s| instant >= s)
+                    && self.end.is_none_or(|e| instant < e)
+                {
+                    Some(trace)
+                } else {
+                    None
+                }
+            })
+            .collect();
+        let occurrences: Vec<_> = traces.iter().map(|trace| trace.instant).collect();
+        self.check_max_skip_gap(lower, upper, &occurrences, gap_check)?;
+        Ok(traces)
+    }
+
     fn try_collect(
         &self,
         lower: DateTime<Utc>,
@@ -564,24 +793,11 @@ impl Schedule {
         gap_check: GapCheck,
         cal: &dyn CalendarProvider,
     ) -> Result<Vec<DateTime<Utc>>, QueryError> {
-        if upper <= lower {
-            return Ok(Vec::new());
-        }
-        let margin = Duration::days(WINDOW_MARGIN_DAYS);
-        let lo_date = lower.with_timezone(&self.timezone).date_naive() - margin;
-        let hi_date = upper.with_timezone(&self.timezone).date_naive() + margin;
-        let occurrences: Vec<_> = self
-            .generate(lo_date, hi_date, cal)?
+        Ok(self
+            .try_collect_traces(lower, upper, gap_check, cal)?
             .into_iter()
-            .filter(|t| {
-                *t > lower
-                    && *t < upper
-                    && self.start.is_none_or(|s| *t >= s)
-                    && self.end.is_none_or(|e| *t < e)
-            })
-            .collect();
-        self.check_max_skip_gap(lower, upper, &occurrences, gap_check)?;
-        Ok(occurrences)
+            .map(|trace| trace.instant)
+            .collect())
     }
 
     /// Effective hard upper bound for a forward search: the earlier of `end` and
@@ -617,6 +833,15 @@ impl Schedule {
         Ok(self.try_upcoming(1, after, cal)?.into_iter().next())
     }
 
+    /// First occurrence trace strictly after `after`.
+    pub fn try_next_trace(
+        &self,
+        after: DateTime<Utc>,
+        cal: &dyn CalendarProvider,
+    ) -> Result<Option<OccurrenceTrace>, QueryError> {
+        Ok(self.try_upcoming_trace(1, after, cal)?.into_iter().next())
+    }
+
     /// The last occurrence strictly before `before`. `None` ⇒ none exists within
     /// the search horizon.
     pub fn previous(
@@ -640,6 +865,27 @@ impl Schedule {
             let occ = self.try_collect(lower, before, GapCheck::OpenHead, cal)?;
             if let Some(last) = occ.last() {
                 return Ok(Some(*last));
+            }
+            if lower <= cap {
+                return Ok(None);
+            }
+            span = (span * 2).min(ABSOLUTE_HORIZON_DAYS);
+        }
+    }
+
+    /// Last occurrence trace strictly before `before`.
+    pub fn try_previous_trace(
+        &self,
+        before: DateTime<Utc>,
+        cal: &dyn CalendarProvider,
+    ) -> Result<Option<OccurrenceTrace>, QueryError> {
+        let cap = self.backward_cap(before);
+        let mut span = INITIAL_HORIZON_DAYS;
+        loop {
+            let lower = (before - Duration::days(span)).max(cap);
+            let occ = self.try_collect_traces(lower, before, GapCheck::OpenHead, cal)?;
+            if let Some(last) = occ.last() {
+                return Ok(Some(last.clone()));
             }
             if lower <= cap {
                 return Ok(None);
@@ -683,6 +929,31 @@ impl Schedule {
         }
     }
 
+    /// Up to `n` occurrence traces strictly after `after`.
+    pub fn try_upcoming_trace(
+        &self,
+        n: usize,
+        after: DateTime<Utc>,
+        cal: &dyn CalendarProvider,
+    ) -> Result<Vec<OccurrenceTrace>, QueryError> {
+        if n == 0 {
+            return Ok(Vec::new());
+        }
+        let cap = self.forward_cap(after);
+        let mut span = INITIAL_HORIZON_DAYS;
+        loop {
+            let upper = (after + Duration::days(span)).min(cap);
+            let occ = self.try_collect_traces(after, upper, GapCheck::OpenTail, cal)?;
+            if occ.len() >= n {
+                return Ok(occ.into_iter().take(n).collect());
+            }
+            if upper >= cap {
+                return Ok(occ);
+            }
+            span = (span * 2).min(ABSOLUTE_HORIZON_DAYS);
+        }
+    }
+
     /// All occurrences strictly in `(after, before)`, ascending. `until(end)[0]`
     /// equals `next(after)`.
     pub fn until(
@@ -702,6 +973,16 @@ impl Schedule {
         cal: &dyn CalendarProvider,
     ) -> Result<Vec<DateTime<Utc>>, QueryError> {
         self.try_collect(after, before, GapCheck::Closed, cal)
+    }
+
+    /// Occurrence traces in `(after, before)`, ascending.
+    pub fn try_until_trace(
+        &self,
+        before: DateTime<Utc>,
+        after: DateTime<Utc>,
+        cal: &dyn CalendarProvider,
+    ) -> Result<Vec<OccurrenceTrace>, QueryError> {
+        self.try_collect_traces(after, before, GapCheck::Closed, cal)
     }
 
     /// All occurrences strictly in `(after, before)`, **descending**.
@@ -725,5 +1006,128 @@ impl Schedule {
         let mut v = self.try_collect(after, before, GapCheck::Closed, cal)?;
         v.reverse();
         Ok(v)
+    }
+
+    /// Occurrence traces in `(after, before)`, descending.
+    pub fn try_since_trace(
+        &self,
+        after: DateTime<Utc>,
+        before: DateTime<Utc>,
+        cal: &dyn CalendarProvider,
+    ) -> Result<Vec<OccurrenceTrace>, QueryError> {
+        let mut v = self.try_collect_traces(after, before, GapCheck::Closed, cal)?;
+        v.reverse();
+        Ok(v)
+    }
+
+    /// Whether `instant` is an occurrence of this schedule.
+    pub fn try_is_occurrence(
+        &self,
+        instant: DateTime<Utc>,
+        cal: &dyn CalendarProvider,
+    ) -> Result<bool, QueryError> {
+        let lower = instant - Duration::milliseconds(1);
+        let upper = instant + Duration::milliseconds(1);
+        Ok(self
+            .try_collect(lower, upper, GapCheck::Closed, cal)?
+            .contains(&instant))
+    }
+
+    pub fn is_occurrence(&self, instant: DateTime<Utc>, cal: &dyn CalendarProvider) -> bool {
+        self.try_is_occurrence(instant, cal).unwrap_or(false)
+    }
+
+    /// Count occurrences strictly in `(after, before)`.
+    pub fn try_count_between(
+        &self,
+        after: DateTime<Utc>,
+        before: DateTime<Utc>,
+        cal: &dyn CalendarProvider,
+    ) -> Result<usize, QueryError> {
+        Ok(self.try_until(before, after, cal)?.len())
+    }
+
+    pub fn count_between(
+        &self,
+        after: DateTime<Utc>,
+        before: DateTime<Utc>,
+        cal: &dyn CalendarProvider,
+    ) -> usize {
+        self.try_count_between(after, before, cal)
+            .unwrap_or_default()
+    }
+
+    /// Human-readable summary of the schedule's base recurrence.
+    pub fn describe(&self) -> String {
+        let base = match &self.freq {
+            Frequency::Hourly { minute } => format!("Every hour at minute {minute:02}"),
+            Frequency::Daily { time } => format!("Every day at {}", time_label(*time)),
+            Frequency::Weekly { days, time } => {
+                let days = days
+                    .iter()
+                    .map(|day| weekday_label(*day))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                format!("Every {days} at {}", time_label(*time))
+            }
+            Frequency::EveryNDays {
+                interval,
+                start_date,
+                time,
+            } => format!(
+                "Every {interval} days from {start_date} at {}",
+                time_label(*time)
+            ),
+            Frequency::EveryNWeeks {
+                interval,
+                start_date,
+                days,
+                time,
+            } => {
+                let days = days
+                    .iter()
+                    .map(|day| weekday_label(*day))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                format!(
+                    "Every {interval} weeks from {start_date} on {days} at {}",
+                    time_label(*time)
+                )
+            }
+            Frequency::MonthlyByDay { days, time } => {
+                let days = days
+                    .iter()
+                    .map(|day| month_day_label(*day))
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                format!("Every month on {days} at {}", time_label(*time))
+            }
+            Frequency::MonthlyByWeekday { weekdays, time } => {
+                format!(
+                    "Every month on {} rule(s) at {}",
+                    weekdays.len(),
+                    time_label(*time)
+                )
+            }
+            Frequency::Yearly { month, day, time } => format!(
+                "Every year on {month}/{} at {}",
+                month_day_label(*day),
+                time_label(*time)
+            ),
+            Frequency::Quarterly { month, day, time } => format!(
+                "Every quarter in month {month} on {} at {}",
+                month_day_label(*day),
+                time_label(*time)
+            ),
+            Frequency::CustomCron { expr } => format!("Cron `{expr}`"),
+        };
+        let mut parts = vec![format!("{base} {}", self.timezone)];
+        if !self.overlays.is_empty() {
+            parts.push(format!("with {} overlay(s)", self.overlays.len()));
+        }
+        if !matches!(self.makeup, Makeup::None) {
+            parts.push("with makeup".to_string());
+        }
+        parts.join(", ")
     }
 }

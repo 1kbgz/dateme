@@ -396,4 +396,68 @@ test.describe("Schedule", () => {
       "2026-08-15T09:00:00.000Z",
     ]);
   });
+
+  test("computes additional frequencies", async ({ page }) => {
+    const res = await run(
+      page,
+      `const everyTwoDays = new mod.Schedule({
+         freq: { type: "every_n_days", interval: 2, start_date: "2026-01-01", time: "09:00" },
+         timezone: "UTC",
+       });
+       const quarterly = new mod.Schedule({
+         freq: { type: "quarterly", month: 1, day: { type: "day", value: 15 }, time: "12:00" },
+         timezone: "UTC",
+       });
+       const cron = new mod.Schedule({
+         freq: { type: "custom_cron", expr: "30 9 * * 1" },
+         timezone: "UTC",
+       });
+       return {
+         everyTwoDays: everyTwoDays.until(new Date(Date.UTC(2026, 0, 6)), new Date(Date.UTC(2026, 0, 1))).map(d => d.toISOString()),
+         quarterly: quarterly.until(new Date(Date.UTC(2026, 7, 1)), new Date(Date.UTC(2026, 0, 1))).map(d => d.toISOString()),
+         cron: cron.next(new Date(Date.UTC(2026, 0, 1))).toISOString(),
+       };`,
+    );
+    expect(res.everyTwoDays).toEqual([
+      "2026-01-01T09:00:00.000Z",
+      "2026-01-03T09:00:00.000Z",
+      "2026-01-05T09:00:00.000Z",
+    ]);
+    expect(res.quarterly).toEqual([
+      "2026-01-15T12:00:00.000Z",
+      "2026-04-15T12:00:00.000Z",
+      "2026-07-15T12:00:00.000Z",
+    ]);
+    expect(res.cron).toBe("2026-01-05T09:30:00.000Z");
+  });
+
+  test("supports introspection and occurrence traces", async ({ page }) => {
+    const res = await run(
+      page,
+      `const s = new mod.Schedule({
+         freq: { type: "weekly", days: [mod.Weekday.Mon], time: "09:00" },
+         timezone: "UTC",
+       });
+       const after = new Date(Date.UTC(2026, 0, 1));
+       const occurrence = new Date(Date.UTC(2026, 0, 5, 9));
+       const trace = s.nextTrace(after);
+       return {
+         isOccurrence: s.isOccurrence(occurrence),
+         isNotOccurrence: s.isOccurrence(new Date(Date.UTC(2026, 0, 5, 10))),
+         count: s.countBetween(after, new Date(Date.UTC(2026, 0, 20))),
+         description: s.describe(),
+         trace: { instant: trace.instant.toISOString(), reason: trace.reason },
+         upcomingTrace: s.upcomingTrace(1, after).map(t => ({ instant: t.instant.toISOString(), reason: t.reason })),
+       };`,
+    );
+    expect(res.isOccurrence).toBe(true);
+    expect(res.isNotOccurrence).toBe(false);
+    expect(res.count).toBe(3);
+    expect(res.description).toContain("Every Monday at 09:00 UTC");
+    expect(res.trace).toEqual({
+      instant: "2026-01-05T09:00:00.000Z",
+      reason: "base",
+    });
+    expect(res.upcomingTrace).toEqual([res.trace]);
+  });
 });

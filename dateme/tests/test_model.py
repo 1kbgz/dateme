@@ -9,6 +9,9 @@ from dateme import (
     CalendarId,
     CalendarUnion,
     CustomCalendar,
+    CustomCron,
+    EveryNDays,
+    EveryNWeeks,
     Makeup,
     MakeupFailure,
     MakeupStep,
@@ -18,6 +21,7 @@ from dateme import (
     NthWeekday,
     Overlay,
     OverlayRule,
+    Quarterly,
     Schedule,
     Weekday,
     WeekdayMakeup,
@@ -318,13 +322,48 @@ def test_model_serializes_all_frequencies():
         model.Hourly(30),
         model.Daily("09:00"),
         Weekly([Weekday.MON, Weekday.WED], "17:00"),
+        EveryNDays(2, "2026-01-01", "09:00"),
+        EveryNWeeks(2, "2026-01-05", [Weekday.MON], "09:00"),
         MonthlyByDay([MonthDay.day(1), MonthDay.last()], "12:00"),
         model.MonthlyByWeekday([NthWeekday(Nth.FIRST, Weekday.TUE)], "09:00"),
         model.Yearly(7, MonthDay.day(4), "12:00"),
+        Quarterly(1, MonthDay.day(15), "12:00"),
+        CustomCron("30 9 * * 1"),
     ]
     for freq in specs:
         s = Schedule(model.Schedule(freq=freq, timezone="UTC"))
         s.validate()  # every built frequency is structurally valid
+
+
+def test_new_frequencies_compute_occurrences():
+    every_two_days = Schedule(model.Schedule(freq=EveryNDays(2, "2026-01-01", "09:00"), timezone="UTC"))
+    assert every_two_days.until(utc(2026, 1, 6), utc(2026, 1, 1)) == [
+        utc(2026, 1, 1, 9),
+        utc(2026, 1, 3, 9),
+        utc(2026, 1, 5, 9),
+    ]
+
+    quarterly = Schedule(model.Schedule(freq=Quarterly(1, MonthDay.day(15), "12:00"), timezone="UTC"))
+    assert quarterly.until(utc(2026, 8, 1), utc(2026, 1, 1)) == [
+        utc(2026, 1, 15, 12),
+        utc(2026, 4, 15, 12),
+        utc(2026, 7, 15, 12),
+    ]
+
+    cron = Schedule(model.Schedule(freq=CustomCron("30 9 * * 1"), timezone="UTC"))
+    assert cron.next(utc(2026, 1, 1)) == utc(2026, 1, 5, 9, 30)
+
+
+def test_introspection_and_trace_methods():
+    schedule = Schedule(model.Schedule(freq=Weekly([Weekday.MON], "09:00"), timezone="UTC"))
+    occurrence = utc(2026, 1, 5, 9)
+    assert schedule.is_occurrence(occurrence)
+    assert not schedule.is_occurrence(utc(2026, 1, 5, 10))
+    assert schedule.count_between(utc(2026, 1, 1), utc(2026, 1, 20)) == 3
+    assert "Every Monday at 09:00 UTC" in schedule.describe()
+    trace = schedule.next_trace(utc(2026, 1, 1))
+    assert trace == {"instant": occurrence, "reason": "base"}
+    assert schedule.upcoming_trace(1, utc(2026, 1, 1)) == [trace]
 
 
 def test_time_accepts_datetime_time():

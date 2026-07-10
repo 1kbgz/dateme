@@ -145,4 +145,87 @@ impl Schedule {
             .map(to_millis)
             .collect())
     }
+
+    /// First occurrence trace strictly after `after_ms`; JSON or null.
+    #[wasm_bindgen(js_name = nextTraceJSON)]
+    pub fn next_trace_json(&self, after_ms: f64) -> Result<Option<String>, JsError> {
+        self.inner
+            .try_next_trace(from_millis(after_ms)?, &self.calendars)
+            .map_err(|e| JsError::new(&e.to_string()))?
+            .map(|trace| serde_json::to_string(&trace).map_err(|e| JsError::new(&e.to_string())))
+            .transpose()
+    }
+
+    /// Last occurrence trace strictly before `before_ms`; JSON or null.
+    #[wasm_bindgen(js_name = previousTraceJSON)]
+    pub fn previous_trace_json(&self, before_ms: f64) -> Result<Option<String>, JsError> {
+        self.inner
+            .try_previous_trace(from_millis(before_ms)?, &self.calendars)
+            .map_err(|e| JsError::new(&e.to_string()))?
+            .map(|trace| serde_json::to_string(&trace).map_err(|e| JsError::new(&e.to_string())))
+            .transpose()
+    }
+
+    /// Occurrence traces in `(after_ms, before_ms)`, ascending; JSON array.
+    #[wasm_bindgen(js_name = untilTraceJSON)]
+    pub fn until_trace_json(&self, before_ms: f64, after_ms: f64) -> Result<String, JsError> {
+        let traces = self
+            .inner
+            .try_until_trace(
+                from_millis(before_ms)?,
+                from_millis(after_ms)?,
+                &self.calendars,
+            )
+            .map_err(|e| JsError::new(&e.to_string()))?;
+        serde_json::to_string(&traces).map_err(|e| JsError::new(&e.to_string()))
+    }
+
+    /// Occurrence traces in `(after_ms, before_ms)`, descending; JSON array.
+    #[wasm_bindgen(js_name = sinceTraceJSON)]
+    pub fn since_trace_json(&self, after_ms: f64, before_ms: f64) -> Result<String, JsError> {
+        let traces = self
+            .inner
+            .try_since_trace(
+                from_millis(after_ms)?,
+                from_millis(before_ms)?,
+                &self.calendars,
+            )
+            .map_err(|e| JsError::new(&e.to_string()))?;
+        serde_json::to_string(&traces).map_err(|e| JsError::new(&e.to_string()))
+    }
+
+    /// The next `n` occurrence traces strictly after `after_ms`; JSON array.
+    #[wasm_bindgen(js_name = upcomingTraceJSON)]
+    pub fn upcoming_trace_json(&self, n: usize, after_ms: f64) -> Result<String, JsError> {
+        let traces = self
+            .inner
+            .try_upcoming_trace(n, from_millis(after_ms)?, &self.calendars)
+            .map_err(|e| JsError::new(&e.to_string()))?;
+        serde_json::to_string(&traces).map_err(|e| JsError::new(&e.to_string()))
+    }
+
+    /// Whether `instant_ms` is an occurrence.
+    #[wasm_bindgen(js_name = isOccurrence)]
+    pub fn is_occurrence(&self, instant_ms: f64) -> Result<bool, JsError> {
+        self.inner
+            .try_is_occurrence(from_millis(instant_ms)?, &self.calendars)
+            .map_err(|e| JsError::new(&e.to_string()))
+    }
+
+    /// Count occurrences strictly in `(after_ms, before_ms)`.
+    #[wasm_bindgen(js_name = countBetween)]
+    pub fn count_between(&self, after_ms: f64, before_ms: f64) -> Result<usize, JsError> {
+        self.inner
+            .try_count_between(
+                from_millis(after_ms)?,
+                from_millis(before_ms)?,
+                &self.calendars,
+            )
+            .map_err(|e| JsError::new(&e.to_string()))
+    }
+
+    /// Human-readable summary.
+    pub fn describe(&self) -> String {
+        self.inner.describe()
+    }
 }
