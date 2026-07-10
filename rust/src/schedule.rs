@@ -5,7 +5,7 @@
 //! computation lives in [`crate::engine`]; this module defines the data model,
 //! its serde form, and structural validation.
 
-use chrono::{DateTime, NaiveTime, Utc, Weekday};
+use chrono::{DateTime, NaiveDate, NaiveTime, Utc, Weekday};
 use chrono_tz::Tz;
 use serde::de::{self, MapAccess, SeqAccess, Visitor};
 use serde::ser::{SerializeMap, SerializeSeq};
@@ -132,7 +132,7 @@ pub enum Overlay {
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct OverlayCalendar {
-    pub calendar: CalendarId,
+    pub calendar: CalendarSpec,
     pub rule: OverlayRule,
     /// Makeup override used when this overlay drops a base occurrence.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -154,6 +154,22 @@ pub enum OverlayRule {
     Exclude,
     /// Drop the occurrence if its local date is NOT in the calendar set.
     Only,
+}
+
+/// A calendar set used by overlays.
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum CalendarSpec {
+    /// Built-in named calendar.
+    BuiltIn(CalendarId),
+    /// Inline date set.
+    Dates { dates: Vec<NaiveDate> },
+    /// Union of calendar sets.
+    Union { union: Vec<CalendarSpec> },
+    /// Difference of calendar sets: first set minus every following set.
+    Diff { diff: Vec<CalendarSpec> },
+    /// User-provided named calendar resolved by a binding/provider callback.
+    Custom { custom: String },
 }
 
 /// Built-in calendars. Concrete implementations are provided by a
@@ -457,6 +473,8 @@ pub enum ScheduleError {
     InvalidSkipThreshold(u32),
     InvalidMaxSkipGap(u32),
     EmptyOverlayGroup,
+    EmptyCalendarGroup,
+    EmptyCustomCalendar,
     StartNotBeforeEnd,
     NeverFires,
 }
@@ -475,6 +493,8 @@ impl fmt::Display for ScheduleError {
                 write!(f, "max skip gap {n} out of range 1..")
             }
             ScheduleError::EmptyOverlayGroup => write!(f, "overlay any group is empty"),
+            ScheduleError::EmptyCalendarGroup => write!(f, "calendar group is empty"),
+            ScheduleError::EmptyCustomCalendar => write!(f, "custom calendar name is empty"),
             ScheduleError::StartNotBeforeEnd => write!(f, "start must be strictly before end"),
             ScheduleError::NeverFires => write!(f, "schedule can never produce an occurrence"),
         }
@@ -547,13 +567,43 @@ impl Schedule {
 
 fn validate_overlay(overlay: &Overlay) -> Result<(), ScheduleError> {
     match overlay {
-        Overlay::Calendar(_) => Ok(()),
+        Overlay::Calendar(overlay) => validate_calendar(&overlay.calendar),
         Overlay::Any(group) => {
             if group.any.is_empty() {
                 return Err(ScheduleError::EmptyOverlayGroup);
             }
             for child in &group.any {
                 validate_overlay(child)?;
+            }
+            Ok(())
+        }
+    }
+}
+
+fn validate_calendar(calendar: &CalendarSpec) -> Result<(), ScheduleError> {
+    match calendar {
+        CalendarSpec::BuiltIn(_) | CalendarSpec::Dates { .. } => Ok(()),
+        CalendarSpec::Custom { custom } => {
+            if custom.is_empty() {
+                return Err(ScheduleError::EmptyCustomCalendar);
+            }
+            Ok(())
+        }
+        CalendarSpec::Union { union } => {
+            if union.is_empty() {
+                return Err(ScheduleError::EmptyCalendarGroup);
+            }
+            for calendar in union {
+                validate_calendar(calendar)?;
+            }
+            Ok(())
+        }
+        CalendarSpec::Diff { diff } => {
+            if diff.is_empty() {
+                return Err(ScheduleError::EmptyCalendarGroup);
+            }
+            for calendar in diff {
+                validate_calendar(calendar)?;
             }
             Ok(())
         }

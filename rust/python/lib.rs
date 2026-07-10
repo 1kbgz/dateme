@@ -4,8 +4,8 @@
 //! occurrence queries as methods taking/returning timezone-aware `datetime`s.
 //! When a reference instant is omitted it defaults to "now" (UTC).
 
-use chrono::{DateTime, Utc};
-use dateme_core::{DefaultCalendars, Schedule as BaseSchedule};
+use chrono::{DateTime, NaiveDate, Utc};
+use dateme_core::{CalendarId, CalendarProvider, DefaultCalendars, Schedule as BaseSchedule};
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
@@ -18,7 +18,41 @@ use pyo3::prelude::*;
 #[pyclass(name = "Schedule")]
 pub struct Schedule {
     inner: BaseSchedule,
-    calendars: DefaultCalendars,
+    calendars: PythonCalendars,
+}
+
+struct PythonCalendars {
+    defaults: DefaultCalendars,
+    custom: Option<Py<PyAny>>,
+}
+
+impl PythonCalendars {
+    fn new(custom: Option<Py<PyAny>>) -> Self {
+        Self {
+            defaults: DefaultCalendars::new(),
+            custom,
+        }
+    }
+}
+
+impl CalendarProvider for PythonCalendars {
+    fn contains(&self, id: CalendarId, date: NaiveDate) -> Option<bool> {
+        self.defaults.contains(id, date)
+    }
+
+    fn contains_custom(&self, name: &str, date: NaiveDate) -> Option<bool> {
+        let provider = self.custom.as_ref()?;
+        Python::attach(|py| {
+            let provider = provider.bind(py);
+            let date = date.to_string();
+            let result = if provider.hasattr("contains").ok()? {
+                provider.call_method1("contains", (name, date))
+            } else {
+                provider.call1((name, date))
+            };
+            result.ok()?.extract::<bool>().ok()
+        })
+    }
 }
 
 /// Normalize a Python spec into a JSON string. Accepts a JSON ``str``, a
@@ -39,7 +73,7 @@ fn spec_to_json(spec: &Bound<'_, PyAny>) -> PyResult<String> {
 
 impl Schedule {
     /// Parse and validate a JSON schedule, returning a ready-to-query engine.
-    fn build(json: &str) -> PyResult<Self> {
+    fn build(json: &str, calendar_provider: Option<Py<PyAny>>) -> PyResult<Self> {
         let mut inner: BaseSchedule =
             serde_json::from_str(json).map_err(|e| PyValueError::new_err(e.to_string()))?;
         inner
@@ -47,7 +81,7 @@ impl Schedule {
             .map_err(|e| PyValueError::new_err(e.to_string()))?;
         Ok(Schedule {
             inner,
-            calendars: DefaultCalendars::new(),
+            calendars: PythonCalendars::new(calendar_provider),
         })
     }
 }
@@ -60,21 +94,24 @@ impl Schedule {
     /// The schedule is validated on construction; an invalid schedule raises
     /// ``ValueError``.
     #[new]
-    fn new(spec: &Bound<'_, PyAny>) -> PyResult<Self> {
+    #[pyo3(signature = (spec, calendar_provider=None))]
+    fn new(spec: &Bound<'_, PyAny>, calendar_provider: Option<Py<PyAny>>) -> PyResult<Self> {
         let json = spec_to_json(spec)?;
-        Self::build(&json)
+        Self::build(&json, calendar_provider)
     }
 
     /// Build a schedule from its JSON representation.
     #[staticmethod]
-    fn from_json(json: &str) -> PyResult<Self> {
-        Self::build(json)
+    #[pyo3(signature = (json, calendar_provider=None))]
+    fn from_json(json: &str, calendar_provider: Option<Py<PyAny>>) -> PyResult<Self> {
+        Self::build(json, calendar_provider)
     }
 
     /// Build a schedule from a ``dict`` or typed ``dateme.model`` builder.
     #[staticmethod]
-    fn from_dict(spec: &Bound<'_, PyAny>) -> PyResult<Self> {
-        Self::new(spec)
+    #[pyo3(signature = (spec, calendar_provider=None))]
+    fn from_dict(spec: &Bound<'_, PyAny>, calendar_provider: Option<Py<PyAny>>) -> PyResult<Self> {
+        Self::new(spec, calendar_provider)
     }
 
     /// Serialize back to a JSON string.

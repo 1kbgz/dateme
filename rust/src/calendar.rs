@@ -16,6 +16,12 @@ pub trait CalendarProvider {
     /// Whether `date` is in the set for `id`. Returns `None` if this provider
     /// does not supply `id` (the occurrence is then treated as not-in-set).
     fn contains(&self, id: CalendarId, date: NaiveDate) -> Option<bool>;
+
+    /// Whether `date` is in the set for a user-provided calendar name.
+    /// Providers that do not support named custom calendars can use the default.
+    fn contains_custom(&self, _name: &str, _date: NaiveDate) -> Option<bool> {
+        None
+    }
 }
 
 /// A provider that supplies no calendars. Valid only for schedules with no

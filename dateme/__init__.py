@@ -2,7 +2,11 @@ from . import model
 from .dateme import Schedule
 from .model import (
     AnyOverlay,
+    CalendarDates,
+    CalendarDiff,
     CalendarId,
+    CalendarUnion,
+    CustomCalendar,
     Daily,
     Hourly,
     Makeup,
@@ -27,7 +31,11 @@ __all__ = [
     "Schedule",
     "model",
     "AnyOverlay",
+    "CalendarDates",
+    "CalendarDiff",
     "CalendarId",
+    "CalendarUnion",
+    "CustomCalendar",
     "Daily",
     "Hourly",
     "Makeup",

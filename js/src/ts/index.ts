@@ -5,6 +5,10 @@ export { default as init } from "../../dist/pkg/dateme";
 export * as wasm from "../../dist/pkg/dateme";
 export * from "./model";
 
+export type CalendarProvider =
+  | ((name: string, date: string) => boolean)
+  | { contains(name: string, date: string): boolean };
+
 /**
  * A recurrence schedule. Construct from a typed spec object or its JSON string,
  * then query occurrence instants. Reference instants default to `new Date()`.
@@ -14,9 +18,13 @@ export * from "./model";
 export class Schedule {
   private inner: WasmSchedule;
 
-  constructor(spec: ScheduleSpec | string) {
+  constructor(
+    spec: ScheduleSpec | string,
+    calendarProvider?: CalendarProvider,
+  ) {
     this.inner = new WasmSchedule(
       typeof spec === "string" ? spec : JSON.stringify(spec),
+      calendarProvider,
     );
   }
 

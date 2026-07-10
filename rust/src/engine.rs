@@ -4,8 +4,8 @@
 
 use crate::calendar::CalendarProvider;
 use crate::schedule::{
-    Frequency, Makeup, MakeupDirection, MakeupFailure, MonthDay, Nth, Overlay, OverlayRule,
-    Schedule,
+    CalendarSpec, Frequency, Makeup, MakeupDirection, MakeupFailure, MonthDay, Nth, Overlay,
+    OverlayRule, Schedule,
 };
 use chrono::{
     DateTime, Datelike, Duration, LocalResult, NaiveDate, NaiveTime, TimeZone, Utc, Weekday,
@@ -278,6 +278,26 @@ impl Schedule {
         out
     }
 
+    fn in_calendar(calendar: &CalendarSpec, date: NaiveDate, cal: &dyn CalendarProvider) -> bool {
+        match calendar {
+            CalendarSpec::BuiltIn(id) => cal.contains(*id, date).unwrap_or(false),
+            CalendarSpec::Dates { dates } => dates.contains(&date),
+            CalendarSpec::Union { union } => union
+                .iter()
+                .any(|calendar| Self::in_calendar(calendar, date, cal)),
+            CalendarSpec::Diff { diff } => {
+                let Some((first, rest)) = diff.split_first() else {
+                    return false;
+                };
+                Self::in_calendar(first, date, cal)
+                    && rest
+                        .iter()
+                        .all(|calendar| !Self::in_calendar(calendar, date, cal))
+            }
+            CalendarSpec::Custom { custom } => cal.contains_custom(custom, date).unwrap_or(false),
+        }
+    }
+
     fn overlay_outcome(
         overlay: &Overlay,
         date: NaiveDate,
@@ -285,7 +305,7 @@ impl Schedule {
     ) -> OverlayOutcome {
         match overlay {
             Overlay::Calendar(overlay) => {
-                let in_set = cal.contains(overlay.calendar, date).unwrap_or(false);
+                let in_set = Self::in_calendar(&overlay.calendar, date, cal);
                 let passes = match overlay.rule {
                     OverlayRule::Exclude => !in_set,
                     OverlayRule::Only => in_set,

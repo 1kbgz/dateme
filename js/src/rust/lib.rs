@@ -4,14 +4,49 @@
 //! passed as epoch milliseconds (`number` in JS); the TypeScript wrapper adapts
 //! these to `Date` objects and defaults omitted instants to `Date.now()`.
 
-use chrono::{DateTime, Utc};
-use dateme::{DefaultCalendars, Schedule as BaseSchedule};
+use chrono::{DateTime, NaiveDate, Utc};
+use dateme::{CalendarId, CalendarProvider, DefaultCalendars, Schedule as BaseSchedule};
+use js_sys::{Function, Reflect};
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 
 #[wasm_bindgen]
 pub struct Schedule {
     inner: BaseSchedule,
-    calendars: DefaultCalendars,
+    calendars: JsCalendars,
+}
+
+struct JsCalendars {
+    defaults: DefaultCalendars,
+    custom: Option<JsValue>,
+}
+
+impl JsCalendars {
+    fn new(custom: Option<JsValue>) -> Self {
+        Self {
+            defaults: DefaultCalendars::new(),
+            custom,
+        }
+    }
+}
+
+impl CalendarProvider for JsCalendars {
+    fn contains(&self, id: CalendarId, date: NaiveDate) -> Option<bool> {
+        self.defaults.contains(id, date)
+    }
+
+    fn contains_custom(&self, name: &str, date: NaiveDate) -> Option<bool> {
+        let provider = self.custom.as_ref()?;
+        let name = JsValue::from_str(name);
+        let date = JsValue::from_str(&date.to_string());
+        if provider.is_function() {
+            let function: &Function = provider.unchecked_ref();
+            return function.call2(&JsValue::NULL, &name, &date).ok()?.as_bool();
+        }
+        let contains = Reflect::get(provider, &JsValue::from_str("contains")).ok()?;
+        let function: Function = contains.dyn_into().ok()?;
+        function.call2(provider, &name, &date).ok()?.as_bool()
+    }
 }
 
 fn from_millis(ms: f64) -> Result<DateTime<Utc>, JsError> {
@@ -28,13 +63,13 @@ impl Schedule {
     /// Build a schedule from its JSON representation. The schedule is validated
     /// on construction; an invalid schedule throws.
     #[wasm_bindgen(constructor)]
-    pub fn new(json: &str) -> Result<Schedule, JsError> {
+    pub fn new(json: &str, calendar_provider: Option<JsValue>) -> Result<Schedule, JsError> {
         let mut inner: BaseSchedule =
             serde_json::from_str(json).map_err(|e| JsError::new(&e.to_string()))?;
         inner.validate().map_err(|e| JsError::new(&e.to_string()))?;
         Ok(Schedule {
             inner,
-            calendars: DefaultCalendars::new(),
+            calendars: JsCalendars::new(calendar_provider),
         })
     }
 

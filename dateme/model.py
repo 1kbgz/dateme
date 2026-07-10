@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
-from datetime import datetime, time
+from datetime import date as Date, datetime, time
 from enum import Enum
 
 __all__ = [
@@ -21,6 +21,10 @@ __all__ = [
     "WeekdayMakeup",
     "OverlayRule",
     "CalendarId",
+    "CalendarDates",
+    "CalendarUnion",
+    "CalendarDiff",
+    "CustomCalendar",
     "MakeupFailure",
     "MonthDay",
     "NthWeekday",
@@ -114,6 +118,75 @@ class CalendarId(str, Enum):
     NYSE_TRADING_DAY = "nyse_trading_day"
 
 
+def _date_str(value: str | Date | datetime) -> str:
+    if isinstance(value, datetime):
+        return value.date().isoformat()
+    if isinstance(value, Date):
+        return value.isoformat()
+    return value
+
+
+@dataclass(frozen=True)
+class CalendarDates:
+    """An inline set of local dates."""
+
+    dates: list[str | Date | datetime]
+
+    def to_dict(self) -> dict:
+        return {"dates": [_date_str(d) for d in self.dates]}
+
+
+@dataclass(frozen=True)
+class CalendarUnion:
+    """A calendar that contains dates present in any child calendar."""
+
+    union: list[CalendarSpec]
+
+    def __post_init__(self) -> None:
+        if not self.union:
+            raise ValueError("calendar union is empty")
+
+    def to_dict(self) -> dict:
+        return {"union": [_calendar_to_json(c) for c in self.union]}
+
+
+@dataclass(frozen=True)
+class CalendarDiff:
+    """A calendar containing dates in the first child, minus following children."""
+
+    diff: list[CalendarSpec]
+
+    def __post_init__(self) -> None:
+        if not self.diff:
+            raise ValueError("calendar diff is empty")
+
+    def to_dict(self) -> dict:
+        return {"diff": [_calendar_to_json(c) for c in self.diff]}
+
+
+@dataclass(frozen=True)
+class CustomCalendar:
+    """A named calendar resolved by a runtime provider."""
+
+    custom: str
+
+    def __post_init__(self) -> None:
+        if not self.custom:
+            raise ValueError("custom calendar name is empty")
+
+    def to_dict(self) -> dict:
+        return {"custom": self.custom}
+
+
+CalendarSpec = CalendarId | CalendarDates | CalendarUnion | CalendarDiff | CustomCalendar
+
+
+def _calendar_to_json(value: CalendarSpec) -> str | dict:
+    if isinstance(value, CalendarId):
+        return value.value
+    return value.to_dict()
+
+
 def _makeup_to_json(value: Makeup | WeekdayMakeup | list[Makeup | MakeupStep]) -> str | dict | list:
     if isinstance(value, Makeup):
         return value.value
@@ -177,12 +250,12 @@ class NthWeekday:
 class Overlay:
     """A calendar filter applied to occurrences."""
 
-    calendar: CalendarId
+    calendar: CalendarSpec
     rule: OverlayRule
     makeup: Makeup | WeekdayMakeup | list[Makeup | MakeupStep] | None = None
 
     def to_dict(self) -> dict:
-        out = {"calendar": self.calendar.value, "rule": self.rule.value}
+        out = {"calendar": _calendar_to_json(self.calendar), "rule": self.rule.value}
         if self.makeup is not None:
             out["makeup"] = _makeup_to_json(self.makeup)
         return out

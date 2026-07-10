@@ -34,6 +34,20 @@ Any object with a `to_dict()` method is accepted, which is what makes the typed
 builders work directly. `Schedule.from_json(str)` and `Schedule.from_dict(obj)`
 are explicit alternatives to the constructor.
 
+Pass an optional custom calendar provider as the second argument when the spec
+uses `{"custom": "name"}` calendar refs. The provider can be a callable or an
+object with `contains(name, date)`, where `date` is a `"YYYY-MM-DD"` string:
+
+```python
+spec = {
+    "freq": {"type": "daily", "time": "09:00"},
+    "timezone": "UTC",
+    "overlays": [{"calendar": {"custom": "shutdown"}, "rule": "exclude"}],
+}
+
+schedule = Schedule(spec, lambda name, date: name == "shutdown" and date == "2026-08-14")
+```
+
 ```{eval-rst}
 .. autoclass:: dateme.Schedule
    :members:
@@ -85,8 +99,8 @@ enums. Build a structure from them and pass it to `Schedule` (or call `to_dict()
 / `to_json()`). Construction performs light validation — an out-of-range minute,
 an empty weekday list, or a month day outside 1–31 raises `ValueError`
 immediately. The enums (`Makeup`, `OverlayRule`, `CalendarId`, `Nth`, `Weekday`)
-and the frequency/`MonthDay`/`NthWeekday`/`Overlay` builders are re-exported at
-the package top level for convenience.
+and the frequency/`MonthDay`/`NthWeekday`/`Overlay`/calendar builders are
+re-exported at the package top level for convenience.
 
 ```{eval-rst}
 .. automodule:: dateme.model
