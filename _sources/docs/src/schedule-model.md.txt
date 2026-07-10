@@ -21,6 +21,7 @@ native objects instead of hand-writing JSON.
 | `max_makeup_hops`              | integer or null                   | no       | `null`   | Maximum days to scan for makeup; `null` uses the built-in limit.  |
 | `makeup_failure`               | [Makeup failure](#makeup-failure) | no       | `"skip"` | What to do when makeup cannot find a surviving date.              |
 | `skip_if_consecutive_excluded` | integer or null                   | no       | `null`   | Skip excluded base-occurrence runs at or above this length.       |
+| `max_skip_gap`                 | integer or null                   | no       | `null`   | Error if a query window has a gap longer than this many days.     |
 | `start`                        | RFC 3339 datetime or null         | no       | `null`   | No occurrence before this instant.                                |
 | `end`                          | RFC 3339 datetime or null         | no       | `null`   | No occurrence at or after this instant.                           |
 
@@ -156,14 +157,18 @@ One of: `"first"`, `"second"`, `"third"`, `"fourth"`, `"fifth"`, `"last"`.
 
 ## Overlays
 
-An overlay filters occurrences against a named calendar. An occurrence's **local
-date** (in the schedule's timezone) is tested — not its UTC date. Multiple
-overlays are **ANDed**: an occurrence survives only if it passes every overlay.
+An overlay filters occurrences against a named calendar or a group of overlays.
+An occurrence's **local date** (in the schedule's timezone) is tested — not its
+UTC date. Top-level overlays are **ANDed**: an occurrence survives only if it
+passes every overlay.
 
-| Field      | Type                     | Description         |
-| ---------- | ------------------------ | ------------------- |
-| `calendar` | [CalendarId](#calendars) | Which calendar set. |
-| `rule`     | `"exclude"` or `"only"`  | How to apply it.    |
+Calendar overlay fields:
+
+| Field      | Type                     | Description                                            |
+| ---------- | ------------------------ | ------------------------------------------------------ |
+| `calendar` | [CalendarId](#calendars) | Which calendar set.                                    |
+| `rule`     | `"exclude"` or `"only"`  | How to apply it.                                       |
+| `makeup`   | [Makeup](#makeup)        | Optional makeup override when this overlay drops date. |
 
 | Rule      | Effect                                                            |
 | --------- | ----------------------------------------------------------------- |
@@ -173,6 +178,23 @@ overlays are **ANDed**: an occurrence survives only if it passes every overlay.
 For example `{"calendar": "nyse_holiday", "rule": "exclude"}` skips NYSE holidays;
 `{"calendar": "nyse_trading_day", "rule": "only"}` keeps only NYSE session days
 (also removing weekends).
+
+Use `any` to create an OR group. The group passes when any child overlay passes.
+
+```json
+{
+  "any": [
+    { "calendar": "us_federal_holiday", "rule": "exclude" },
+    { "calendar": "nyse_holiday", "rule": "exclude" }
+  ],
+  "makeup": "none"
+}
+```
+
+When a date is dropped, the first failing top-level overlay supplies its
+`makeup` override. If an `any` group fails, the group's `makeup` wins; otherwise
+the first failing child makeup is used. If no failing overlay supplies makeup,
+the schedule-level `makeup` field is used.
 
 (calendars)=
 
@@ -259,10 +281,11 @@ the schedule is dropped rather than duplicated. See
 What to do when `makeup` is `"before"` or `"after"` but no surviving destination
 is found within `max_makeup_hops`. One of:
 
-| Value             | Effect                                            |
-| ----------------- | ------------------------------------------------- |
-| `"skip"`          | Drop the occurrence silently.                     |
-| `"keep_original"` | Emit the occurrence on its original excluded day. |
+| Value             | Effect                                                   |
+| ----------------- | -------------------------------------------------------- |
+| `"skip"`          | Drop the occurrence silently.                            |
+| `"keep_original"` | Emit the occurrence on its original excluded day.        |
+| `"error"`         | Raise/throw from fallible queries and Python/JS methods. |
 
 When `makeup` is `"none"`, the cycle is skipped and `makeup_failure` is ignored.
 
@@ -282,6 +305,17 @@ run is counted over consecutive entries in the base recurrence series. When a
 run length is at least the threshold, every excluded base occurrence in that run
 is dropped and does not use `makeup` or `makeup_failure`.
 
+Set `max_skip_gap` to make queries fail if the returned occurrence stream has a
+gap longer than the configured number of days.
+
+```json
+{ "max_skip_gap": 5 }
+```
+
+`until` and `since` check the complete query window. `next`, `previous`, and
+`upcoming` check the gap from the anchor through returned occurrences, but do
+not treat the open search horizon after the last returned occurrence as a gap.
+
 ## Serialization notes
 
 - `timezone` is the IANA name string (`"UTC"`, `"America/New_York"`, …).
@@ -293,6 +327,7 @@ is dropped and does not use `makeup` or `makeup_failure`.
   above.
 - `skip_if_consecutive_excluded` must be `null`, absent, or an integer at least
   `1`.
+- `max_skip_gap` must be `null`, absent, or an integer at least `1`.
 
 (validation)=
 
@@ -300,12 +335,15 @@ is dropped and does not use `makeup` or `makeup_failure`.
 
 `validate` checks the schedule's structure and raises/throws on:
 
-| Condition                                         | Message                  |
-| ------------------------------------------------- | ------------------------ |
-| `hourly.minute` outside 0–59                      | minute out of range      |
-| Empty `days` / `weekdays` selection               | selection is empty       |
-| A `MonthDay` `value` outside 1–31                 | month day out of range   |
-| `yearly.month` outside 1–12                       | month out of range       |
-| `start` not strictly before `end` (when both set) | start must be before end |
+| Condition                                         | Message                     |
+| ------------------------------------------------- | --------------------------- |
+| `hourly.minute` outside 0–59                      | minute out of range         |
+| Empty `days` / `weekdays` selection               | selection is empty          |
+| A `MonthDay` `value` outside 1–31                 | month day out of range      |
+| `yearly.month` outside 1–12                       | month out of range          |
+| `skip_if_consecutive_excluded` less than 1        | skip threshold out of range |
+| `max_skip_gap` less than 1                        | max skip gap out of range   |
+| Empty overlay `any` group                         | overlay group is empty      |
+| `start` not strictly before `end` (when both set) | start must be before end    |
 
 Duplicate entries in `days` / `weekdays` are removed rather than rejected.

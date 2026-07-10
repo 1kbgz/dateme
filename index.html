@@ -318,11 +318,13 @@ it (<code class="docutils literal notranslate"><span class="pre">none</span></co
 can cap that search, and <code class="docutils literal notranslate"><span class="pre">makeup_failure</span></code> can keep the original date when makeup
 cannot find a surviving date.
 <code class="docutils literal notranslate"><span class="pre">skip_if_consecutive_excluded</span></code> can drop runs of excluded base occurrences before
-makeup. <code class="docutils literal notranslate"><span class="pre">makeup</span></code> can also vary by excluded weekday, and <code class="docutils literal notranslate"><span class="pre">makeup_only_on</span></code> can
-restrict makeup target weekdays. Makeup can also be constrained to the same week,
+makeup, while <code class="docutils literal notranslate"><span class="pre">max_skip_gap</span></code> can turn long occurrence gaps into query errors.
+<code class="docutils literal notranslate"><span class="pre">makeup</span></code> can also vary by excluded weekday, and <code class="docutils literal notranslate"><span class="pre">makeup_only_on</span></code> can restrict
+makeup target weekdays. Makeup can also be constrained to the same week,
 non-weekend days, or before the next base occurrence, and fallback makeup
-strategies can be tried in order. DST gaps and overlaps are resolved on
-conversion to UTC.</p>
+strategies can be tried in order. Overlay groups can express OR composition, and
+individual overlays can override makeup behavior. DST gaps and overlaps are
+resolved on conversion to UTC.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This library was generated using <a class="reference external" href="https://copier.readthedocs.io/en/stable/">copier</a> from the <a class="reference external" href="https://github.com/python-project-templates/base">Base Python Project Template repository</a>.</p>

@@ -306,13 +306,19 @@ native objects instead of hand-writing JSON.</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
 <td><p>Skip excluded base-occurrence runs at or above this length.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">start</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">max_skip_gap</span></code></p></td>
+<td><p>integer or null</p></td>
+<td><p>no</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
+<td><p>Error if a query window has a gap longer than this many days.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">start</span></code></p></td>
 <td><p>RFC 3339 datetime or null</p></td>
 <td><p>no</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
 <td><p>No occurrence before this instant.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">end</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">end</span></code></p></td>
 <td><p>RFC 3339 datetime or null</p></td>
 <td><p>no</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">null</span></code></p></td>
@@ -567,9 +573,11 @@ fields.</p>
 </section>
 <section id="overlays">
 <span id="id5"></span><h2>Overlays<a class="headerlink" href="#overlays" title="Link to this heading">¶</a></h2>
-<p>An overlay filters occurrences against a named calendar. An occurrence’s <strong>local
-date</strong> (in the schedule’s timezone) is tested — not its UTC date. Multiple
-overlays are <strong>ANDed</strong>: an occurrence survives only if it passes every overlay.</p>
+<p>An overlay filters occurrences against a named calendar or a group of overlays.
+An occurrence’s <strong>local date</strong> (in the schedule’s timezone) is tested — not its
+UTC date. Top-level overlays are <strong>ANDed</strong>: an occurrence survives only if it
+passes every overlay.</p>
+<p>Calendar overlay fields:</p>
 <div class="table-wrapper colwidths-auto docutils container">
 <table class="docutils align-default">
 <thead>
@@ -586,6 +594,10 @@ overlays are <strong>ANDed</strong>: an occurrence survives only if it passes ev
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rule</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">&quot;exclude&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;only&quot;</span></code></p></td>
 <td><p>How to apply it.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">makeup</span></code></p></td>
+<td><p><a class="reference internal" href="#makeup">Makeup</a></p></td>
+<td><p>Optional makeup override when this overlay drops date.</p></td>
 </tr>
 </tbody>
 </table>
@@ -610,6 +622,20 @@ overlays are <strong>ANDed</strong>: an occurrence survives only if it passes ev
 <p>For example <code class="docutils literal notranslate"><span class="pre">{&quot;calendar&quot;:</span> <span class="pre">&quot;nyse_holiday&quot;,</span> <span class="pre">&quot;rule&quot;:</span> <span class="pre">&quot;exclude&quot;}</span></code> skips NYSE holidays;
 <code class="docutils literal notranslate"><span class="pre">{&quot;calendar&quot;:</span> <span class="pre">&quot;nyse_trading_day&quot;,</span> <span class="pre">&quot;rule&quot;:</span> <span class="pre">&quot;only&quot;}</span></code> keeps only NYSE session days
 (also removing weekends).</p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">any</span></code> to create an OR group. The group passes when any child overlay passes.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;any&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;calendar&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;us_federal_holiday&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;rule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;exclude&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;calendar&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;nyse_holiday&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;rule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;exclude&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="w">  </span><span class="nt">&quot;makeup&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>When a date is dropped, the first failing top-level overlay supplies its
+<code class="docutils literal notranslate"><span class="pre">makeup</span></code> override. If an <code class="docutils literal notranslate"><span class="pre">any</span></code> group fails, the group’s <code class="docutils literal notranslate"><span class="pre">makeup</span></code> wins; otherwise
+the first failing child makeup is used. If no failing overlay supplies makeup,
+the schedule-level <code class="docutils literal notranslate"><span class="pre">makeup</span></code> field is used.</p>
 </section>
 <section id="calendars">
 <span id="id6"></span><h2>Calendars<a class="headerlink" href="#calendars" title="Link to this heading">¶</a></h2>
@@ -738,6 +764,9 @@ is found within <code class="docutils literal notranslate"><span class="pre">max
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;keep_original&quot;</span></code></p></td>
 <td><p>Emit the occurrence on its original excluded day.</p></td>
 </tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">&quot;error&quot;</span></code></p></td>
+<td><p>Raise/throw from fallible queries and Python/JS methods.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -754,6 +783,14 @@ before makeup is applied.</p>
 run is counted over consecutive entries in the base recurrence series. When a
 run length is at least the threshold, every excluded base occurrence in that run
 is dropped and does not use <code class="docutils literal notranslate"><span class="pre">makeup</span></code> or <code class="docutils literal notranslate"><span class="pre">makeup_failure</span></code>.</p>
+<p>Set <code class="docutils literal notranslate"><span class="pre">max_skip_gap</span></code> to make queries fail if the returned occurrence stream has a
+gap longer than the configured number of days.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;max_skip_gap&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">until</span></code> and <code class="docutils literal notranslate"><span class="pre">since</span></code> check the complete query window. <code class="docutils literal notranslate"><span class="pre">next</span></code>, <code class="docutils literal notranslate"><span class="pre">previous</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">upcoming</span></code> check the gap from the anchor through returned occurrences, but do
+not treat the open search horizon after the last returned occurrence as a gap.</p>
 </section>
 <section id="serialization-notes">
 <h2>Serialization notes<a class="headerlink" href="#serialization-notes" title="Link to this heading">¶</a></h2>
@@ -767,6 +804,7 @@ is dropped and does not use <code class="docutils literal notranslate"><span cla
 above.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">skip_if_consecutive_excluded</span></code> must be <code class="docutils literal notranslate"><span class="pre">null</span></code>, absent, or an integer at least
 <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_skip_gap</span></code> must be <code class="docutils literal notranslate"><span class="pre">null</span></code>, absent, or an integer at least <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></li>
 </ul>
 </section>
 <section id="validation">
@@ -792,7 +830,16 @@ above.</p></li>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">yearly.month</span></code> outside 1–12</p></td>
 <td><p>month out of range</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">start</span></code> not strictly before <code class="docutils literal notranslate"><span class="pre">end</span></code> (when both set)</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">skip_if_consecutive_excluded</span></code> less than 1</p></td>
+<td><p>skip threshold out of range</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">max_skip_gap</span></code> less than 1</p></td>
+<td><p>max skip gap out of range</p></td>
+</tr>
+<tr class="row-even"><td><p>Empty overlay <code class="docutils literal notranslate"><span class="pre">any</span></code> group</p></td>
+<td><p>overlay group is empty</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">start</span></code> not strictly before <code class="docutils literal notranslate"><span class="pre">end</span></code> (when both set)</p></td>
 <td><p>start must be before end</p></td>
 </tr>
 </tbody>
