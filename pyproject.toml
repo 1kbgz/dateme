@@ -224,7 +224,6 @@ section-order = [
 [tool.yardang]
 title = "dateme"
 root = "README.md"
-<<<<<<< before updating
 pages = [
     "docs/src/tutorial.md",
     "docs/src/how-to.md",
@@ -242,8 +241,4 @@ exclude-patterns = [
     "rust/**",
     "dateme/extension/**",
 ]
-=======
-pages = []
-use-autoapi = true
->>>>>>> after updating
 
