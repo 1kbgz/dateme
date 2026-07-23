@@ -32,8 +32,6 @@ from .model import (
 __version__ = "0.2.0"
 
 __all__ = [
-    "Schedule",
-    "model",
     "AnyOverlay",
     "CalendarDates",
     "CalendarDiff",
@@ -56,8 +54,10 @@ __all__ = [
     "Overlay",
     "OverlayRule",
     "Quarterly",
+    "Schedule",
     "Weekday",
-    "Weekly",
     "WeekdayMakeup",
+    "Weekly",
     "Yearly",
+    "model",
 ]

@@ -1,4 +1,4 @@
-from datetime import datetime, time, timezone
+from datetime import UTC, datetime, time
 
 import pytest
 
@@ -31,7 +31,7 @@ from dateme import (
 
 
 def utc(y, m, d, hh=0, mm=0):
-    return datetime(y, m, d, hh, mm, tzinfo=timezone.utc)
+    return datetime(y, m, d, hh, mm, tzinfo=UTC)
 
 
 def nyse_monday_spec():
