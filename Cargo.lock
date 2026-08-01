@@ -104,9 +104,9 @@ dependencies = [
 
 [[package]]
 name = "finance-dates"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2ab54c766702811f87c832e595aa4d665f066c41d6c6680c6c4d496a121de37"
+checksum = "c8e3c5352314a4bd326573576cbd0e698c70b6ec10151e0b736b5c8b4a889cea"
 dependencies = [
  "chrono",
  "chrono-tz",
