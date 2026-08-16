@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 
+<<<<<<< before updating
 // Load the built ESM bundle in the browser, initialize the wasm module, then
 // exercise the Schedule API. Mirrors the Rust/Python NYSE-Monday vector.
 async function run(page, body) {
@@ -507,5 +508,10 @@ test.describe("Schedule", () => {
       "2026-01-02T12:00:00.000Z",
     ]);
     expect(res.error).toContain("end bound");
+=======
+test.describe("Basics", () => {
+  test("basic", async () => {
+    await expect("").toBe("");
+>>>>>>> after updating
   });
 });
