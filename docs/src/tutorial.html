@@ -266,16 +266,16 @@ the next open day.”</strong></p>
 <section id="step-1-describe-the-schedule">
 <h2>Step 1 — Describe the schedule<a class="headerlink" href="#step-1-describe-the-schedule" title="Link to this heading">¶</a></h2>
 <p>A schedule is written as JSON. Paste this in:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">spec</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">spec</span> <span class="o">=</span> <span class="s2">"""</span>
 <span class="s2">{</span>
-<span class="s2">  &quot;freq&quot;: { &quot;type&quot;: &quot;weekly&quot;, &quot;days&quot;: [&quot;mon&quot;], &quot;time&quot;: &quot;17:30&quot; },</span>
-<span class="s2">  &quot;timezone&quot;: &quot;America/New_York&quot;,</span>
-<span class="s2">  &quot;overlays&quot;: [ { &quot;calendar&quot;: &quot;nyse_holiday&quot;, &quot;rule&quot;: &quot;exclude&quot; } ],</span>
-<span class="s2">  &quot;makeup&quot;: &quot;after&quot;,</span>
-<span class="s2">  &quot;start&quot;: null,</span>
-<span class="s2">  &quot;end&quot;: null</span>
+<span class="s2">  "freq": { "type": "weekly", "days": ["mon"], "time": "17:30" },</span>
+<span class="s2">  "timezone": "America/New_York",</span>
+<span class="s2">  "overlays": [ { "calendar": "nyse_holiday", "rule": "exclude" } ],</span>
+<span class="s2">  "makeup": "after",</span>
+<span class="s2">  "start": null,</span>
+<span class="s2">  "end": null</span>
 <span class="s2">}</span>
-<span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">"""</span>
 
 <span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
 </pre></div>

@@ -256,10 +256,10 @@ signatures, see the <a class="reference internal" href="api-python.html"><span c
 <span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span>
 
 <span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;weekly&quot;</span><span class="p">,</span> <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">],</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;17:30&quot;</span><span class="p">},</span>
-    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="s2">&quot;nyse_holiday&quot;</span><span class="p">,</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;exclude&quot;</span><span class="p">}],</span>
-    <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="s2">&quot;after&quot;</span><span class="p">,</span>
+    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"weekly"</span><span class="p">,</span> <span class="s2">"days"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"mon"</span><span class="p">],</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"17:30"</span><span class="p">},</span>
+    <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"America/New_York"</span><span class="p">,</span>
+    <span class="s2">"overlays"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"calendar"</span><span class="p">:</span> <span class="s2">"nyse_holiday"</span><span class="p">,</span> <span class="s2">"rule"</span><span class="p">:</span> <span class="s2">"exclude"</span><span class="p">}],</span>
+    <span class="s2">"makeup"</span><span class="p">:</span> <span class="s2">"after"</span><span class="p">,</span>
 <span class="p">})</span>
 
 <span class="n">after</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
@@ -274,10 +274,10 @@ cycle.</p>
 <h2>How to Run Only on Trading Days<a class="headerlink" href="#how-to-run-only-on-trading-days" title="Link to this heading">¶</a></h2>
 <p>Use an <code class="docutils literal notranslate"><span class="pre">only</span></code> overlay against <code class="docutils literal notranslate"><span class="pre">nyse_trading_day</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;16:00&quot;</span><span class="p">},</span>
-    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="s2">&quot;nyse_trading_day&quot;</span><span class="p">,</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;only&quot;</span><span class="p">}],</span>
-    <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"daily"</span><span class="p">,</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"16:00"</span><span class="p">},</span>
+    <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"America/New_York"</span><span class="p">,</span>
+    <span class="s2">"overlays"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"calendar"</span><span class="p">:</span> <span class="s2">"nyse_trading_day"</span><span class="p">,</span> <span class="s2">"rule"</span><span class="p">:</span> <span class="s2">"only"</span><span class="p">}],</span>
+    <span class="s2">"makeup"</span><span class="p">:</span> <span class="s2">"none"</span><span class="p">,</span>
 <span class="p">})</span>
 </pre></div>
 </div>
@@ -287,14 +287,14 @@ cycle.</p>
 <p>Use the last day of the month, require US business days, and roll back when the
 last calendar day is not a business day.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;monthly_by_day&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;last&quot;</span><span class="p">}],</span>
-        <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;16:00&quot;</span><span class="p">,</span>
+    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"monthly_by_day"</span><span class="p">,</span>
+        <span class="s2">"days"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"last"</span><span class="p">}],</span>
+        <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"16:00"</span><span class="p">,</span>
     <span class="p">},</span>
-    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="s2">&quot;us_business_day&quot;</span><span class="p">,</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;only&quot;</span><span class="p">}],</span>
-    <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="s2">&quot;before&quot;</span><span class="p">,</span>
+    <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"America/New_York"</span><span class="p">,</span>
+    <span class="s2">"overlays"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"calendar"</span><span class="p">:</span> <span class="s2">"us_business_day"</span><span class="p">,</span> <span class="s2">"rule"</span><span class="p">:</span> <span class="s2">"only"</span><span class="p">}],</span>
+    <span class="s2">"makeup"</span><span class="p">:</span> <span class="s2">"before"</span><span class="p">,</span>
 <span class="p">})</span>
 </pre></div>
 </div>
@@ -303,26 +303,26 @@ last calendar day is not a business day.</p>
 <h2>How to Schedule Multiple Days in One Rule<a class="headerlink" href="#how-to-schedule-multiple-days-in-one-rule" title="Link to this heading">¶</a></h2>
 <p>Put every selected slot in the frequency object.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;weekly&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">,</span> <span class="s2">&quot;wed&quot;</span><span class="p">,</span> <span class="s2">&quot;fri&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">,</span>
+    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"weekly"</span><span class="p">,</span>
+        <span class="s2">"days"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"mon"</span><span class="p">,</span> <span class="s2">"wed"</span><span class="p">,</span> <span class="s2">"fri"</span><span class="p">],</span>
+        <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"09:00"</span><span class="p">,</span>
     <span class="p">},</span>
-    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+    <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"UTC"</span><span class="p">,</span>
 <span class="p">})</span>
 </pre></div>
 </div>
 <p>For monthly slots:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;monthly_by_weekday&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;weekdays&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">{</span><span class="s2">&quot;nth&quot;</span><span class="p">:</span> <span class="s2">&quot;first&quot;</span><span class="p">,</span> <span class="s2">&quot;weekday&quot;</span><span class="p">:</span> <span class="s2">&quot;tue&quot;</span><span class="p">},</span>
-            <span class="p">{</span><span class="s2">&quot;nth&quot;</span><span class="p">:</span> <span class="s2">&quot;third&quot;</span><span class="p">,</span> <span class="s2">&quot;weekday&quot;</span><span class="p">:</span> <span class="s2">&quot;tue&quot;</span><span class="p">},</span>
+    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"monthly_by_weekday"</span><span class="p">,</span>
+        <span class="s2">"weekdays"</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s2">"nth"</span><span class="p">:</span> <span class="s2">"first"</span><span class="p">,</span> <span class="s2">"weekday"</span><span class="p">:</span> <span class="s2">"tue"</span><span class="p">},</span>
+            <span class="p">{</span><span class="s2">"nth"</span><span class="p">:</span> <span class="s2">"third"</span><span class="p">,</span> <span class="s2">"weekday"</span><span class="p">:</span> <span class="s2">"tue"</span><span class="p">},</span>
         <span class="p">],</span>
-        <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">,</span>
+        <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"09:00"</span><span class="p">,</span>
     <span class="p">},</span>
-    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+    <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"UTC"</span><span class="p">,</span>
 <span class="p">})</span>
 </pre></div>
 </div>
@@ -331,26 +331,26 @@ last calendar day is not a business day.</p>
 <h2>How to Create Biweekly or Every-N-Day Schedules<a class="headerlink" href="#how-to-create-biweekly-or-every-n-day-schedules" title="Link to this heading">¶</a></h2>
 <p>Use <code class="docutils literal notranslate"><span class="pre">every_n_weeks</span></code> when the schedule repeats by week.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;every_n_weeks&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;interval&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
-        <span class="s2">&quot;start_date&quot;</span><span class="p">:</span> <span class="s2">&quot;2026-01-05&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">,</span> <span class="s2">&quot;thu&quot;</span><span class="p">],</span>
-        <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;17:00&quot;</span><span class="p">,</span>
+    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"every_n_weeks"</span><span class="p">,</span>
+        <span class="s2">"interval"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="s2">"start_date"</span><span class="p">:</span> <span class="s2">"2026-01-05"</span><span class="p">,</span>
+        <span class="s2">"days"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"mon"</span><span class="p">,</span> <span class="s2">"thu"</span><span class="p">],</span>
+        <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"17:00"</span><span class="p">,</span>
     <span class="p">},</span>
-    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+    <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"UTC"</span><span class="p">,</span>
 <span class="p">})</span>
 </pre></div>
 </div>
 <p>Use <code class="docutils literal notranslate"><span class="pre">every_n_days</span></code> when the schedule repeats by elapsed calendar days.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;every_n_days&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;interval&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-        <span class="s2">&quot;start_date&quot;</span><span class="p">:</span> <span class="s2">&quot;2026-01-01&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">,</span>
+    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"every_n_days"</span><span class="p">,</span>
+        <span class="s2">"interval"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s2">"start_date"</span><span class="p">:</span> <span class="s2">"2026-01-01"</span><span class="p">,</span>
+        <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"09:00"</span><span class="p">,</span>
     <span class="p">},</span>
-    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+    <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"UTC"</span><span class="p">,</span>
 <span class="p">})</span>
 </pre></div>
 </div>
@@ -359,13 +359,13 @@ last calendar day is not a business day.</p>
 <h2>How to Schedule Quarterly Events<a class="headerlink" href="#how-to-schedule-quarterly-events" title="Link to this heading">¶</a></h2>
 <p>Use <code class="docutils literal notranslate"><span class="pre">quarterly</span></code>. <code class="docutils literal notranslate"><span class="pre">month</span></code> is the month within each quarter: <code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">2</span></code>, or <code class="docutils literal notranslate"><span class="pre">3</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;quarterly&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;month&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="s2">&quot;day&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;day&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">},</span>
-        <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;12:00&quot;</span><span class="p">,</span>
+    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"quarterly"</span><span class="p">,</span>
+        <span class="s2">"month"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">"day"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"day"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="mi">15</span><span class="p">},</span>
+        <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"12:00"</span><span class="p">,</span>
     <span class="p">},</span>
-    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+    <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"UTC"</span><span class="p">,</span>
 <span class="p">})</span>
 </pre></div>
 </div>
@@ -374,8 +374,8 @@ last calendar day is not a business day.</p>
 <h2>How to Use a Cron Expression<a class="headerlink" href="#how-to-use-a-cron-expression" title="Link to this heading">¶</a></h2>
 <p>Use <code class="docutils literal notranslate"><span class="pre">custom_cron</span></code> for a five-field cron expression in schedule-local time.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;custom_cron&quot;</span><span class="p">,</span> <span class="s2">&quot;expr&quot;</span><span class="p">:</span> <span class="s2">&quot;30 9 * * 1-5&quot;</span><span class="p">},</span>
-    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
+    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"custom_cron"</span><span class="p">,</span> <span class="s2">"expr"</span><span class="p">:</span> <span class="s2">"30 9 * * 1-5"</span><span class="p">},</span>
+    <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"America/New_York"</span><span class="p">,</span>
 <span class="p">})</span>
 </pre></div>
 </div>
@@ -384,10 +384,10 @@ last calendar day is not a business day.</p>
 <h2>How to Bound a Series<a class="headerlink" href="#how-to-bound-a-series" title="Link to this heading">¶</a></h2>
 <p>Set <code class="docutils literal notranslate"><span class="pre">start</span></code> and/or <code class="docutils literal notranslate"><span class="pre">end</span></code> as UTC instants.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;12:00&quot;</span><span class="p">},</span>
-    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="s2">&quot;2026-06-01T00:00:00Z&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="s2">&quot;2026-07-01T00:00:00Z&quot;</span><span class="p">,</span>
+    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"daily"</span><span class="p">,</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"12:00"</span><span class="p">},</span>
+    <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"UTC"</span><span class="p">,</span>
+    <span class="s2">"start"</span><span class="p">:</span> <span class="s2">"2026-06-01T00:00:00Z"</span><span class="p">,</span>
+    <span class="s2">"end"</span><span class="p">:</span> <span class="s2">"2026-07-01T00:00:00Z"</span><span class="p">,</span>
 <span class="p">})</span>
 </pre></div>
 </div>
@@ -416,8 +416,8 @@ last calendar day is not a business day.</p>
 <h2>How to Annotate Made-Up Occurrences<a class="headerlink" href="#how-to-annotate-made-up-occurrences" title="Link to this heading">¶</a></h2>
 <p>Use trace methods when a UI needs to show why an occurrence exists.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">trace</span> <span class="o">=</span> <span class="n">schedule</span><span class="o">.</span><span class="n">next_trace</span><span class="p">(</span><span class="n">after</span><span class="p">)</span>
-<span class="n">trace</span><span class="p">[</span><span class="s2">&quot;instant&quot;</span><span class="p">]</span>
-<span class="n">trace</span><span class="p">[</span><span class="s2">&quot;reason&quot;</span><span class="p">]</span>
+<span class="n">trace</span><span class="p">[</span><span class="s2">"instant"</span><span class="p">]</span>
+<span class="n">trace</span><span class="p">[</span><span class="s2">"reason"</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>For a list:</p>
@@ -442,10 +442,10 @@ last calendar day is not a business day.</p>
 <h2>How to Iterate a Bounded Schedule<a class="headerlink" href="#how-to-iterate-a-bounded-schedule" title="Link to this heading">¶</a></h2>
 <p>Set <code class="docutils literal notranslate"><span class="pre">end</span></code>, then iterate the schedule.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;12:00&quot;</span><span class="p">},</span>
-    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="s2">&quot;2026-01-01T00:00:00Z&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="s2">&quot;2026-01-04T00:00:00Z&quot;</span><span class="p">,</span>
+    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"daily"</span><span class="p">,</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"12:00"</span><span class="p">},</span>
+    <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"UTC"</span><span class="p">,</span>
+    <span class="s2">"start"</span><span class="p">:</span> <span class="s2">"2026-01-01T00:00:00Z"</span><span class="p">,</span>
+    <span class="s2">"end"</span><span class="p">:</span> <span class="s2">"2026-01-04T00:00:00Z"</span><span class="p">,</span>
 <span class="p">})</span>
 
 <span class="k">for</span> <span class="n">instant</span> <span class="ow">in</span> <span class="n">schedule</span><span class="p">:</span>
@@ -471,14 +471,14 @@ last calendar day is not a business day.</p>
 <h2>How to Restrict Makeup Destinations<a class="headerlink" href="#how-to-restrict-makeup-destinations" title="Link to this heading">¶</a></h2>
 <p>Use destination constraints with a makeup direction.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;weekly&quot;</span><span class="p">,</span> <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">],</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span>
-    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="s2">&quot;us_federal_holiday&quot;</span><span class="p">,</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;exclude&quot;</span><span class="p">}],</span>
-    <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="s2">&quot;after&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;makeup_only_on&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tue&quot;</span><span class="p">,</span> <span class="s2">&quot;wed&quot;</span><span class="p">,</span> <span class="s2">&quot;thu&quot;</span><span class="p">],</span>
-    <span class="s2">&quot;makeup_within_week&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="s2">&quot;makeup_exclude_weekends&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="s2">&quot;makeup_before_next&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"weekly"</span><span class="p">,</span> <span class="s2">"days"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"mon"</span><span class="p">],</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"09:00"</span><span class="p">},</span>
+    <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"UTC"</span><span class="p">,</span>
+    <span class="s2">"overlays"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"calendar"</span><span class="p">:</span> <span class="s2">"us_federal_holiday"</span><span class="p">,</span> <span class="s2">"rule"</span><span class="p">:</span> <span class="s2">"exclude"</span><span class="p">}],</span>
+    <span class="s2">"makeup"</span><span class="p">:</span> <span class="s2">"after"</span><span class="p">,</span>
+    <span class="s2">"makeup_only_on"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"tue"</span><span class="p">,</span> <span class="s2">"wed"</span><span class="p">,</span> <span class="s2">"thu"</span><span class="p">],</span>
+    <span class="s2">"makeup_within_week"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">"makeup_exclude_weekends"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">"makeup_before_next"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">})</span>
 </pre></div>
 </div>
@@ -487,13 +487,13 @@ last calendar day is not a business day.</p>
 <h2>How to Use Different Makeup Rules by Weekday<a class="headerlink" href="#how-to-use-different-makeup-rules-by-weekday" title="Link to this heading">¶</a></h2>
 <p>Use a weekday map for <code class="docutils literal notranslate"><span class="pre">makeup</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;weekly&quot;</span><span class="p">,</span> <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">,</span> <span class="s2">&quot;fri&quot;</span><span class="p">],</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span>
-    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="s2">&quot;us_federal_holiday&quot;</span><span class="p">,</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;exclude&quot;</span><span class="p">}],</span>
-    <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;mon&quot;</span><span class="p">:</span> <span class="s2">&quot;after&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;fri&quot;</span><span class="p">:</span> <span class="s2">&quot;before&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"weekly"</span><span class="p">,</span> <span class="s2">"days"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"mon"</span><span class="p">,</span> <span class="s2">"fri"</span><span class="p">],</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"09:00"</span><span class="p">},</span>
+    <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"UTC"</span><span class="p">,</span>
+    <span class="s2">"overlays"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"calendar"</span><span class="p">:</span> <span class="s2">"us_federal_holiday"</span><span class="p">,</span> <span class="s2">"rule"</span><span class="p">:</span> <span class="s2">"exclude"</span><span class="p">}],</span>
+    <span class="s2">"makeup"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"mon"</span><span class="p">:</span> <span class="s2">"after"</span><span class="p">,</span>
+        <span class="s2">"fri"</span><span class="p">:</span> <span class="s2">"before"</span><span class="p">,</span>
+        <span class="s2">"default"</span><span class="p">:</span> <span class="s2">"none"</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">})</span>
 </pre></div>
@@ -503,13 +503,13 @@ last calendar day is not a business day.</p>
 <h2>How to Try Fallback Makeup Strategies<a class="headerlink" href="#how-to-try-fallback-makeup-strategies" title="Link to this heading">¶</a></h2>
 <p>Use a makeup cascade.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span>
-    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="s2">&quot;us_federal_holiday&quot;</span><span class="p">,</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;exclude&quot;</span><span class="p">}],</span>
-    <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="p">{</span><span class="s2">&quot;direction&quot;</span><span class="p">:</span> <span class="s2">&quot;after&quot;</span><span class="p">,</span> <span class="s2">&quot;max_hops&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
-        <span class="p">{</span><span class="s2">&quot;direction&quot;</span><span class="p">:</span> <span class="s2">&quot;before&quot;</span><span class="p">,</span> <span class="s2">&quot;max_hops&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
-        <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"daily"</span><span class="p">,</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"09:00"</span><span class="p">},</span>
+    <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"UTC"</span><span class="p">,</span>
+    <span class="s2">"overlays"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"calendar"</span><span class="p">:</span> <span class="s2">"us_federal_holiday"</span><span class="p">,</span> <span class="s2">"rule"</span><span class="p">:</span> <span class="s2">"exclude"</span><span class="p">}],</span>
+    <span class="s2">"makeup"</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s2">"direction"</span><span class="p">:</span> <span class="s2">"after"</span><span class="p">,</span> <span class="s2">"max_hops"</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+        <span class="p">{</span><span class="s2">"direction"</span><span class="p">:</span> <span class="s2">"before"</span><span class="p">,</span> <span class="s2">"max_hops"</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+        <span class="s2">"none"</span><span class="p">,</span>
     <span class="p">],</span>
 <span class="p">})</span>
 </pre></div>
@@ -519,12 +519,12 @@ last calendar day is not a business day.</p>
 <h2>How to Fail When Makeup Cannot Find a Date<a class="headerlink" href="#how-to-fail-when-makeup-cannot-find-a-date" title="Link to this heading">¶</a></h2>
 <p>Use <code class="docutils literal notranslate"><span class="pre">makeup_failure:</span> <span class="pre">&quot;error&quot;</span></code> for strict schedules.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span>
-    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dates&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;2026-01-02&quot;</span><span class="p">]},</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;exclude&quot;</span><span class="p">}],</span>
-    <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="s2">&quot;after&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;max_makeup_hops&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="s2">&quot;makeup_failure&quot;</span><span class="p">:</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
+    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"daily"</span><span class="p">,</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"09:00"</span><span class="p">},</span>
+    <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"UTC"</span><span class="p">,</span>
+    <span class="s2">"overlays"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"calendar"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"dates"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"2026-01-02"</span><span class="p">]},</span> <span class="s2">"rule"</span><span class="p">:</span> <span class="s2">"exclude"</span><span class="p">}],</span>
+    <span class="s2">"makeup"</span><span class="p">:</span> <span class="s2">"after"</span><span class="p">,</span>
+    <span class="s2">"max_makeup_hops"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s2">"makeup_failure"</span><span class="p">:</span> <span class="s2">"error"</span><span class="p">,</span>
 <span class="p">})</span>
 </pre></div>
 </div>
@@ -534,11 +534,11 @@ last calendar day is not a business day.</p>
 <h2>How to Skip Runs of Consecutive Exclusions<a class="headerlink" href="#how-to-skip-runs-of-consecutive-exclusions" title="Link to this heading">¶</a></h2>
 <p>Use <code class="docutils literal notranslate"><span class="pre">skip_if_consecutive_excluded</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span>
-    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dates&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;2026-01-05&quot;</span><span class="p">,</span> <span class="s2">&quot;2026-01-06&quot;</span><span class="p">]},</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;exclude&quot;</span><span class="p">}],</span>
-    <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="s2">&quot;after&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;skip_if_consecutive_excluded&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"daily"</span><span class="p">,</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"09:00"</span><span class="p">},</span>
+    <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"UTC"</span><span class="p">,</span>
+    <span class="s2">"overlays"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"calendar"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"dates"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"2026-01-05"</span><span class="p">,</span> <span class="s2">"2026-01-06"</span><span class="p">]},</span> <span class="s2">"rule"</span><span class="p">:</span> <span class="s2">"exclude"</span><span class="p">}],</span>
+    <span class="s2">"makeup"</span><span class="p">:</span> <span class="s2">"after"</span><span class="p">,</span>
+    <span class="s2">"skip_if_consecutive_excluded"</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
 <span class="p">})</span>
 </pre></div>
 </div>
@@ -547,9 +547,9 @@ last calendar day is not a business day.</p>
 <h2>How to Alert on Long Gaps<a class="headerlink" href="#how-to-alert-on-long-gaps" title="Link to this heading">¶</a></h2>
 <p>Use <code class="docutils literal notranslate"><span class="pre">max_skip_gap</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;weekly&quot;</span><span class="p">,</span> <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mon&quot;</span><span class="p">],</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span>
-    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;max_skip_gap&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"weekly"</span><span class="p">,</span> <span class="s2">"days"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"mon"</span><span class="p">],</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"09:00"</span><span class="p">},</span>
+    <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"UTC"</span><span class="p">,</span>
+    <span class="s2">"max_skip_gap"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
 <span class="p">})</span>
 </pre></div>
 </div>
@@ -560,18 +560,18 @@ last calendar day is not a business day.</p>
 <p>Use <code class="docutils literal notranslate"><span class="pre">dates</span></code> for inline sets, <code class="docutils literal notranslate"><span class="pre">union</span></code> for any child set, and <code class="docutils literal notranslate"><span class="pre">diff</span></code> for the first
 set minus later sets.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span>
-    <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"daily"</span><span class="p">,</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"09:00"</span><span class="p">},</span>
+    <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"UTC"</span><span class="p">,</span>
+    <span class="s2">"overlays"</span><span class="p">:</span> <span class="p">[</span>
         <span class="p">{</span>
-            <span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;union&quot;</span><span class="p">:</span> <span class="p">[</span>
-                    <span class="s2">&quot;us_federal_holiday&quot;</span><span class="p">,</span>
-                    <span class="p">{</span><span class="s2">&quot;dates&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;2026-12-24&quot;</span><span class="p">]},</span>
-                    <span class="p">{</span><span class="s2">&quot;custom&quot;</span><span class="p">:</span> <span class="s2">&quot;company_shutdown&quot;</span><span class="p">},</span>
+            <span class="s2">"calendar"</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">"union"</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">"us_federal_holiday"</span><span class="p">,</span>
+                    <span class="p">{</span><span class="s2">"dates"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"2026-12-24"</span><span class="p">]},</span>
+                    <span class="p">{</span><span class="s2">"custom"</span><span class="p">:</span> <span class="s2">"company_shutdown"</span><span class="p">},</span>
                 <span class="p">]</span>
             <span class="p">},</span>
-            <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;exclude&quot;</span><span class="p">,</span>
+            <span class="s2">"rule"</span><span class="p">:</span> <span class="s2">"exclude"</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">],</span>
 <span class="p">})</span>
@@ -583,14 +583,14 @@ set minus later sets.</p>
 <p>Use <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">&quot;custom&quot;:</span> <span class="pre">&quot;name&quot;</span> <span class="pre">}</span></code> in the schedule and pass a provider to the
 constructor.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">contains</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">date</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;company_shutdown&quot;</span> <span class="ow">and</span> <span class="n">date</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;2026-12-24&quot;</span><span class="p">,</span> <span class="s2">&quot;2026-12-31&quot;</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">name</span> <span class="o">==</span> <span class="s2">"company_shutdown"</span> <span class="ow">and</span> <span class="n">date</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">"2026-12-24"</span><span class="p">,</span> <span class="s2">"2026-12-31"</span><span class="p">}</span>
 
 
 <span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span>
     <span class="p">{</span>
-        <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;09:00&quot;</span><span class="p">},</span>
-        <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;custom&quot;</span><span class="p">:</span> <span class="s2">&quot;company_shutdown&quot;</span><span class="p">},</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="s2">&quot;exclude&quot;</span><span class="p">}],</span>
+        <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"daily"</span><span class="p">,</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"09:00"</span><span class="p">},</span>
+        <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"UTC"</span><span class="p">,</span>
+        <span class="s2">"overlays"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"calendar"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"custom"</span><span class="p">:</span> <span class="s2">"company_shutdown"</span><span class="p">},</span> <span class="s2">"rule"</span><span class="p">:</span> <span class="s2">"exclude"</span><span class="p">}],</span>
     <span class="p">},</span>
     <span class="n">contains</span><span class="p">,</span>
 <span class="p">)</span>
@@ -598,7 +598,7 @@ constructor.</p>
 </div>
 <p>JavaScript providers receive the same <code class="docutils literal notranslate"><span class="pre">(name,</span> <span class="pre">date)</span></code> arguments.</p>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">schedule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">(</span><span class="nx">spec</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">date</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;company_shutdown&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">date</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;2026-12-24&quot;</span><span class="p">;</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"company_shutdown"</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">date</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"2026-12-24"</span><span class="p">;</span>
 <span class="p">});</span>
 </pre></div>
 </div>
@@ -610,8 +610,8 @@ constructor.</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">model</span> <span class="k">as</span> <span class="n">m</span>
 
 <span class="n">spec</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">Schedule</span><span class="p">(</span>
-    <span class="n">freq</span><span class="o">=</span><span class="n">Weekly</span><span class="p">([</span><span class="n">Weekday</span><span class="o">.</span><span class="n">MON</span><span class="p">],</span> <span class="s2">&quot;17:30&quot;</span><span class="p">),</span>
-    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
+    <span class="n">freq</span><span class="o">=</span><span class="n">Weekly</span><span class="p">([</span><span class="n">Weekday</span><span class="o">.</span><span class="n">MON</span><span class="p">],</span> <span class="s2">"17:30"</span><span class="p">),</span>
+    <span class="n">timezone</span><span class="o">=</span><span class="s2">"America/New_York"</span><span class="p">,</span>
     <span class="n">overlays</span><span class="o">=</span><span class="p">[</span><span class="n">Overlay</span><span class="p">(</span><span class="n">CalendarId</span><span class="o">.</span><span class="n">NYSE_HOLIDAY</span><span class="p">,</span> <span class="n">OverlayRule</span><span class="o">.</span><span class="n">EXCLUDE</span><span class="p">)],</span>
     <span class="n">makeup</span><span class="o">=</span><span class="n">Makeup</span><span class="o">.</span><span class="n">AFTER</span><span class="p">,</span>
 <span class="p">)</span>
@@ -620,12 +620,12 @@ constructor.</p>
 </pre></div>
 </div>
 <p>Use <code class="docutils literal notranslate"><span class="pre">ScheduleSpec</span></code> and runtime enum objects in TypeScript.</p>
-<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="nx">init</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">,</span><span class="w"> </span><span class="nx">Weekday</span><span class="p">,</span><span class="w"> </span><span class="nx">CalendarId</span><span class="p">,</span><span class="w"> </span><span class="nx">OverlayRule</span><span class="p">,</span><span class="w"> </span><span class="nx">Makeup</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;dateme&quot;</span><span class="p">;</span>
-<span class="k">import</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ScheduleSpec</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;dateme&quot;</span><span class="p">;</span>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="nx">init</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">,</span><span class="w"> </span><span class="nx">Weekday</span><span class="p">,</span><span class="w"> </span><span class="nx">CalendarId</span><span class="p">,</span><span class="w"> </span><span class="nx">OverlayRule</span><span class="p">,</span><span class="w"> </span><span class="nx">Makeup</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"dateme"</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ScheduleSpec</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"dateme"</span><span class="p">;</span>
 
 <span class="kd">const</span><span class="w"> </span><span class="nx">spec</span><span class="o">:</span><span class="w"> </span><span class="kt">ScheduleSpec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;weekly&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">days</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">Weekday</span><span class="p">.</span><span class="nx">Mon</span><span class="p">],</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;17:30&quot;</span><span class="w"> </span><span class="p">},</span>
-<span class="w">  </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"weekly"</span><span class="p">,</span><span class="w"> </span><span class="nx">days</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">Weekday</span><span class="p">.</span><span class="nx">Mon</span><span class="p">],</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">"17:30"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">"America/New_York"</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">overlays</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">calendar</span><span class="o">:</span><span class="w"> </span><span class="kt">CalendarId.NyseHoliday</span><span class="p">,</span><span class="w"> </span><span class="nx">rule</span><span class="o">:</span><span class="w"> </span><span class="kt">OverlayRule.Exclude</span><span class="w"> </span><span class="p">}],</span>
 <span class="w">  </span><span class="nx">makeup</span><span class="o">:</span><span class="w"> </span><span class="kt">Makeup.After</span><span class="p">,</span>
 <span class="p">};</span>

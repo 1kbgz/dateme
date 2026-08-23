@@ -235,13 +235,13 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for dateme.model</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Typed builders for the dateme schedule model.</span>
+<span></span><span class="sd">"""Typed builders for the dateme schedule model.</span>
 
 <span class="sd">These dataclasses and enums mirror the JSON schedule model. Build a structure</span>
 <span class="sd">from them and pass it to :class:`dateme.Schedule` (or call ``to_dict()`` /</span>
 <span class="sd">``to_json()``). Construction performs light validation; the authoritative</span>
 <span class="sd">structural check remains :meth:`dateme.Schedule.validate`.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -251,78 +251,78 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">&quot;AnyOverlay&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;CalendarDates&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;CalendarDiff&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;CalendarId&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;CalendarUnion&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;CustomCalendar&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;CustomCron&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Daily&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;EveryNDays&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;EveryNWeeks&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Frequency&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Hourly&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Makeup&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;MakeupFailure&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;MakeupStep&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;MonthDay&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;MonthlyByDay&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;MonthlyByWeekday&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Nth&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;NthWeekday&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Overlay&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;OverlayRule&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Quarterly&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Schedule&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Weekday&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;WeekdayMakeup&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Weekly&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;Yearly&quot;</span><span class="p">,</span>
+    <span class="s2">"AnyOverlay"</span><span class="p">,</span>
+    <span class="s2">"CalendarDates"</span><span class="p">,</span>
+    <span class="s2">"CalendarDiff"</span><span class="p">,</span>
+    <span class="s2">"CalendarId"</span><span class="p">,</span>
+    <span class="s2">"CalendarUnion"</span><span class="p">,</span>
+    <span class="s2">"CustomCalendar"</span><span class="p">,</span>
+    <span class="s2">"CustomCron"</span><span class="p">,</span>
+    <span class="s2">"Daily"</span><span class="p">,</span>
+    <span class="s2">"EveryNDays"</span><span class="p">,</span>
+    <span class="s2">"EveryNWeeks"</span><span class="p">,</span>
+    <span class="s2">"Frequency"</span><span class="p">,</span>
+    <span class="s2">"Hourly"</span><span class="p">,</span>
+    <span class="s2">"Makeup"</span><span class="p">,</span>
+    <span class="s2">"MakeupFailure"</span><span class="p">,</span>
+    <span class="s2">"MakeupStep"</span><span class="p">,</span>
+    <span class="s2">"MonthDay"</span><span class="p">,</span>
+    <span class="s2">"MonthlyByDay"</span><span class="p">,</span>
+    <span class="s2">"MonthlyByWeekday"</span><span class="p">,</span>
+    <span class="s2">"Nth"</span><span class="p">,</span>
+    <span class="s2">"NthWeekday"</span><span class="p">,</span>
+    <span class="s2">"Overlay"</span><span class="p">,</span>
+    <span class="s2">"OverlayRule"</span><span class="p">,</span>
+    <span class="s2">"Quarterly"</span><span class="p">,</span>
+    <span class="s2">"Schedule"</span><span class="p">,</span>
+    <span class="s2">"Weekday"</span><span class="p">,</span>
+    <span class="s2">"WeekdayMakeup"</span><span class="p">,</span>
+    <span class="s2">"Weekly"</span><span class="p">,</span>
+    <span class="s2">"Yearly"</span><span class="p">,</span>
 <span class="p">]</span>
 
 
 <div class="viewcode-block" id="Weekday">
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.Weekday">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Weekday</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
-    <span class="n">MON</span> <span class="o">=</span> <span class="s2">&quot;mon&quot;</span>
-    <span class="n">TUE</span> <span class="o">=</span> <span class="s2">&quot;tue&quot;</span>
-    <span class="n">WED</span> <span class="o">=</span> <span class="s2">&quot;wed&quot;</span>
-    <span class="n">THU</span> <span class="o">=</span> <span class="s2">&quot;thu&quot;</span>
-    <span class="n">FRI</span> <span class="o">=</span> <span class="s2">&quot;fri&quot;</span>
-    <span class="n">SAT</span> <span class="o">=</span> <span class="s2">&quot;sat&quot;</span>
-    <span class="n">SUN</span> <span class="o">=</span> <span class="s2">&quot;sun&quot;</span></div>
+    <span class="n">MON</span> <span class="o">=</span> <span class="s2">"mon"</span>
+    <span class="n">TUE</span> <span class="o">=</span> <span class="s2">"tue"</span>
+    <span class="n">WED</span> <span class="o">=</span> <span class="s2">"wed"</span>
+    <span class="n">THU</span> <span class="o">=</span> <span class="s2">"thu"</span>
+    <span class="n">FRI</span> <span class="o">=</span> <span class="s2">"fri"</span>
+    <span class="n">SAT</span> <span class="o">=</span> <span class="s2">"sat"</span>
+    <span class="n">SUN</span> <span class="o">=</span> <span class="s2">"sun"</span></div>
 
 
 
 <div class="viewcode-block" id="Nth">
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.Nth">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Nth</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
-    <span class="n">FIRST</span> <span class="o">=</span> <span class="s2">&quot;first&quot;</span>
-    <span class="n">SECOND</span> <span class="o">=</span> <span class="s2">&quot;second&quot;</span>
-    <span class="n">THIRD</span> <span class="o">=</span> <span class="s2">&quot;third&quot;</span>
-    <span class="n">FOURTH</span> <span class="o">=</span> <span class="s2">&quot;fourth&quot;</span>
-    <span class="n">FIFTH</span> <span class="o">=</span> <span class="s2">&quot;fifth&quot;</span>
-    <span class="n">LAST</span> <span class="o">=</span> <span class="s2">&quot;last&quot;</span></div>
+    <span class="n">FIRST</span> <span class="o">=</span> <span class="s2">"first"</span>
+    <span class="n">SECOND</span> <span class="o">=</span> <span class="s2">"second"</span>
+    <span class="n">THIRD</span> <span class="o">=</span> <span class="s2">"third"</span>
+    <span class="n">FOURTH</span> <span class="o">=</span> <span class="s2">"fourth"</span>
+    <span class="n">FIFTH</span> <span class="o">=</span> <span class="s2">"fifth"</span>
+    <span class="n">LAST</span> <span class="o">=</span> <span class="s2">"last"</span></div>
 
 
 
 <div class="viewcode-block" id="Makeup">
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.Makeup">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Makeup</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
-    <span class="n">NONE</span> <span class="o">=</span> <span class="s2">&quot;none&quot;</span>
-    <span class="n">BEFORE</span> <span class="o">=</span> <span class="s2">&quot;before&quot;</span>
-    <span class="n">AFTER</span> <span class="o">=</span> <span class="s2">&quot;after&quot;</span>
-    <span class="n">NEAREST</span> <span class="o">=</span> <span class="s2">&quot;nearest&quot;</span></div>
+    <span class="n">NONE</span> <span class="o">=</span> <span class="s2">"none"</span>
+    <span class="n">BEFORE</span> <span class="o">=</span> <span class="s2">"before"</span>
+    <span class="n">AFTER</span> <span class="o">=</span> <span class="s2">"after"</span>
+    <span class="n">NEAREST</span> <span class="o">=</span> <span class="s2">"nearest"</span></div>
 
 
 
 <div class="viewcode-block" id="MakeupFailure">
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.MakeupFailure">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MakeupFailure</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
-    <span class="n">SKIP</span> <span class="o">=</span> <span class="s2">&quot;skip&quot;</span>
-    <span class="n">KEEP_ORIGINAL</span> <span class="o">=</span> <span class="s2">&quot;keep_original&quot;</span>
-    <span class="n">ERROR</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span></div>
+    <span class="n">SKIP</span> <span class="o">=</span> <span class="s2">"skip"</span>
+    <span class="n">KEEP_ORIGINAL</span> <span class="o">=</span> <span class="s2">"keep_original"</span>
+    <span class="n">ERROR</span> <span class="o">=</span> <span class="s2">"error"</span></div>
 
 
 
@@ -330,13 +330,13 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.MakeupStep">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MakeupStep</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;One cascade makeup step.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""One cascade makeup step."""</span>
 
     <span class="n">direction</span><span class="p">:</span> <span class="n">Makeup</span>
     <span class="n">max_hops</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;direction&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;max_hops&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_hops</span><span class="p">}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"direction"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">"max_hops"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_hops</span><span class="p">}</span></div>
 
 
 
@@ -344,7 +344,7 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.WeekdayMakeup">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">WeekdayMakeup</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Makeup directions selected by the excluded date&#39;s weekday.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Makeup directions selected by the excluded date's weekday."""</span>
 
     <span class="n">mon</span><span class="p">:</span> <span class="n">Makeup</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">tue</span><span class="p">:</span> <span class="n">Makeup</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
@@ -357,7 +357,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;mon&quot;</span><span class="p">,</span> <span class="s2">&quot;tue&quot;</span><span class="p">,</span> <span class="s2">&quot;wed&quot;</span><span class="p">,</span> <span class="s2">&quot;thu&quot;</span><span class="p">,</span> <span class="s2">&quot;fri&quot;</span><span class="p">,</span> <span class="s2">&quot;sat&quot;</span><span class="p">,</span> <span class="s2">&quot;sun&quot;</span><span class="p">,</span> <span class="s2">&quot;default&quot;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"mon"</span><span class="p">,</span> <span class="s2">"tue"</span><span class="p">,</span> <span class="s2">"wed"</span><span class="p">,</span> <span class="s2">"thu"</span><span class="p">,</span> <span class="s2">"fri"</span><span class="p">,</span> <span class="s2">"sat"</span><span class="p">,</span> <span class="s2">"sun"</span><span class="p">,</span> <span class="s2">"default"</span><span class="p">):</span>
             <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">out</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span>
@@ -368,18 +368,18 @@
 <div class="viewcode-block" id="OverlayRule">
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.OverlayRule">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">OverlayRule</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
-    <span class="n">EXCLUDE</span> <span class="o">=</span> <span class="s2">&quot;exclude&quot;</span>
-    <span class="n">ONLY</span> <span class="o">=</span> <span class="s2">&quot;only&quot;</span></div>
+    <span class="n">EXCLUDE</span> <span class="o">=</span> <span class="s2">"exclude"</span>
+    <span class="n">ONLY</span> <span class="o">=</span> <span class="s2">"only"</span></div>
 
 
 
 <div class="viewcode-block" id="CalendarId">
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.CalendarId">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CalendarId</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
-    <span class="n">US_FEDERAL_HOLIDAY</span> <span class="o">=</span> <span class="s2">&quot;us_federal_holiday&quot;</span>
-    <span class="n">US_BUSINESS_DAY</span> <span class="o">=</span> <span class="s2">&quot;us_business_day&quot;</span>
-    <span class="n">NYSE_HOLIDAY</span> <span class="o">=</span> <span class="s2">&quot;nyse_holiday&quot;</span>
-    <span class="n">NYSE_TRADING_DAY</span> <span class="o">=</span> <span class="s2">&quot;nyse_trading_day&quot;</span></div>
+    <span class="n">US_FEDERAL_HOLIDAY</span> <span class="o">=</span> <span class="s2">"us_federal_holiday"</span>
+    <span class="n">US_BUSINESS_DAY</span> <span class="o">=</span> <span class="s2">"us_business_day"</span>
+    <span class="n">NYSE_HOLIDAY</span> <span class="o">=</span> <span class="s2">"nyse_holiday"</span>
+    <span class="n">NYSE_TRADING_DAY</span> <span class="o">=</span> <span class="s2">"nyse_trading_day"</span></div>
 
 
 
@@ -395,12 +395,12 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.CalendarDates">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CalendarDates</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;An inline set of local dates.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""An inline set of local dates."""</span>
 
     <span class="n">dates</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Date</span> <span class="o">|</span> <span class="n">datetime</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;dates&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">_date_str</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dates</span><span class="p">]}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"dates"</span><span class="p">:</span> <span class="p">[</span><span class="n">_date_str</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dates</span><span class="p">]}</span></div>
 
 
 
@@ -408,16 +408,16 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.CalendarUnion">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CalendarUnion</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A calendar that contains dates present in any child calendar.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""A calendar that contains dates present in any child calendar."""</span>
 
     <span class="n">union</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CalendarSpec</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">union</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;calendar union is empty&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"calendar union is empty"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;union&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">_calendar_to_json</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">union</span><span class="p">]}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"union"</span><span class="p">:</span> <span class="p">[</span><span class="n">_calendar_to_json</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">union</span><span class="p">]}</span></div>
 
 
 
@@ -425,16 +425,16 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.CalendarDiff">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CalendarDiff</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A calendar containing dates in the first child, minus following children.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""A calendar containing dates in the first child, minus following children."""</span>
 
     <span class="n">diff</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">CalendarSpec</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">diff</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;calendar diff is empty&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"calendar diff is empty"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;diff&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">_calendar_to_json</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">diff</span><span class="p">]}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"diff"</span><span class="p">:</span> <span class="p">[</span><span class="n">_calendar_to_json</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">diff</span><span class="p">]}</span></div>
 
 
 
@@ -442,16 +442,16 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.CustomCalendar">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CustomCalendar</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A named calendar resolved by a runtime provider.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""A named calendar resolved by a runtime provider."""</span>
 
     <span class="n">custom</span><span class="p">:</span> <span class="nb">str</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;custom calendar name is empty&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"custom calendar name is empty"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;custom&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom</span><span class="p">}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"custom"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom</span><span class="p">}</span></div>
 
 
 
@@ -473,14 +473,14 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_time_str</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">time</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Normalize a time-of-day to ``&quot;HH:MM&quot;``.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Normalize a time-of-day to ``"HH:MM"``."""</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">hour</span><span class="si">:</span><span class="s2">02</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">minute</span><span class="si">:</span><span class="s2">02</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">hour</span><span class="si">:</span><span class="s2">02</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">minute</span><span class="si">:</span><span class="s2">02</span><span class="si">}</span><span class="s2">"</span>
     <span class="k">return</span> <span class="n">value</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_instant_str</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Normalize a UTC instant bound to an RFC 3339 string, or ``None``.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Normalize a UTC instant bound to an RFC 3339 string, or ``None``."""</span>
     <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
@@ -492,13 +492,13 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.MonthDay">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MonthDay</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A day within a month: a fixed ``value`` (1-31), or the last day when ``None``.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""A day within a month: a fixed ``value`` (1-31), or the last day when ``None``."""</span>
 
     <span class="n">value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">31</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;month day </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2"> out of range 1..=31&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"month day </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2"> out of range 1..=31"</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">day</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MonthDay</span><span class="p">:</span>
@@ -510,8 +510,8 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;last&quot;</span><span class="p">}</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;day&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">}</span></div>
+            <span class="k">return</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"last"</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"day"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">}</span></div>
 
 
 
@@ -519,13 +519,13 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.NthWeekday">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">NthWeekday</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;An ordinal weekday within a month, e.g. the third Tuesday.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""An ordinal weekday within a month, e.g. the third Tuesday."""</span>
 
     <span class="n">nth</span><span class="p">:</span> <span class="n">Nth</span>
     <span class="n">weekday</span><span class="p">:</span> <span class="n">Weekday</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;nth&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nth</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;weekday&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">weekday</span><span class="o">.</span><span class="n">value</span><span class="p">}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"nth"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nth</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">"weekday"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">weekday</span><span class="o">.</span><span class="n">value</span><span class="p">}</span></div>
 
 
 
@@ -533,16 +533,16 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.Overlay">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Overlay</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A calendar filter applied to occurrences.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""A calendar filter applied to occurrences."""</span>
 
     <span class="n">calendar</span><span class="p">:</span> <span class="n">CalendarSpec</span>
     <span class="n">rule</span><span class="p">:</span> <span class="n">OverlayRule</span>
     <span class="n">makeup</span><span class="p">:</span> <span class="n">Makeup</span> <span class="o">|</span> <span class="n">WeekdayMakeup</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Makeup</span> <span class="o">|</span> <span class="n">MakeupStep</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;calendar&quot;</span><span class="p">:</span> <span class="n">_calendar_to_json</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calendar</span><span class="p">),</span> <span class="s2">&quot;rule&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rule</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"calendar"</span><span class="p">:</span> <span class="n">_calendar_to_json</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calendar</span><span class="p">),</span> <span class="s2">"rule"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rule</span><span class="o">.</span><span class="n">value</span><span class="p">}</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">out</span><span class="p">[</span><span class="s2">&quot;makeup&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_makeup_to_json</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">makeup</span><span class="p">)</span>
+            <span class="n">out</span><span class="p">[</span><span class="s2">"makeup"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_makeup_to_json</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">makeup</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span></div>
 
 
@@ -551,19 +551,19 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.AnyOverlay">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">AnyOverlay</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;An overlay group that passes when any child overlay passes.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""An overlay group that passes when any child overlay passes."""</span>
 
     <span class="nb">any</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Overlay</span> <span class="o">|</span> <span class="n">AnyOverlay</span><span class="p">]</span>
     <span class="n">makeup</span><span class="p">:</span> <span class="n">Makeup</span> <span class="o">|</span> <span class="n">WeekdayMakeup</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">Makeup</span> <span class="o">|</span> <span class="n">MakeupStep</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">any</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;overlay any group is empty&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"overlay any group is empty"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;any&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">o</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">any</span><span class="p">]}</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"any"</span><span class="p">:</span> <span class="p">[</span><span class="n">o</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">any</span><span class="p">]}</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">out</span><span class="p">[</span><span class="s2">&quot;makeup&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_makeup_to_json</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">makeup</span><span class="p">)</span>
+            <span class="n">out</span><span class="p">[</span><span class="s2">"makeup"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_makeup_to_json</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">makeup</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span></div>
 
 
@@ -571,7 +571,7 @@
 <div class="viewcode-block" id="Frequency">
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.Frequency">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Frequency</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for the recurrence frequencies.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Base class for the recurrence frequencies."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>  <span class="c1"># pragma: no cover - overridden</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
@@ -582,16 +582,16 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.Hourly">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Hourly</span><span class="p">(</span><span class="n">Frequency</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Every hour, at ``minute`` past the hour.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Every hour, at ``minute`` past the hour."""</span>
 
     <span class="n">minute</span><span class="p">:</span> <span class="nb">int</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minute</span> <span class="o">&lt;=</span> <span class="mi">59</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;minute </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">minute</span><span class="si">}</span><span class="s2"> out of range 0..=59&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"minute </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">minute</span><span class="si">}</span><span class="s2"> out of range 0..=59"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;hourly&quot;</span><span class="p">,</span> <span class="s2">&quot;minute&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">minute</span><span class="p">}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"hourly"</span><span class="p">,</span> <span class="s2">"minute"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">minute</span><span class="p">}</span></div>
 
 
 
@@ -599,12 +599,12 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.Daily">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Daily</span><span class="p">(</span><span class="n">Frequency</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Every day at ``time``.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Every day at ``time``."""</span>
 
     <span class="n">time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">time</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;daily&quot;</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">_time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"daily"</span><span class="p">,</span> <span class="s2">"time"</span><span class="p">:</span> <span class="n">_time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)}</span></div>
 
 
 
@@ -612,17 +612,17 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.Weekly">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Weekly</span><span class="p">(</span><span class="n">Frequency</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Every selected weekday at ``time``.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Every selected weekday at ``time``."""</span>
 
     <span class="n">days</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Weekday</span><span class="p">]</span>
     <span class="n">time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">time</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">days</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;weekly days selection is empty&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"weekly days selection is empty"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;weekly&quot;</span><span class="p">,</span> <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">days</span><span class="p">],</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">_time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"weekly"</span><span class="p">,</span> <span class="s2">"days"</span><span class="p">:</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">days</span><span class="p">],</span> <span class="s2">"time"</span><span class="p">:</span> <span class="n">_time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)}</span></div>
 
 
 
@@ -630,7 +630,7 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.EveryNDays">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">EveryNDays</span><span class="p">(</span><span class="n">Frequency</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Every ``interval`` days from ``start_date`` at ``time``.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Every ``interval`` days from ``start_date`` at ``time``."""</span>
 
     <span class="n">interval</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Date</span> <span class="o">|</span> <span class="n">datetime</span>
@@ -638,14 +638,14 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;every_n_days interval must be at least 1&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"every_n_days interval must be at least 1"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;every_n_days&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;interval&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">,</span>
-            <span class="s2">&quot;start_date&quot;</span><span class="p">:</span> <span class="n">_date_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="p">),</span>
-            <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">_time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">),</span>
+            <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"every_n_days"</span><span class="p">,</span>
+            <span class="s2">"interval"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">,</span>
+            <span class="s2">"start_date"</span><span class="p">:</span> <span class="n">_date_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="p">),</span>
+            <span class="s2">"time"</span><span class="p">:</span> <span class="n">_time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">),</span>
         <span class="p">}</span></div>
 
 
@@ -654,7 +654,7 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.EveryNWeeks">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">EveryNWeeks</span><span class="p">(</span><span class="n">Frequency</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Every ``interval`` weeks from ``start_date`` on selected weekdays.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Every ``interval`` weeks from ``start_date`` on selected weekdays."""</span>
 
     <span class="n">interval</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">start_date</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Date</span> <span class="o">|</span> <span class="n">datetime</span>
@@ -663,17 +663,17 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;every_n_weeks interval must be at least 1&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"every_n_weeks interval must be at least 1"</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">days</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;every_n_weeks days selection is empty&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"every_n_weeks days selection is empty"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;every_n_weeks&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;interval&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">,</span>
-            <span class="s2">&quot;start_date&quot;</span><span class="p">:</span> <span class="n">_date_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="p">),</span>
-            <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">days</span><span class="p">],</span>
-            <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">_time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">),</span>
+            <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"every_n_weeks"</span><span class="p">,</span>
+            <span class="s2">"interval"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">,</span>
+            <span class="s2">"start_date"</span><span class="p">:</span> <span class="n">_date_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="p">),</span>
+            <span class="s2">"days"</span><span class="p">:</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">days</span><span class="p">],</span>
+            <span class="s2">"time"</span><span class="p">:</span> <span class="n">_time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">),</span>
         <span class="p">}</span></div>
 
 
@@ -682,17 +682,17 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.MonthlyByDay">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MonthlyByDay</span><span class="p">(</span><span class="n">Frequency</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Selected days-of-month at ``time``.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Selected days-of-month at ``time``."""</span>
 
     <span class="n">days</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">MonthDay</span><span class="p">]</span>
     <span class="n">time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">time</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">days</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;monthly days selection is empty&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"monthly days selection is empty"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;monthly_by_day&quot;</span><span class="p">,</span> <span class="s2">&quot;days&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">days</span><span class="p">],</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">_time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"monthly_by_day"</span><span class="p">,</span> <span class="s2">"days"</span><span class="p">:</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">days</span><span class="p">],</span> <span class="s2">"time"</span><span class="p">:</span> <span class="n">_time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)}</span></div>
 
 
 
@@ -700,17 +700,17 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.MonthlyByWeekday">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MonthlyByWeekday</span><span class="p">(</span><span class="n">Frequency</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Selected nth-weekdays at ``time``.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Selected nth-weekdays at ``time``."""</span>
 
     <span class="n">weekdays</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">NthWeekday</span><span class="p">]</span>
     <span class="n">time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">time</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">weekdays</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;monthly weekdays selection is empty&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"monthly weekdays selection is empty"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;monthly_by_weekday&quot;</span><span class="p">,</span> <span class="s2">&quot;weekdays&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">w</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">weekdays</span><span class="p">],</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">_time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"monthly_by_weekday"</span><span class="p">,</span> <span class="s2">"weekdays"</span><span class="p">:</span> <span class="p">[</span><span class="n">w</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">weekdays</span><span class="p">],</span> <span class="s2">"time"</span><span class="p">:</span> <span class="n">_time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)}</span></div>
 
 
 
@@ -718,7 +718,7 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.Yearly">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Yearly</span><span class="p">(</span><span class="n">Frequency</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Once a year in ``month`` on ``day`` at ``time``.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Once a year in ``month`` on ``day`` at ``time``."""</span>
 
     <span class="n">month</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">day</span><span class="p">:</span> <span class="n">MonthDay</span>
@@ -726,10 +726,10 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">month</span> <span class="o">&lt;=</span> <span class="mi">12</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;month </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">month</span><span class="si">}</span><span class="s2"> out of range 1..=12&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"month </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">month</span><span class="si">}</span><span class="s2"> out of range 1..=12"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;yearly&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="s2">&quot;day&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">day</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">_time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"yearly"</span><span class="p">,</span> <span class="s2">"month"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="s2">"day"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">day</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="s2">"time"</span><span class="p">:</span> <span class="n">_time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)}</span></div>
 
 
 
@@ -737,7 +737,7 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.Quarterly">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Quarterly</span><span class="p">(</span><span class="n">Frequency</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Every quarter on ``month`` within quarter (1-3), on ``day`` at ``time``.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Every quarter on ``month`` within quarter (1-3), on ``day`` at ``time``."""</span>
 
     <span class="n">month</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">day</span><span class="p">:</span> <span class="n">MonthDay</span>
@@ -745,10 +745,10 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">month</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;quarter month </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">month</span><span class="si">}</span><span class="s2"> out of range 1..=3&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"quarter month </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">month</span><span class="si">}</span><span class="s2"> out of range 1..=3"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;quarterly&quot;</span><span class="p">,</span> <span class="s2">&quot;month&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="s2">&quot;day&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">day</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">_time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"quarterly"</span><span class="p">,</span> <span class="s2">"month"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="s2">"day"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">day</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="s2">"time"</span><span class="p">:</span> <span class="n">_time_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)}</span></div>
 
 
 
@@ -756,12 +756,12 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.CustomCron">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">CustomCron</span><span class="p">(</span><span class="n">Frequency</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Five-field cron expression in schedule-local time.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Five-field cron expression in schedule-local time."""</span>
 
     <span class="n">expr</span><span class="p">:</span> <span class="nb">str</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;custom_cron&quot;</span><span class="p">,</span> <span class="s2">&quot;expr&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">}</span></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"custom_cron"</span><span class="p">,</span> <span class="s2">"expr"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">expr</span><span class="p">}</span></div>
 
 
 
@@ -769,11 +769,11 @@
 <a class="viewcode-back" href="../../docs/src/api-python.html#dateme.model.Schedule">[docs]</a>
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Schedule</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A complete schedule spec.</span>
+<span class="w">    </span><span class="sd">"""A complete schedule spec.</span>
 
 <span class="sd">    Pass an instance to :class:`dateme.Schedule` to compute occurrences, or call</span>
 <span class="sd">    :meth:`to_dict` / :meth:`to_json` for the storable form.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="n">freq</span><span class="p">:</span> <span class="n">Frequency</span>
     <span class="n">timezone</span><span class="p">:</span> <span class="nb">str</span>
@@ -792,26 +792,26 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_if_consecutive_excluded</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_if_consecutive_excluded</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;skip_if_consecutive_excluded must be at least 1&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"skip_if_consecutive_excluded must be at least 1"</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_skip_gap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_skip_gap</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;max_skip_gap must be at least 1&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"max_skip_gap must be at least 1"</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;freq&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
-            <span class="s2">&quot;timezone&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">timezone</span><span class="p">,</span>
-            <span class="s2">&quot;overlays&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">o</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">overlays</span><span class="p">],</span>
-            <span class="s2">&quot;makeup&quot;</span><span class="p">:</span> <span class="n">_makeup_to_json</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">makeup</span><span class="p">),</span>
-            <span class="s2">&quot;max_makeup_hops&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_makeup_hops</span><span class="p">,</span>
-            <span class="s2">&quot;makeup_failure&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup_failure</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-            <span class="s2">&quot;makeup_only_on&quot;</span><span class="p">:</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup_only_on</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup_only_on</span><span class="p">],</span>
-            <span class="s2">&quot;makeup_within_week&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup_within_week</span><span class="p">,</span>
-            <span class="s2">&quot;makeup_exclude_weekends&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup_exclude_weekends</span><span class="p">,</span>
-            <span class="s2">&quot;makeup_before_next&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup_before_next</span><span class="p">,</span>
-            <span class="s2">&quot;skip_if_consecutive_excluded&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_if_consecutive_excluded</span><span class="p">,</span>
-            <span class="s2">&quot;max_skip_gap&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_skip_gap</span><span class="p">,</span>
-            <span class="s2">&quot;start&quot;</span><span class="p">:</span> <span class="n">_instant_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">),</span>
-            <span class="s2">&quot;end&quot;</span><span class="p">:</span> <span class="n">_instant_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">),</span>
+            <span class="s2">"freq"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
+            <span class="s2">"timezone"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">timezone</span><span class="p">,</span>
+            <span class="s2">"overlays"</span><span class="p">:</span> <span class="p">[</span><span class="n">o</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">overlays</span><span class="p">],</span>
+            <span class="s2">"makeup"</span><span class="p">:</span> <span class="n">_makeup_to_json</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">makeup</span><span class="p">),</span>
+            <span class="s2">"max_makeup_hops"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_makeup_hops</span><span class="p">,</span>
+            <span class="s2">"makeup_failure"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup_failure</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="s2">"makeup_only_on"</span><span class="p">:</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup_only_on</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup_only_on</span><span class="p">],</span>
+            <span class="s2">"makeup_within_week"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup_within_week</span><span class="p">,</span>
+            <span class="s2">"makeup_exclude_weekends"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup_exclude_weekends</span><span class="p">,</span>
+            <span class="s2">"makeup_before_next"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeup_before_next</span><span class="p">,</span>
+            <span class="s2">"skip_if_consecutive_excluded"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_if_consecutive_excluded</span><span class="p">,</span>
+            <span class="s2">"max_skip_gap"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_skip_gap</span><span class="p">,</span>
+            <span class="s2">"start"</span><span class="p">:</span> <span class="n">_instant_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">),</span>
+            <span class="s2">"end"</span><span class="p">:</span> <span class="n">_instant_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">),</span>
         <span class="p">}</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>

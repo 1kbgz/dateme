@@ -305,7 +305,7 @@ as every other binding.</p>
 </section>
 <section id="initialization">
 <h2>Initialization<a class="headerlink" href="#initialization" title="Link to this heading">¶</a></h2>
-<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="nx">init</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Schedule</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;dateme&quot;</span><span class="p">;</span>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="nx">init</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Schedule</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"dateme"</span><span class="p">;</span>
 
 <span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">();</span>
 </pre></div>
@@ -343,8 +343,8 @@ as every other binding.</p>
 <p>The constructor validates the schedule. Malformed JSON, invalid enum values,
 invalid timezone names, and structural validation failures throw.</p>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">schedule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">({</span>
-<span class="w">  </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;daily&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;09:00&quot;</span><span class="w"> </span><span class="p">},</span>
-<span class="w">  </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"daily"</span><span class="p">,</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">"09:00"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">"UTC"</span><span class="p">,</span>
 <span class="p">});</span>
 </pre></div>
 </div>
@@ -356,18 +356,18 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 <p>A function provider:</p>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">schedule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">(</span>
 <span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;daily&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;09:00&quot;</span><span class="w"> </span><span class="p">},</span>
-<span class="w">    </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;UTC&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">overlays</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">calendar</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">custom</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;shutdown&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nx">rule</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;exclude&quot;</span><span class="w"> </span><span class="p">}],</span>
+<span class="w">    </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"daily"</span><span class="p">,</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">"09:00"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">"UTC"</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">overlays</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">calendar</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">custom</span><span class="o">:</span><span class="w"> </span><span class="s2">"shutdown"</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nx">rule</span><span class="o">:</span><span class="w"> </span><span class="s2">"exclude"</span><span class="w"> </span><span class="p">}],</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="p">(</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">date</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;shutdown&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">date</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;2026-08-14&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="p">(</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">date</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"shutdown"</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">date</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"2026-08-14"</span><span class="p">,</span>
 <span class="p">);</span>
 </pre></div>
 </div>
 <p>An object provider:</p>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="nx">contains</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">date</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;shutdown&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">date</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">&quot;2026-08-14&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"shutdown"</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">date</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s2">"2026-08-14"</span><span class="p">;</span>
 <span class="w">  </span><span class="p">},</span>
 <span class="p">};</span>
 
@@ -444,7 +444,7 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 </pre></div>
 </div>
 <p>Returns the first occurrence strictly after <code class="docutils literal notranslate"><span class="pre">after</span></code>.</p>
-<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">after</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">&quot;2026-01-13T00:00:00Z&quot;</span><span class="p">);</span>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">after</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">"2026-01-13T00:00:00Z"</span><span class="p">);</span>
 <span class="nx">schedule</span><span class="p">.</span><span class="nx">next</span><span class="p">(</span><span class="nx">after</span><span class="p">);</span>
 </pre></div>
 </div>
@@ -455,7 +455,7 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 </pre></div>
 </div>
 <p>Returns the last occurrence strictly before <code class="docutils literal notranslate"><span class="pre">before</span></code>.</p>
-<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">previous</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">&quot;2026-01-13T00:00:00Z&quot;</span><span class="p">));</span>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">previous</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">"2026-01-13T00:00:00Z"</span><span class="p">));</span>
 </pre></div>
 </div>
 </section>
@@ -465,7 +465,7 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 </pre></div>
 </div>
 <p>Returns occurrences in <code class="docutils literal notranslate"><span class="pre">(after,</span> <span class="pre">before)</span></code>, ascending.</p>
-<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">until</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">&quot;2026-02-01T00:00:00Z&quot;</span><span class="p">),</span><span class="w"> </span><span class="nx">after</span><span class="p">);</span>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">until</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">"2026-02-01T00:00:00Z"</span><span class="p">),</span><span class="w"> </span><span class="nx">after</span><span class="p">);</span>
 </pre></div>
 </div>
 </section>
@@ -475,7 +475,7 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 </pre></div>
 </div>
 <p>Returns occurrences in <code class="docutils literal notranslate"><span class="pre">(after,</span> <span class="pre">before)</span></code>, descending.</p>
-<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">since</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">&quot;2026-01-01T00:00:00Z&quot;</span><span class="p">));</span>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">since</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">"2026-01-01T00:00:00Z"</span><span class="p">));</span>
 </pre></div>
 </div>
 </section>
@@ -549,7 +549,7 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 </table>
 </div>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">trace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">schedule</span><span class="p">.</span><span class="nx">nextTrace</span><span class="p">(</span><span class="nx">after</span><span class="p">);</span>
-<span class="c1">// { instant: Date, reason: &quot;base&quot; }</span>
+<span class="c1">// { instant: Date, reason: "base" }</span>
 </pre></div>
 </div>
 </section>
@@ -559,7 +559,7 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 </pre></div>
 </div>
 <p>Returns whether <code class="docutils literal notranslate"><span class="pre">instant</span></code> is an occurrence of the schedule.</p>
-<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">isOccurrence</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">&quot;2026-01-20T22:30:00Z&quot;</span><span class="p">));</span>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">isOccurrence</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">"2026-01-20T22:30:00Z"</span><span class="p">));</span>
 </pre></div>
 </div>
 </section>
@@ -569,7 +569,7 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 </pre></div>
 </div>
 <p>Returns the number of occurrences strictly in <code class="docutils literal notranslate"><span class="pre">(after,</span> <span class="pre">before)</span></code>.</p>
-<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">countBetween</span><span class="p">(</span><span class="nx">after</span><span class="p">,</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">&quot;2026-02-01T00:00:00Z&quot;</span><span class="p">));</span>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">countBetween</span><span class="p">(</span><span class="nx">after</span><span class="p">,</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">"2026-02-01T00:00:00Z"</span><span class="p">));</span>
 </pre></div>
 </div>
 </section>
@@ -581,7 +581,7 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 <p>Returns a human-readable summary of the base recurrence, timezone, overlay
 count, and makeup presence.</p>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">describe</span><span class="p">();</span>
-<span class="c1">// &quot;Every Monday at 17:30 America/New_York, with 1 overlay(s), with makeup&quot;</span>
+<span class="c1">// "Every Monday at 17:30 America/New_York, with 1 overlay(s), with makeup"</span>
 </pre></div>
 </div>
 </section>
@@ -598,7 +598,7 @@ or from the current time when <code class="docutils literal notranslate"><span c
 <span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">instant</span><span class="p">.</span><span class="nx">toISOString</span><span class="p">());</span>
 <span class="p">}</span>
 
-<span class="nb">Array</span><span class="p">.</span><span class="kr">from</span><span class="p">(</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">iterBetween</span><span class="p">(</span><span class="nx">after</span><span class="p">,</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">&quot;2026-02-01T00:00:00Z&quot;</span><span class="p">)));</span>
+<span class="nb">Array</span><span class="p">.</span><span class="kr">from</span><span class="p">(</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">iterBetween</span><span class="p">(</span><span class="nx">after</span><span class="p">,</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">"2026-02-01T00:00:00Z"</span><span class="p">)));</span>
 <span class="nb">Array</span><span class="p">.</span><span class="kr">from</span><span class="p">(</span><span class="nx">schedule</span><span class="p">.</span><span class="nx">iterUpcoming</span><span class="p">(</span><span class="mf">3</span><span class="p">,</span><span class="w"> </span><span class="nx">after</span><span class="p">));</span>
 </pre></div>
 </div>
@@ -614,12 +614,12 @@ or from the current time when <code class="docutils literal notranslate"><span c
 <span class="w">  </span><span class="nx">CalendarId</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">OverlayRule</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">Makeup</span><span class="p">,</span>
-<span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;dateme&quot;</span><span class="p">;</span>
-<span class="k">import</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ScheduleSpec</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;dateme&quot;</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"dateme"</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ScheduleSpec</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"dateme"</span><span class="p">;</span>
 
 <span class="kd">const</span><span class="w"> </span><span class="nx">spec</span><span class="o">:</span><span class="w"> </span><span class="kt">ScheduleSpec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;weekly&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">days</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">Weekday</span><span class="p">.</span><span class="nx">Mon</span><span class="p">],</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;17:30&quot;</span><span class="w"> </span><span class="p">},</span>
-<span class="w">  </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;America/New_York&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"weekly"</span><span class="p">,</span><span class="w"> </span><span class="nx">days</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">Weekday</span><span class="p">.</span><span class="nx">Mon</span><span class="p">],</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">"17:30"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">"America/New_York"</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">overlays</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">calendar</span><span class="o">:</span><span class="w"> </span><span class="kt">CalendarId.NyseHoliday</span><span class="p">,</span><span class="w"> </span><span class="nx">rule</span><span class="o">:</span><span class="w"> </span><span class="kt">OverlayRule.Exclude</span><span class="w"> </span><span class="p">}],</span>
 <span class="w">  </span><span class="nx">makeup</span><span class="o">:</span><span class="w"> </span><span class="kt">Makeup.After</span><span class="p">,</span>
 <span class="p">};</span>
