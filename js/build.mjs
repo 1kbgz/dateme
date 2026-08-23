@@ -18,6 +18,18 @@ const BUNDLES = [
 ];
 
 async function build() {
+  if (fs.existsSync("dist")) {
+    for (const entry of fs.readdirSync("dist")) {
+      if (entry !== "pkg") {
+        fs.rmSync(`dist/${entry}`, { recursive: true, force: true });
+      }
+    }
+  }
+  fs.rmSync("../dateme/extension", {
+    recursive: true,
+    force: true,
+  });
+
   // Bundle css
   await bundle_css();
 
@@ -41,10 +53,6 @@ async function build() {
   }
 
   // Copy servable assets to python extension (exclude esm/)
-  fs.rmSync("../dateme/extension", {
-    recursive: true,
-    force: true,
-  });
   fs.mkdirSync("../dateme/extension", { recursive: true });
   await cpy("dist/**/*", "../dateme/extension", {
     filter: (file) =>
@@ -53,4 +61,4 @@ async function build() {
   });
 }
 
-build();
+await build();
