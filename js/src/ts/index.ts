@@ -1,4 +1,4 @@
-import init, { Schedule as WasmSchedule } from "../../dist/pkg/dateme";
+import { Schedule as WasmSchedule } from "../../dist/pkg/dateme";
 import type { ScheduleSpec } from "./model";
 
 export { default as init } from "../../dist/pkg/dateme";
