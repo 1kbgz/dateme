@@ -96,6 +96,7 @@ mod finance {
             day,
             roll: WeekendRoll::NearestWeekday,
             since_year: since,
+            until_year: None,
         }
     }
 
@@ -105,6 +106,7 @@ mod finance {
             weekday,
             n,
             since_year: None,
+            until_year: None,
         }
     }
 
