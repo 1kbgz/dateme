@@ -44,6 +44,7 @@ develop = [
     "hatch-rs",
     "hatchling",
     "mdformat",
+    "mdformat-frontmatter",
     "mdformat-tables>=1",
     "pytest",
     "pytest-cov",
@@ -128,7 +129,7 @@ skip = "*win32 *arm64"
 [tool.coverage.run]
 branch = true
 omit = [
-    "dateme/tests/integration/",
+    "dateme/tests/integration/*",
 ]
 
 [tool.coverage.report]
@@ -142,9 +143,6 @@ fail_under = 50
 
 [tool.hatch.build]
 artifacts = [
-    "dateme/*.dll",
-    "dateme/*.dylib",
-    "dateme/*.so",
     "dateme/extension",
 ]
 
@@ -174,9 +172,10 @@ packages = [
     "Cargo.lock",
 ]
 exclude = [
-    "dateme/*.dll",
-    "dateme/*.dylib",
-    "dateme/*.so",
+    "*.dll",
+    "*.dylib",
+    "*.so",
+    "*.pyd",
     "dateme/extension",
     "js/dist",
     "js/node_modules",
@@ -185,6 +184,12 @@ exclude = [
 ]
 
 [tool.hatch.build.targets.wheel]
+artifacts = [
+    "dateme/*.dll",
+    "dateme/*.dylib",
+    "dateme/*.so",
+    "dateme/extension",
+]
 packages = [
     "dateme",
 ]
