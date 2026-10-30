@@ -110,8 +110,10 @@ export type Frequency =
   | { type: "quarterly"; month: number; day: MonthDay; time: string }
   | { type: "custom_cron"; expr: string };
 
-export interface ScheduleSpec {
-  freq: Frequency;
+export type ScheduleSpec = (
+  | { frequency: Frequency; freq?: never }
+  | { frequency?: never; freq: Frequency }
+) & {
   timezone: string;
   overlays?: Array<Overlay | AnyOverlay>;
   makeup?: Makeup | WeekdayMakeup | Array<Makeup | MakeupStep>;
@@ -125,4 +127,9 @@ export interface ScheduleSpec {
   max_skip_gap?: number | null;
   start?: string | null;
   end?: string | null;
-}
+};
+
+export type CanonicalScheduleSpec = Extract<
+  ScheduleSpec,
+  { frequency: Frequency }
+>;

@@ -1,3 +1,5 @@
+import json
+from dataclasses import replace
 from datetime import UTC, datetime, time
 
 import pytest
@@ -47,6 +49,67 @@ def test_construct_from_typed_model():
     s = Schedule(nyse_monday_spec())
     s.validate()
     assert s.next(utc(2026, 1, 13)) == utc(2026, 1, 20, 22, 30)
+
+
+@pytest.mark.parametrize("name", ["frequency", "freq"])
+def test_frequency_keywords_and_attributes(name):
+    frequency = model.Daily("12:00")
+    if name == "frequency":
+        spec = model.Schedule(frequency=frequency, timezone="UTC")
+    else:
+        spec = model.Schedule(freq=frequency, timezone="UTC")
+    assert spec.frequency is frequency
+    assert spec.freq is frequency
+    assert spec.to_dict()["frequency"] == {"type": "daily", "time": "12:00"}
+    assert "freq" not in spec.to_dict()
+    assert Schedule(spec).next(utc(2026, 1, 1)) == utc(2026, 1, 1, 12)
+
+
+@pytest.mark.parametrize("name", ["frequency", "freq"])
+@pytest.mark.parametrize("as_json", [False, True])
+def test_frequency_native_input_and_roundtrip(name, as_json):
+    spec = {name: {"type": "daily", "time": "12:00"}, "timezone": "UTC"}
+    schedule = Schedule(json.dumps(spec) if as_json else spec)
+    assert schedule.next(utc(2026, 1, 1)) == utc(2026, 1, 1, 12)
+    assert schedule.to_dict()["frequency"] == {"type": "daily", "time": "12:00"}
+    assert "freq" not in schedule.to_dict()
+    assert Schedule(schedule.to_json()).next(utc(2026, 1, 1)) == utc(2026, 1, 1, 12)
+
+
+def test_frequency_positional_constructor():
+    spec = model.Schedule(model.Daily("12:00"), "UTC", [], Makeup.NONE)
+    assert spec.to_dict()["frequency"] == {"type": "daily", "time": "12:00"}
+    assert Schedule(spec).next(utc(2026, 1, 1)) == utc(2026, 1, 1, 12)
+
+
+def test_frequency_legacy_dataclass_replace():
+    spec = model.Schedule(freq=model.Daily("12:00"), timezone="UTC")
+    updated = replace(spec, freq=model.Daily("09:00"))
+    assert Schedule(updated).next(utc(2026, 1, 1)) == utc(2026, 1, 1, 9)
+    assert Schedule(spec).next(utc(2026, 1, 1)) == utc(2026, 1, 1, 12)
+
+
+def test_frequency_rejects_both_keywords():
+    with pytest.raises(TypeError, match="frequency.*freq"):
+        model.Schedule(frequency=model.Daily("12:00"), freq=model.Daily("09:00"), timezone="UTC")
+
+
+def test_frequency_native_rejects_both_names():
+    with pytest.raises(ValueError, match="duplicate field"):
+        Schedule(
+            {
+                "frequency": {"type": "daily", "time": "12:00"},
+                "freq": {"type": "daily", "time": "09:00"},
+                "timezone": "UTC",
+            }
+        )
+
+
+def test_frequency_and_timezone_are_required():
+    with pytest.raises(TypeError, match="frequency"):
+        model.Schedule(timezone="UTC")
+    with pytest.raises(TypeError, match="timezone"):
+        model.Schedule(frequency=model.Daily("12:00"))
 
 
 def test_typed_dict_json_agree():
@@ -312,7 +375,7 @@ def test_to_dict_roundtrip():
     spec = nyse_monday_spec()
     s = Schedule(spec)
     d = s.to_dict()
-    assert d["freq"] == {"type": "weekly", "days": ["mon"], "time": "17:30"}
+    assert d["frequency"] == {"type": "weekly", "days": ["mon"], "time": "17:30"}
     # rebuilding from the dict yields an identical schedule
     assert Schedule(d).to_json() == s.to_json()
 
@@ -368,7 +431,7 @@ def test_introspection_and_trace_methods():
 
 def test_time_accepts_datetime_time():
     spec = model.Schedule(freq=model.Daily(time(9, 30)), timezone="UTC")
-    assert spec.to_dict()["freq"]["time"] == "09:30"
+    assert spec.to_dict()["frequency"]["time"] == "09:30"
 
 
 def test_bounds_accept_datetime():

@@ -47,7 +47,8 @@
     "start:tests": "http-server -p 3000 ",
     "test:js": "playwright test",
     "test:rust": "cargo test -- --show-output",
-    "test": "npm-run-all test:rust test:js",
+    "test:types": "tsc --ignoreConfig --noEmit --strict --skipLibCheck --target ES2020 --module ESNext --moduleResolution Bundler tests/model.types.ts",
+    "test": "npm-run-all test:rust test:types test:js",
     "watch": "nodemon --watch src -e ts,css,html --exec \"pnpm build:debug\""
   },
   "dependencies": {},

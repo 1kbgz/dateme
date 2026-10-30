@@ -15,6 +15,7 @@ use std::fmt;
 /// A recurrence rule. Serialize to JSON for storage.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Schedule {
+    #[serde(rename = "frequency", alias = "freq")]
     pub freq: Frequency,
     #[serde(with = "tz_serde")]
     pub timezone: Tz,
