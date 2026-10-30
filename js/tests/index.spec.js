@@ -22,6 +22,51 @@ const NYSE_MONDAY = JSON.stringify({
 });
 
 test.describe("Schedule", () => {
+  for (const name of ["frequency", "freq"]) {
+    for (const asJSON of [false, true]) {
+      test(`accepts ${name} in ${asJSON ? "JSON" : "objects"} and serializes frequency`, async ({
+        page,
+      }) => {
+        const res = await run(
+          page,
+          `const spec = {
+             ${name}: { type: "daily", time: "12:00" }, timezone: "UTC",
+           };
+           const s = new mod.Schedule(${asJSON ? "JSON.stringify(spec)" : "spec"});
+           const output = s.toObject();
+           const roundtrip = new mod.Schedule(JSON.stringify(s));
+           return {
+             next: s.next(new Date("2026-01-01T00:00:00Z")).toISOString(),
+             frequency: output.frequency,
+             hasAlias: Object.hasOwn(output, "freq"),
+             roundtrip: roundtrip.next(new Date("2026-01-01T00:00:00Z")).toISOString(),
+           };`,
+        );
+        expect(res).toEqual({
+          next: "2026-01-01T12:00:00.000Z",
+          frequency: { type: "daily", time: "12:00" },
+          hasAlias: false,
+          roundtrip: "2026-01-01T12:00:00.000Z",
+        });
+      });
+    }
+  }
+
+  test("rejects frequency and freq together", async ({ page }) => {
+    const message = await run(
+      page,
+      `try {
+         new mod.Schedule({
+           frequency: { type: "daily", time: "12:00" },
+           freq: { type: "daily", time: "09:00" },
+           timezone: "UTC",
+         });
+         return "";
+       } catch (e) { return e.message; }`,
+    );
+    expect(message).toContain("duplicate field");
+  });
+
   test("next makes up after an NYSE holiday", async ({ page }) => {
     const iso = await run(
       page,
@@ -108,7 +153,7 @@ test.describe("Schedule", () => {
        s.validate();
        return {
          next: s.next(new Date(Date.UTC(2026, 0, 13))).toISOString(),
-         roundtrip: s.toObject().freq.type,
+         roundtrip: s.toObject().frequency.type,
        };`,
     );
     expect(res.next).toBe("2026-01-20T22:30:00.000Z");

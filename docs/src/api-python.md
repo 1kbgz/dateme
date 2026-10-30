@@ -1,6 +1,7 @@
 # Python API
 
-Reference for the `dateme` Python package.
+Constructors, queries, serialization, and typed builders in the `dateme` Python
+package.
 
 ## Exports
 
@@ -30,13 +31,17 @@ Schedule(spec, calendar_provider=None)
 
 Parameters:
 
-| Parameter           | Type                                      | Description                                    |
-| ------------------- | ----------------------------------------- | ---------------------------------------------- |
-| `spec`              | JSON `str`, `dict`, or object `to_dict()` | Schedule model.                                |
-| `calendar_provider` | callable or object, optional              | Provider for `{ "custom": "name" }` calendars. |
+| Parameter           | Type                                           | Description                                    |
+| ------------------- | ---------------------------------------------- | ---------------------------------------------- |
+| `spec`              | JSON `str`, `dict`, or object with `to_dict()` | Schedule model.                                |
+| `calendar_provider` | callable or object, optional                   | Provider for `{ "custom": "name" }` calendars. |
 
 The constructor validates the schedule. Invalid JSON, invalid enum values,
 invalid timezone names, and structural validation failures raise `ValueError`.
+
+JSON and dictionary specs accept `frequency` (preferred) or the legacy `freq`
+key. Supplying both is an error, even if their values match. Serialization uses
+only `frequency`.
 
 Examples:
 
@@ -44,7 +49,7 @@ Examples:
 from dateme import Schedule
 
 schedule = Schedule({
-    "freq": {"type": "daily", "time": "09:00"},
+    "frequency": {"type": "daily", "time": "09:00"},
     "timezone": "UTC",
 })
 ```
@@ -54,7 +59,7 @@ from dateme import Schedule, Weekly, Weekday, Overlay, CalendarId, OverlayRule, 
 from dateme import model as m
 
 spec = m.Schedule(
-    freq=Weekly([Weekday.MON], "17:30"),
+    frequency=Weekly([Weekday.MON], "17:30"),
     timezone="America/New_York",
     overlays=[Overlay(CalendarId.NYSE_HOLIDAY, OverlayRule.EXCLUDE)],
     makeup=Makeup.AFTER,
@@ -64,15 +69,15 @@ schedule = Schedule(spec)
 
 ### Custom Calendar Providers
 
-Custom calendars are referenced in a schedule with `{ "custom": "name" }`.
-Providers receive `(name, date)` where `date` is a `YYYY-MM-DD` string.
+Schedules reference custom calendars with `{ "custom": "name" }`. Providers
+receive `(name, date)`, where `date` is a `YYYY-MM-DD` string, and return a bool.
 
 A callable provider:
 
 ```python
 schedule = Schedule(
     {
-        "freq": {"type": "daily", "time": "09:00"},
+        "frequency": {"type": "daily", "time": "09:00"},
         "timezone": "UTC",
         "overlays": [{"calendar": {"custom": "shutdown"}, "rule": "exclude"}],
     },
@@ -91,14 +96,15 @@ class Calendars:
 schedule = Schedule(spec, Calendars())
 ```
 
-Missing custom calendar values are treated as absent from the set.
+Without a custom provider, custom calendar dates are treated as absent from the
+set.
 
 ## Datetime Handling
 
 | Rule             | Behavior                                                         |
 | ---------------- | ---------------------------------------------------------------- |
-| Input datetimes  | Timezone-aware `datetime` values are expected.                   |
-| Naive inputs     | Interpreted as UTC by PyO3 datetime conversion.                  |
+| Input datetimes  | Timezone-aware `datetime` values are required.                   |
+| Naive inputs     | Rejected with `TypeError` by PyO3 datetime conversion.           |
 | Returned values  | Timezone-aware UTC `datetime` values.                            |
 | Optional anchors | Default to the current UTC time.                                 |
 | Query bounds     | Strict: occurrences exactly at `after` or `before` are excluded. |
@@ -114,7 +120,7 @@ Schedule.from_json(json, calendar_provider=None) -> Schedule
 Builds a schedule from a JSON string.
 
 ```python
-schedule = Schedule.from_json('{"freq":{"type":"daily","time":"09:00"},"timezone":"UTC"}')
+schedule = Schedule.from_json('{"frequency":{"type":"daily","time":"09:00"},"timezone":"UTC"}')
 ```
 
 ### `Schedule.from_dict`
@@ -126,7 +132,7 @@ Schedule.from_dict(spec, calendar_provider=None) -> Schedule
 Builds a schedule from a `dict` or typed builder object.
 
 ```python
-schedule = Schedule.from_dict({"freq": {"type": "daily", "time": "09:00"}, "timezone": "UTC"})
+schedule = Schedule.from_dict({"frequency": {"type": "daily", "time": "09:00"}, "timezone": "UTC"})
 ```
 
 ### `to_json`
@@ -135,7 +141,7 @@ schedule = Schedule.from_dict({"freq": {"type": "daily", "time": "09:00"}, "time
 schedule.to_json() -> str
 ```
 
-Returns the JSON representation.
+Returns a JSON string with the canonical `frequency` key, never `freq`.
 
 ```python
 blob = schedule.to_json()
@@ -148,7 +154,7 @@ again = Schedule.from_json(blob)
 schedule.to_dict() -> dict
 ```
 
-Returns the schedule model as a Python dictionary.
+Returns a dictionary with the canonical `frequency` key, never `freq`.
 
 ```python
 spec = schedule.to_dict()
@@ -160,7 +166,7 @@ spec = schedule.to_dict()
 schedule.validate() -> None
 ```
 
-Re-runs structural validation. Raises `ValueError` on failure.
+Checks the schedule's structure again. Raises `ValueError` on failure.
 
 ```python
 schedule.validate()
@@ -172,7 +178,8 @@ schedule.validate()
 schedule.next(after=None) -> datetime | None
 ```
 
-Returns the first occurrence strictly after `after`.
+Returns the first occurrence strictly after `after`, or `None` if none is found
+within the schedule bounds and search horizon.
 
 ```python
 from datetime import datetime, timezone
@@ -187,7 +194,8 @@ schedule.next(after)
 schedule.previous(before=None) -> datetime | None
 ```
 
-Returns the last occurrence strictly before `before`.
+Returns the last occurrence strictly before `before`, or `None` if none is found
+within the schedule bounds and search horizon.
 
 ```python
 before = datetime(2026, 1, 13, tzinfo=timezone.utc)
@@ -226,7 +234,8 @@ schedule.since(start)
 schedule.upcoming(n, after=None) -> list[datetime]
 ```
 
-Returns the next `n` occurrences strictly after `after`, ascending.
+Returns up to `n` occurrences strictly after `after`, ascending. The result can
+be shorter if the schedule ends or the search horizon is reached.
 
 ```python
 schedule.upcoming(5, after)
@@ -288,8 +297,8 @@ schedule.count_between(after, end)
 schedule.describe() -> str
 ```
 
-Returns a human-readable summary of the base recurrence, timezone, overlay
-count, and makeup presence.
+Returns a readable summary of the base recurrence, timezone, overlay count, and
+whether makeup is configured.
 
 ```python
 schedule.describe()
@@ -306,7 +315,8 @@ instant in schedule -> bool
 ```
 
 `iter(schedule)` requires the schedule to have an `end` bound. It starts from
-`start`, or from the current UTC time when `start` is absent.
+`start`, or from the current UTC time when `start` is absent. This anchor is
+exclusive, so an occurrence exactly at `start` is not included in iteration.
 
 ```python
 for instant in bounded_schedule:
@@ -319,8 +329,14 @@ instant in schedule
 
 ## Typed Model
 
-`dateme.model` mirrors the [Schedule model](schedule-model.md) as dataclasses
-and enums. Builders expose `to_dict()` and schedules expose `to_json()`.
+`dateme.model` provides dataclasses and enums for the
+[Schedule model](schedule-model.md). Builders expose `to_dict()`; model schedules
+also expose `to_json()`.
+
+Use `model.Schedule(frequency=..., timezone=...)` and read the recurrence through
+`.frequency`. The legacy `freq=...` keyword and `.freq` attribute remain
+supported. Pass exactly one keyword; supplying both is an error. Both
+`to_dict()` and `to_json()` output only `frequency`.
 
 ```python
 from dateme import (
@@ -338,7 +354,7 @@ from dateme import (
 from dateme import model as m
 
 spec = m.Schedule(
-    freq=MonthlyByWeekday([NthWeekday(Nth.THIRD, Weekday.FRI)], "16:00"),
+    frequency=MonthlyByWeekday([NthWeekday(Nth.THIRD, Weekday.FRI)], "16:00"),
     timezone="America/New_York",
     overlays=[Overlay(CalendarId.NYSE_TRADING_DAY, OverlayRule.ONLY)],
     makeup=Makeup.NONE,
