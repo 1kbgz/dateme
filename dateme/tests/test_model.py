@@ -54,7 +54,10 @@ def test_construct_from_typed_model():
 @pytest.mark.parametrize("name", ["frequency", "freq"])
 def test_frequency_keywords_and_attributes(name):
     frequency = model.Daily("12:00")
-    spec = model.Schedule(**{name: frequency}, timezone="UTC")
+    if name == "frequency":
+        spec = model.Schedule(frequency=frequency, timezone="UTC")
+    else:
+        spec = model.Schedule(freq=frequency, timezone="UTC")
     assert spec.frequency is frequency
     assert spec.freq is frequency
     assert spec.to_dict()["frequency"] == {"type": "daily", "time": "12:00"}
