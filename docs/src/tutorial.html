@@ -161,21 +161,17 @@
       <div class="fd-prose">
   <section class="tex2jax_ignore mathjax_ignore" id="getting-started">
 <h1>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading">¶</a></h1>
-<p>This tutorial walks you through your first schedule with <code class="docutils literal notranslate"><span class="pre">dateme</span></code>. By the end
-you will have described a recurring event, asked when it next fires, and
-projected a series of upcoming occurrences. You do not need to know anything
-about the library yet — follow along and each step will produce the result
-shown.</p>
-<p>We will build one schedule: <strong>“every Monday at 17:30 New York time, but skip
-weeks when the New York Stock Exchange is closed on that Monday, moving those to
-the next open day.”</strong></p>
+<p>Build a schedule for <strong>every Monday at 17:30 New York time</strong>, moving NYSE
+holidays to the next date that passes the calendar filter. Then query its next,
+previous, and upcoming occurrences using fixed dates so the results are
+repeatable.</p>
 <section id="before-you-start">
 <h2>Before you start<a class="headerlink" href="#before-you-start" title="Link to this heading">¶</a></h2>
 <p>Install the package:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>dateme
 </pre></div>
 </div>
-<p>Open a Python session and import the one class you need:</p>
+<p>Open a Python session and import <code class="docutils literal notranslate"><span class="pre">Schedule</span></code> and the datetime types:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span>
 </pre></div>
@@ -183,10 +179,10 @@ the next open day.”</strong></p>
 </section>
 <section id="step-1-describe-the-schedule">
 <h2>Step 1 — Describe the schedule<a class="headerlink" href="#step-1-describe-the-schedule" title="Link to this heading">¶</a></h2>
-<p>A schedule is written as JSON. Paste this in:</p>
+<p>Create a schedule from this JSON:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">spec</span> <span class="o">=</span> <span class="s2">"""</span>
 <span class="s2">{</span>
-<span class="s2">  "freq": { "type": "weekly", "days": ["mon"], "time": "17:30" },</span>
+<span class="s2">  "frequency": { "type": "weekly", "days": ["mon"], "time": "17:30" },</span>
 <span class="s2">  "timezone": "America/New_York",</span>
 <span class="s2">  "overlays": [ { "calendar": "nyse_holiday", "rule": "exclude" } ],</span>
 <span class="s2">  "makeup": "after",</span>
@@ -198,23 +194,21 @@ the next open day.”</strong></p>
 <span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Read it back to yourself: fire <strong>weekly</strong> on <strong>Monday</strong> at <strong>17:30</strong>, in the
-<strong>America/New_York</strong> timezone; <strong>exclude</strong> any date that is an <strong>NYSE holiday</strong>;
-and when a Monday is dropped, <strong>make it up after</strong> — move to the next surviving
-day.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">frequency</span></code> sets Monday at 17:30 in <code class="docutils literal notranslate"><span class="pre">America/New_York</span></code>. The overlay excludes
+NYSE holidays, and <code class="docutils literal notranslate"><span class="pre">makeup:</span> <span class="pre">&quot;after&quot;</span></code> moves each excluded occurrence to the next
+date that passes the overlay.</p>
 </section>
 <section id="step-2-check-it-is-valid">
 <h2>Step 2 — Check it is valid<a class="headerlink" href="#step-2-check-it-is-valid" title="Link to this heading">¶</a></h2>
-<p>Ask the schedule to validate itself. Nothing happens if it is well-formed — that
-is success:</p>
+<p>The constructor validates the schedule. Call <code class="docutils literal notranslate"><span class="pre">validate()</span></code> to check it again;
+it returns without output when the schedule is valid:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
 <section id="step-3-ask-when-it-next-fires">
 <h2>Step 3 — Ask when it next fires<a class="headerlink" href="#step-3-ask-when-it-next-fires" title="Link to this heading">¶</a></h2>
-<p>Pick a reference instant and ask for the next occurrence after it. We use a
-fixed date so your output matches this page exactly:</p>
+<p>Ask for the first occurrence after January 13, 2026:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">after</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
 <span class="n">schedule</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">after</span><span class="p">)</span>
 </pre></div>
@@ -223,15 +217,14 @@ fixed date so your output matches this page exactly:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>datetime.datetime(2026, 1, 20, 22, 30, tzinfo=datetime.timezone.utc)
 </pre></div>
 </div>
-<p>Look closely at what happened. The next Monday after January 13 is January 19,
-2026 — but that is Martin Luther King Jr. Day and the NYSE is closed. The
-<code class="docutils literal notranslate"><span class="pre">exclude</span></code> overlay dropped it, and <code class="docutils literal notranslate"><span class="pre">makeup:</span> <span class="pre">after</span></code> moved it to <strong>Tuesday
-January 20 at 17:30 New York time</strong>, which is <code class="docutils literal notranslate"><span class="pre">22:30Z</span></code> (New York is five hours
-behind UTC in January). The library did the calendar and timezone work for you.</p>
+<p>January 19 is Martin Luther King Jr. Day, when the NYSE is closed. The overlay
+excludes that Monday, and makeup moves it to <strong>Tuesday, January 20 at 17:30 New
+York time</strong>. The returned instant is <code class="docutils literal notranslate"><span class="pre">22:30Z</span></code>, five hours ahead of New York in
+January.</p>
 </section>
 <section id="step-4-project-several-occurrences">
 <h2>Step 4 — Project several occurrences<a class="headerlink" href="#step-4-project-several-occurrences" title="Link to this heading">¶</a></h2>
-<p>For a “next instances” list, ask for the next few at once:</p>
+<p>Request the next three occurrences from the same reference instant:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">upcoming</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">after</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -240,24 +233,22 @@ behind UTC in January). The library did the calendar and timezone work for you.<
  datetime.datetime(2026, 2, 2, 22, 30, tzinfo=datetime.timezone.utc)]
 </pre></div>
 </div>
-<p>The first is the made-up Tuesday; the rest are ordinary Mondays.</p>
+<p>The first is the Tuesday makeup occurrence; the other two are Mondays.</p>
 </section>
 <section id="step-5-look-backward-too">
 <h2>Step 5 — Look backward too<a class="headerlink" href="#step-5-look-backward-too" title="Link to this heading">¶</a></h2>
-<p>Every forward query has a backward twin. Ask what fired most recently before your
-reference instant:</p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">previous</span></code> to find the last occurrence before the same reference instant:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">previous</span><span class="p">(</span><span class="n">after</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>datetime.datetime(2026, 1, 12, 22, 30, tzinfo=datetime.timezone.utc)
 </pre></div>
 </div>
-<p>Monday January 12 — a normal week.</p>
+<p>The result is Monday, January 12 at 17:30 New York time.</p>
 </section>
 <section id="step-6-get-a-whole-series">
 <h2>Step 6 — Get a whole series<a class="headerlink" href="#step-6-get-a-whole-series" title="Link to this heading">¶</a></h2>
-<p>To list every occurrence between two instants, use <code class="docutils literal notranslate"><span class="pre">until</span></code> (ascending) or <code class="docutils literal notranslate"><span class="pre">since</span></code>
-(descending):</p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">until</span></code> to list occurrences between two instants in ascending order:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">end</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">occurrence</span> <span class="ow">in</span> <span class="n">schedule</span><span class="o">.</span><span class="n">until</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">after</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">occurrence</span><span class="p">)</span>
@@ -272,17 +263,15 @@ reference instant:</p>
 </section>
 <section id="what-you-have-learned">
 <h2>What you have learned<a class="headerlink" href="#what-you-have-learned" title="Link to this heading">¶</a></h2>
-<p>You described a recurring event as JSON, validated it, and asked five kinds of
-question about it: <code class="docutils literal notranslate"><span class="pre">next</span></code>, <code class="docutils literal notranslate"><span class="pre">previous</span></code>, <code class="docutils literal notranslate"><span class="pre">upcoming</span></code>, <code class="docutils literal notranslate"><span class="pre">until</span></code>, and <code class="docutils literal notranslate"><span class="pre">since</span></code>. You saw
-the engine apply a real market-holiday calendar and a makeup rule, and convert
-local wall-clock times to UTC across a timezone offset — all without any manual
-date arithmetic.</p>
-<p>From here:</p>
+<p>The schedule uses a market-holiday filter and makeup rule to produce UTC
+instants. You queried it with <code class="docutils literal notranslate"><span class="pre">next</span></code>, <code class="docutils literal notranslate"><span class="pre">previous</span></code>, <code class="docutils literal notranslate"><span class="pre">upcoming</span></code>, and <code class="docutils literal notranslate"><span class="pre">until</span></code>. For
+the same window in descending order, use <code class="docutils literal notranslate"><span class="pre">since(after,</span> <span class="pre">end)</span></code>.</p>
+<p>Next steps:</p>
 <ul class="simple">
-<li><p>To accomplish a specific real-world task, see the <a class="reference internal" href="how-to.html"><span class="std std-doc">How-to guides</span></a>.</p></li>
+<li><p>For scheduling recipes, see the <a class="reference internal" href="how-to.html"><span class="std std-doc">How-to guides</span></a>.</p></li>
 <li><p>For every field you can put in a schedule, see the <a class="reference internal" href="schedule-model.html"><span class="std std-doc">Schedule model</span></a>.</p></li>
-<li><p>To understand <em>how</em> occurrences are computed, read <a class="reference internal" href="explanation.html"><span class="std std-doc">How the engine works</span></a>.</p></li>
-<li><p>The same schedule works in the browser — see the <a class="reference internal" href="api-javascript.html"><span class="std std-doc">JavaScript API</span></a>.</p></li>
+<li><p>For recurrence generation and calendar behavior, read <a class="reference internal" href="explanation.html"><span class="std std-doc">How the engine works</span></a>.</p></li>
+<li><p>To use the same schedule in the browser, see the <a class="reference internal" href="api-javascript.html"><span class="std std-doc">JavaScript API</span></a>.</p></li>
 </ul>
 </section>
 </section>

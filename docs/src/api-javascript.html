@@ -200,10 +200,11 @@
       <div class="fd-prose">
   <section class="tex2jax_ignore mathjax_ignore" id="javascript-api">
 <h1>JavaScript API<a class="headerlink" href="#javascript-api" title="Link to this heading">¶</a></h1>
-<p>Reference for the JavaScript and TypeScript package.</p>
-<p>The JavaScript package wraps the same Rust engine through WebAssembly. Public
-methods take and return <code class="docutils literal notranslate"><span class="pre">Date</span></code> objects. Schedule specs use the same JSON shape
-as every other binding.</p>
+<p>Initialization, queries, serialization, and types in the JavaScript and
+TypeScript package.</p>
+<p>The package wraps the Rust engine through WebAssembly. Occurrence queries take
+and return <code class="docutils literal notranslate"><span class="pre">Date</span></code> objects. Schedule specs use the same JSON format as the other
+bindings.</p>
 <section id="exports">
 <h2>Exports<a class="headerlink" href="#exports" title="Link to this heading">¶</a></h2>
 <table class="docutils align-default">
@@ -260,12 +261,12 @@ as every other binding.</p>
 </section>
 <section id="initialization">
 <h2>Initialization<a class="headerlink" href="#initialization" title="Link to this heading">¶</a></h2>
-<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="nx">init</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Schedule</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"dateme"</span><span class="p">;</span>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">init</span><span class="p">,</span><span class="w"> </span><span class="nx">Schedule</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"dateme"</span><span class="p">;</span>
 
 <span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">();</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">init()</span></code> must resolve before constructing <code class="docutils literal notranslate"><span class="pre">Schedule</span></code>.</p>
+<p>Wait for <code class="docutils literal notranslate"><span class="pre">init()</span></code> to resolve before constructing a <code class="docutils literal notranslate"><span class="pre">Schedule</span></code>.</p>
 </section>
 <section id="schedule">
 <h2><code class="docutils literal notranslate"><span class="pre">Schedule</span></code><a class="headerlink" href="#schedule" title="Link to this heading">¶</a></h2>
@@ -295,8 +296,11 @@ as every other binding.</p>
 </table>
 <p>The constructor validates the schedule. Malformed JSON, invalid enum values,
 invalid timezone names, and structural validation failures throw.</p>
+<p>Object and JSON specs accept <code class="docutils literal notranslate"><span class="pre">frequency</span></code> (preferred) or the legacy <code class="docutils literal notranslate"><span class="pre">freq</span></code> key.
+Supplying both is an error, even if their values match. Serialization uses only
+<code class="docutils literal notranslate"><span class="pre">frequency</span></code>.</p>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">schedule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">({</span>
-<span class="w">  </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"daily"</span><span class="p">,</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">"09:00"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">frequency</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"daily"</span><span class="p">,</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">"09:00"</span><span class="w"> </span><span class="p">},</span>
 <span class="w">  </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">"UTC"</span><span class="p">,</span>
 <span class="p">});</span>
 </pre></div>
@@ -304,12 +308,12 @@ invalid timezone names, and structural validation failures throw.</p>
 </section>
 <section id="custom-calendar-providers">
 <h3>Custom Calendar Providers<a class="headerlink" href="#custom-calendar-providers" title="Link to this heading">¶</a></h3>
-<p>Custom calendars are referenced in a schedule with <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">custom:</span> <span class="pre">&quot;name&quot;</span> <span class="pre">}</span></code>.
-Providers receive <code class="docutils literal notranslate"><span class="pre">(name,</span> <span class="pre">date)</span></code> where <code class="docutils literal notranslate"><span class="pre">date</span></code> is a <code class="docutils literal notranslate"><span class="pre">YYYY-MM-DD</span></code> string.</p>
+<p>Schedules reference custom calendars with <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">custom:</span> <span class="pre">&quot;name&quot;</span> <span class="pre">}</span></code>. Providers
+receive <code class="docutils literal notranslate"><span class="pre">(name,</span> <span class="pre">date)</span></code>, where <code class="docutils literal notranslate"><span class="pre">date</span></code> is a <code class="docutils literal notranslate"><span class="pre">YYYY-MM-DD</span></code> string, and return a boolean.</p>
 <p>A function provider:</p>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">schedule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">(</span>
 <span class="w">  </span><span class="p">{</span>
-<span class="w">    </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"daily"</span><span class="p">,</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">"09:00"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">frequency</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"daily"</span><span class="p">,</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">"09:00"</span><span class="w"> </span><span class="p">},</span>
 <span class="w">    </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">"UTC"</span><span class="p">,</span>
 <span class="w">    </span><span class="nx">overlays</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">calendar</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">custom</span><span class="o">:</span><span class="w"> </span><span class="s2">"shutdown"</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nx">rule</span><span class="o">:</span><span class="w"> </span><span class="s2">"exclude"</span><span class="w"> </span><span class="p">}],</span>
 <span class="w">  </span><span class="p">},</span>
@@ -327,7 +331,8 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 <span class="kd">const</span><span class="w"> </span><span class="nx">schedule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">(</span><span class="nx">spec</span><span class="p">,</span><span class="w"> </span><span class="nx">provider</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>Missing custom calendar values are treated as absent from the set.</p>
+<p>Without a custom provider, custom calendar dates are treated as absent from the
+set.</p>
 </section>
 </section>
 <section id="date-handling">
@@ -364,27 +369,28 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 <div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">validate</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="ow">void</span>
 </pre></div>
 </div>
-<p>Re-runs structural validation. Throws on failure.</p>
+<p>Checks the schedule’s structure again. Throws on failure.</p>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">validate</span><span class="p">();</span>
 </pre></div>
 </div>
 </section>
 <section id="toobject">
 <h3><code class="docutils literal notranslate"><span class="pre">toObject</span></code><a class="headerlink" href="#toobject" title="Link to this heading">¶</a></h3>
-<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">toObject</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nx">ScheduleSpec</span>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">toObject</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nx">CanonicalScheduleSpec</span>
 </pre></div>
 </div>
-<p>Returns the schedule as a plain object.</p>
+<p>Returns a plain object with the canonical <code class="docutils literal notranslate"><span class="pre">frequency</span></code> key, never <code class="docutils literal notranslate"><span class="pre">freq</span></code>.</p>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">spec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">schedule</span><span class="p">.</span><span class="nx">toObject</span><span class="p">();</span>
 </pre></div>
 </div>
 </section>
 <section id="tojson">
 <h3><code class="docutils literal notranslate"><span class="pre">toJSON</span></code><a class="headerlink" href="#tojson" title="Link to this heading">¶</a></h3>
-<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">toJSON</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nx">ScheduleSpec</span>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">toJSON</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nx">CanonicalScheduleSpec</span>
 </pre></div>
 </div>
-<p>Returns the schedule as a plain object for <code class="docutils literal notranslate"><span class="pre">JSON.stringify</span></code>.</p>
+<p>Returns a plain object for <code class="docutils literal notranslate"><span class="pre">JSON.stringify</span></code>, using only <code class="docutils literal notranslate"><span class="pre">frequency</span></code>, never
+<code class="docutils literal notranslate"><span class="pre">freq</span></code>.</p>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">schedule</span><span class="p">);</span>
 </pre></div>
 </div>
@@ -394,7 +400,8 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 <div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">next</span><span class="p">(</span><span class="nx">after</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">())</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span>
 </pre></div>
 </div>
-<p>Returns the first occurrence strictly after <code class="docutils literal notranslate"><span class="pre">after</span></code>.</p>
+<p>Returns the first occurrence strictly after <code class="docutils literal notranslate"><span class="pre">after</span></code>, or <code class="docutils literal notranslate"><span class="pre">null</span></code> if none is found
+within the schedule bounds and search horizon.</p>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">after</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">"2026-01-13T00:00:00Z"</span><span class="p">);</span>
 <span class="nx">schedule</span><span class="p">.</span><span class="nx">next</span><span class="p">(</span><span class="nx">after</span><span class="p">);</span>
 </pre></div>
@@ -405,7 +412,8 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 <div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">previous</span><span class="p">(</span><span class="nx">before</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">())</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="kc">null</span>
 </pre></div>
 </div>
-<p>Returns the last occurrence strictly before <code class="docutils literal notranslate"><span class="pre">before</span></code>.</p>
+<p>Returns the last occurrence strictly before <code class="docutils literal notranslate"><span class="pre">before</span></code>, or <code class="docutils literal notranslate"><span class="pre">null</span></code> if none is found
+within the schedule bounds and search horizon.</p>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">previous</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">(</span><span class="s2">"2026-01-13T00:00:00Z"</span><span class="p">));</span>
 </pre></div>
 </div>
@@ -435,7 +443,8 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 <div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">upcoming</span><span class="p">(</span><span class="nx">n</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">,</span><span class="w"> </span><span class="nx">after</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Date</span><span class="p">())</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">[]</span>
 </pre></div>
 </div>
-<p>Returns the next <code class="docutils literal notranslate"><span class="pre">n</span></code> occurrences strictly after <code class="docutils literal notranslate"><span class="pre">after</span></code>, ascending.</p>
+<p>Returns up to <code class="docutils literal notranslate"><span class="pre">n</span></code> occurrences strictly after <code class="docutils literal notranslate"><span class="pre">after</span></code>, ascending. The result can
+be shorter if the schedule ends or the search horizon is reached.</p>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">upcoming</span><span class="p">(</span><span class="mf">5</span><span class="p">,</span><span class="w"> </span><span class="nx">after</span><span class="p">);</span>
 </pre></div>
 </div>
@@ -525,8 +534,8 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 <div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">describe</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span>
 </pre></div>
 </div>
-<p>Returns a human-readable summary of the base recurrence, timezone, overlay
-count, and makeup presence.</p>
+<p>Returns a readable summary of the base recurrence, timezone, overlay count, and
+whether makeup is configured.</p>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">schedule</span><span class="p">.</span><span class="nx">describe</span><span class="p">();</span>
 <span class="c1">// "Every Monday at 17:30 America/New_York, with 1 overlay(s), with makeup"</span>
 </pre></div>
@@ -540,7 +549,8 @@ count, and makeup presence.</p>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">for...of</span></code> requires the schedule to have an <code class="docutils literal notranslate"><span class="pre">end</span></code> bound. It starts from <code class="docutils literal notranslate"><span class="pre">start</span></code>,
-or from the current time when <code class="docutils literal notranslate"><span class="pre">start</span></code> is absent.</p>
+or from the current time when <code class="docutils literal notranslate"><span class="pre">start</span></code> is absent. This anchor is exclusive, so an
+occurrence exactly at <code class="docutils literal notranslate"><span class="pre">start</span></code> is not included in iteration.</p>
 <div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">instant</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">boundedSchedule</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">instant</span><span class="p">.</span><span class="nx">toISOString</span><span class="p">());</span>
 <span class="p">}</span>
@@ -553,9 +563,13 @@ or from the current time when <code class="docutils literal notranslate"><span c
 </section>
 <section id="typescript-model">
 <h2>TypeScript Model<a class="headerlink" href="#typescript-model" title="Link to this heading">¶</a></h2>
-<p>The package exports TypeScript types that mirror the
-<a class="reference internal" href="schedule-model.html"><span class="std std-doc">Schedule model</span></a>.</p>
-<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="nx">init</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<p>The package exports TypeScript types for the <a class="reference internal" href="schedule-model.html"><span class="std std-doc">Schedule model</span></a>.
+<code class="docutils literal notranslate"><span class="pre">ScheduleSpec</span></code> requires exactly one recurrence property: <code class="docutils literal notranslate"><span class="pre">frequency</span></code> (preferred)
+or <code class="docutils literal notranslate"><span class="pre">freq</span></code> (legacy). The type rejects objects with both properties or neither.</p>
+<p><code class="docutils literal notranslate"><span class="pre">CanonicalScheduleSpec</span></code>, returned by <code class="docutils literal notranslate"><span class="pre">toObject()</span></code> and <code class="docutils literal notranslate"><span class="pre">toJSON()</span></code>, always has
+<code class="docutils literal notranslate"><span class="pre">frequency</span></code>.</p>
+<div class="highlight-ts notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">init</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">Schedule</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">Weekday</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">CalendarId</span><span class="p">,</span>
@@ -565,7 +579,7 @@ or from the current time when <code class="docutils literal notranslate"><span c
 <span class="k">import</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ScheduleSpec</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"dateme"</span><span class="p">;</span>
 
 <span class="kd">const</span><span class="w"> </span><span class="nx">spec</span><span class="o">:</span><span class="w"> </span><span class="kt">ScheduleSpec</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"weekly"</span><span class="p">,</span><span class="w"> </span><span class="nx">days</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">Weekday</span><span class="p">.</span><span class="nx">Mon</span><span class="p">],</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">"17:30"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">frequency</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"weekly"</span><span class="p">,</span><span class="w"> </span><span class="nx">days</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">Weekday</span><span class="p">.</span><span class="nx">Mon</span><span class="p">],</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">"17:30"</span><span class="w"> </span><span class="p">},</span>
 <span class="w">  </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">"America/New_York"</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">overlays</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">calendar</span><span class="o">:</span><span class="w"> </span><span class="kt">CalendarId.NyseHoliday</span><span class="p">,</span><span class="w"> </span><span class="nx">rule</span><span class="o">:</span><span class="w"> </span><span class="kt">OverlayRule.Exclude</span><span class="w"> </span><span class="p">}],</span>
 <span class="w">  </span><span class="nx">makeup</span><span class="o">:</span><span class="w"> </span><span class="kt">Makeup.After</span><span class="p">,</span>

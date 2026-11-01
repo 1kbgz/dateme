@@ -1,10 +1,11 @@
 # JavaScript API
 
-Reference for the JavaScript and TypeScript package.
+Initialization, queries, serialization, and types in the JavaScript and
+TypeScript package.
 
-The JavaScript package wraps the same Rust engine through WebAssembly. Public
-methods take and return `Date` objects. Schedule specs use the same JSON shape
-as every other binding.
+The package wraps the Rust engine through WebAssembly. Occurrence queries take
+and return `Date` objects. Schedule specs use the same JSON format as the other
+bindings.
 
 ## Exports
 
@@ -28,12 +29,12 @@ as every other binding.
 ## Initialization
 
 ```js
-import init, { Schedule } from "dateme";
+import { init, Schedule } from "dateme";
 
 await init();
 ```
 
-`init()` must resolve before constructing `Schedule`.
+Wait for `init()` to resolve before constructing a `Schedule`.
 
 ## `Schedule`
 
@@ -53,24 +54,28 @@ Parameters:
 The constructor validates the schedule. Malformed JSON, invalid enum values,
 invalid timezone names, and structural validation failures throw.
 
+Object and JSON specs accept `frequency` (preferred) or the legacy `freq` key.
+Supplying both is an error, even if their values match. Serialization uses only
+`frequency`.
+
 ```js
 const schedule = new Schedule({
-  freq: { type: "daily", time: "09:00" },
+  frequency: { type: "daily", time: "09:00" },
   timezone: "UTC",
 });
 ```
 
 ### Custom Calendar Providers
 
-Custom calendars are referenced in a schedule with `{ custom: "name" }`.
-Providers receive `(name, date)` where `date` is a `YYYY-MM-DD` string.
+Schedules reference custom calendars with `{ custom: "name" }`. Providers
+receive `(name, date)`, where `date` is a `YYYY-MM-DD` string, and return a boolean.
 
 A function provider:
 
 ```js
 const schedule = new Schedule(
   {
-    freq: { type: "daily", time: "09:00" },
+    frequency: { type: "daily", time: "09:00" },
     timezone: "UTC",
     overlays: [{ calendar: { custom: "shutdown" }, rule: "exclude" }],
   },
@@ -90,7 +95,8 @@ const provider = {
 const schedule = new Schedule(spec, provider);
 ```
 
-Missing custom calendar values are treated as absent from the set.
+Without a custom provider, custom calendar dates are treated as absent from the
+set.
 
 ## Date Handling
 
@@ -110,7 +116,7 @@ Missing custom calendar values are treated as absent from the set.
 schedule.validate(): void
 ```
 
-Re-runs structural validation. Throws on failure.
+Checks the schedule's structure again. Throws on failure.
 
 ```js
 schedule.validate();
@@ -119,10 +125,10 @@ schedule.validate();
 ### `toObject`
 
 ```ts
-schedule.toObject(): ScheduleSpec
+schedule.toObject(): CanonicalScheduleSpec
 ```
 
-Returns the schedule as a plain object.
+Returns a plain object with the canonical `frequency` key, never `freq`.
 
 ```js
 const spec = schedule.toObject();
@@ -131,10 +137,11 @@ const spec = schedule.toObject();
 ### `toJSON`
 
 ```ts
-schedule.toJSON(): ScheduleSpec
+schedule.toJSON(): CanonicalScheduleSpec
 ```
 
-Returns the schedule as a plain object for `JSON.stringify`.
+Returns a plain object for `JSON.stringify`, using only `frequency`, never
+`freq`.
 
 ```js
 JSON.stringify(schedule);
@@ -146,7 +153,8 @@ JSON.stringify(schedule);
 schedule.next(after = new Date()): Date | null
 ```
 
-Returns the first occurrence strictly after `after`.
+Returns the first occurrence strictly after `after`, or `null` if none is found
+within the schedule bounds and search horizon.
 
 ```js
 const after = new Date("2026-01-13T00:00:00Z");
@@ -159,7 +167,8 @@ schedule.next(after);
 schedule.previous(before = new Date()): Date | null
 ```
 
-Returns the last occurrence strictly before `before`.
+Returns the last occurrence strictly before `before`, or `null` if none is found
+within the schedule bounds and search horizon.
 
 ```js
 schedule.previous(new Date("2026-01-13T00:00:00Z"));
@@ -195,7 +204,8 @@ schedule.since(new Date("2026-01-01T00:00:00Z"));
 schedule.upcoming(n: number, after = new Date()): Date[]
 ```
 
-Returns the next `n` occurrences strictly after `after`, ascending.
+Returns up to `n` occurrences strictly after `after`, ascending. The result can
+be shorter if the schedule ends or the search horizon is reached.
 
 ```js
 schedule.upcoming(5, after);
@@ -257,8 +267,8 @@ schedule.countBetween(after, new Date("2026-02-01T00:00:00Z"));
 schedule.describe(): string
 ```
 
-Returns a human-readable summary of the base recurrence, timezone, overlay
-count, and makeup presence.
+Returns a readable summary of the base recurrence, timezone, overlay count, and
+whether makeup is configured.
 
 ```js
 schedule.describe();
@@ -274,7 +284,8 @@ schedule.iterUpcoming(n: number, after = new Date()): IterableIterator<Date>
 ```
 
 `for...of` requires the schedule to have an `end` bound. It starts from `start`,
-or from the current time when `start` is absent.
+or from the current time when `start` is absent. This anchor is exclusive, so an
+occurrence exactly at `start` is not included in iteration.
 
 ```js
 for (const instant of boundedSchedule) {
@@ -287,11 +298,16 @@ Array.from(schedule.iterUpcoming(3, after));
 
 ## TypeScript Model
 
-The package exports TypeScript types that mirror the
-[Schedule model](schedule-model.md).
+The package exports TypeScript types for the [Schedule model](schedule-model.md).
+`ScheduleSpec` requires exactly one recurrence property: `frequency` (preferred)
+or `freq` (legacy). The type rejects objects with both properties or neither.
+
+`CanonicalScheduleSpec`, returned by `toObject()` and `toJSON()`, always has
+`frequency`.
 
 ```ts
-import init, {
+import {
+  init,
   Schedule,
   Weekday,
   CalendarId,
@@ -301,7 +317,7 @@ import init, {
 import type { ScheduleSpec } from "dateme";
 
 const spec: ScheduleSpec = {
-  freq: { type: "weekly", days: [Weekday.Mon], time: "17:30" },
+  frequency: { type: "weekly", days: [Weekday.Mon], time: "17:30" },
   timezone: "America/New_York",
   overlays: [{ calendar: CalendarId.NyseHoliday, rule: OverlayRule.Exclude }],
   makeup: Makeup.After,

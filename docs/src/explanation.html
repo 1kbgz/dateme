@@ -169,172 +169,152 @@
       <div class="fd-prose">
   <section class="tex2jax_ignore mathjax_ignore" id="how-the-engine-works">
 <h1>How the engine works<a class="headerlink" href="#how-the-engine-works" title="Link to this heading">¶</a></h1>
-<p>This page explains how <code class="docutils literal notranslate"><span class="pre">dateme</span></code> turns a schedule into concrete instants, and why
-it is built the way it is. It is background reading — you do not need any of it to
-use the library, but it clarifies the corner cases and the guarantees the API
-makes.</p>
+<p><code class="docutils literal notranslate"><span class="pre">dateme</span></code> generates local recurrence times, applies calendar rules, and returns
+UTC instants. Separating recurrence from calendar filtering makes the rules
+reusable, but makeup and daylight-saving transitions need special handling.</p>
 <section id="occurrences-and-the-series-model">
 <h2>Occurrences and the series model<a class="headerlink" href="#occurrences-and-the-series-model" title="Link to this heading">¶</a></h2>
-<p>A schedule does not store a list of dates. It is a <em>rule</em>, and an <strong>occurrence</strong>
-is one instant that rule produces — the wall-clock moment the recurring event
-fires. A recurring event is therefore an open-ended series of occurrences, most
-of which do not “exist” anywhere until you ask for them.</p>
+<p>A schedule stores a rule rather than a list of dates. An occurrence is one UTC
+instant produced by that rule. Queries compute the part of the series they
+need, including any bounds and calendar adjustments.</p>
 <p>Every query is a question about that series relative to a reference instant:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">next</span></code> / <code class="docutils literal notranslate"><span class="pre">previous</span></code> — the single occurrence immediately after / before it.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">until</span></code> / <code class="docutils literal notranslate"><span class="pre">since</span></code> — the whole series in a window, ascending / descending.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">upcoming</span></code> — a fixed count going forward.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">next</span></code> and <code class="docutils literal notranslate"><span class="pre">previous</span></code> find one occurrence after or before the reference instant.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">until</span></code> and <code class="docutils literal notranslate"><span class="pre">since</span></code> return a window in ascending or descending order.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">upcoming</span></code> requests a fixed number of future occurrences.</p></li>
 </ul>
-<p>All queries are <strong>strict</strong>: an occurrence exactly at a bound is excluded. This is
-what makes the series composable — <code class="docutils literal notranslate"><span class="pre">next(t)</span></code> never returns <code class="docutils literal notranslate"><span class="pre">t</span></code> itself, so
-repeatedly calling <code class="docutils literal notranslate"><span class="pre">next</span></code> walks the series without repeating. It is also why
-<code class="docutils literal notranslate"><span class="pre">until(end)[0]</span></code> is exactly <code class="docutils literal notranslate"><span class="pre">next()</span></code> and <code class="docutils literal notranslate"><span class="pre">since(start)[0]</span></code> is exactly <code class="docutils literal notranslate"><span class="pre">previous()</span></code>:
-the count-free series and the single-step queries are the same computation viewed
-at different resolutions.</p>
+<p>Query bounds are strict: an occurrence exactly at an <code class="docutils literal notranslate"><span class="pre">after</span></code> or <code class="docutils literal notranslate"><span class="pre">before</span></code> bound
+is excluded. Calling <code class="docutils literal notranslate"><span class="pre">next(t)</span></code> with the previous result as <code class="docutils literal notranslate"><span class="pre">t</span></code> advances through
+the series without repeating it. With the same explicit anchor and a nonempty
+window, the first result of <code class="docutils literal notranslate"><span class="pre">until(end,</span> <span class="pre">after)</span></code> is <code class="docutils literal notranslate"><span class="pre">next(after)</span></code>. Likewise, the
+first result of <code class="docutils literal notranslate"><span class="pre">since(start,</span> <span class="pre">before)</span></code> is <code class="docutils literal notranslate"><span class="pre">previous(before)</span></code>.</p>
 </section>
 <section id="generation-then-transformation">
 <h2>Generation, then transformation<a class="headerlink" href="#generation-then-transformation" title="Link to this heading">¶</a></h2>
-<p>Occurrences are produced in two stages. First the <strong>base occurrences</strong> come
-purely from the frequency and timezone — every Monday, every 1st and 15th, every
-third day from an anchor, every matching cron minute, and so on. Then each base
-occurrence is <strong>transformed</strong> by the overlays and makeup rule: kept, dropped, or
-moved to a nearby day.</p>
-<p>Keeping these stages separate is what lets the calendar rules stay simple. The
-frequency knows nothing about holidays; the overlays know nothing about
-weekdays-versus-month-days. They compose.</p>
+<p>The engine first generates base occurrences from the frequency: every Monday,
+the first and fifteenth of each month, every third day from an anchor, or each
+matching cron minute. Overlays and makeup then keep, drop, or move those local
+dates. The engine resolves the resulting local times to UTC in the schedule’s
+timezone.</p>
+<p>The frequency defines when an event would occur without calendar filters.
+Overlays test dates independently of that recurrence, so the same holiday rule
+can filter a weekly, monthly, or cron schedule.</p>
 </section>
 <section id="anchors-and-calendar-shape">
 <h2>Anchors and calendar shape<a class="headerlink" href="#anchors-and-calendar-shape" title="Link to this heading">¶</a></h2>
-<p>Some frequencies are anchored to calendar structure: monthly rules are anchored
-to months, yearly rules to years, and quarterly rules to the three-month rhythm
-of quarters. <code class="docutils literal notranslate"><span class="pre">every_n_days</span></code> and <code class="docutils literal notranslate"><span class="pre">every_n_weeks</span></code> need an explicit <code class="docutils literal notranslate"><span class="pre">start_date</span></code>
-because their rhythm is relative rather than intrinsic to the calendar. Without
-that anchor, “every 3 days” is underspecified: there are three equally valid
-series depending on which date starts the cycle.</p>
-<p>Cron is different again. It describes a set of matching local minutes rather
-than a human calendar unit. <code class="docutils literal notranslate"><span class="pre">dateme</span></code> keeps it in the same pipeline as other
-frequencies: cron creates base local datetimes, and overlays and makeup transform
-them afterward.</p>
+<p>Monthly, yearly, and quarterly frequencies repeat within calendar units.
+<code class="docutils literal notranslate"><span class="pre">every_n_days</span></code> and <code class="docutils literal notranslate"><span class="pre">every_n_weeks</span></code> instead need an explicit <code class="docutils literal notranslate"><span class="pre">start_date</span></code> to fix
+the cycle. “Every 3 days” describes three possible series, depending on which
+date starts it.</p>
+<p>Cron describes matching local minutes rather than a calendar interval. It uses
+the same processing as other frequencies: cron generates local datetimes, then
+overlays and makeup adjust their dates.</p>
 </section>
 <section id="timezones-and-dst">
 <span id="id1"></span><h2>Timezones and DST<a class="headerlink" href="#timezones-and-dst" title="Link to this heading">¶</a></h2>
-<p>Occurrences are generated in the schedule’s IANA timezone and then converted to
-UTC. This is deliberate: “17:30 every weekday” should mean 17:30 <em>local</em> all year,
-so the underlying UTC instant must shift when daylight-saving time changes. Anchor
-the schedule to UTC directly (<code class="docutils literal notranslate"><span class="pre">&quot;timezone&quot;:</span> <span class="pre">&quot;UTC&quot;</span></code>) if you want a fixed offset.</p>
-<p>Two moments each year have no clean local-to-UTC mapping, and the engine resolves
-them consistently:</p>
+<p>Recurrence times use the schedule’s IANA timezone before conversion to UTC.
+“17:30 every weekday” therefore stays at 17:30 local time when daylight-saving
+time changes, while its UTC offset changes. A schedule with <code class="docutils literal notranslate"><span class="pre">&quot;timezone&quot;:</span> <span class="pre">&quot;UTC&quot;</span></code>
+has no daylight-saving offset changes.</p>
+<p>In timezones with daylight-saving transitions, some local times are missing or
+occur twice:</p>
 <ul class="simple">
-<li><p><strong>Spring-forward gap.</strong> Clocks jump forward, so a local time like 02:30 may not
-exist on that date. The occurrence moves to the first valid instant at or after
-the gap (03:00 local). The cycle still happens; it is nudged past the missing
-hour.</p></li>
+<li><p><strong>Spring-forward gap.</strong> Clocks jump forward, so a local time may not exist.
+For non-hourly frequencies, the occurrence shifts to the first valid local
+time after the gap. In New York, 02:30 on the spring transition date shifts to
+03:00.</p></li>
 <li><p><strong>Autumn fall-back overlap.</strong> Clocks repeat an hour, so a local time like 01:30
 happens twice. The engine uses the <strong>earlier</strong> of the two instants.</p></li>
 </ul>
-<p>Hourly schedules are the one exception to the gap rule: the missing hour is simply
-absent rather than nudged, because “every hour” already implies one occurrence per
-real hour.</p>
+<p>Hourly schedules skip nonexistent local hours. During a fall-back overlap, they
+emit the repeated local hour only once, at its earlier UTC instant. They follow
+local hour slots rather than fixed one-hour intervals in UTC.</p>
 </section>
 <section id="overlays-and-makeup">
 <span id="id2"></span><h2>Overlays and makeup<a class="headerlink" href="#overlays-and-makeup" title="Link to this heading">¶</a></h2>
-<p>An overlay tests an occurrence’s <strong>local date</strong> against a calendar and either
-keeps or drops it. The local date matters: a 23:30 New York occurrence is judged
-on its New York calendar day, which can differ from its UTC day. Multiple overlays
-are ANDed, which lets two independent senses compose — “skip holidays” and “only
-on trading days” are just two overlays that must both pass.</p>
+<p>An overlay tests an occurrence’s local date against a calendar. A 23:30 New York
+occurrence is checked against its New York date, which can differ from its UTC
+date. Top-level overlays are ANDed, so every filter must pass. An <code class="docutils literal notranslate"><span class="pre">any</span></code> group
+provides an OR condition within those filters.</p>
 <p>When an overlay drops a base occurrence, the <strong>makeup</strong> rule decides what happens:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">none</span></code> drops the cycle.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">before</span></code> / <code class="docutils literal notranslate"><span class="pre">after</span></code> search outward day by day — up to 14 days — for the nearest
-day that passes <em>all</em> overlays, and move the occurrence there at the same
-time-of-day.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">before</span></code> and <code class="docutils literal notranslate"><span class="pre">after</span></code> search day by day, up to 14 days, for an earlier or later
+date that passes all overlays and destination constraints. They keep the
+original local time of day, subject to DST resolution.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">nearest</span></code> searches both directions and prefers the later date on ties.</p></li>
 <li><p>Weekday maps and cascades choose a direction based on context or try fallback
 strategies in order.</p></li>
 </ul>
-<p>The 14-day bound is a safety valve. A pathological overlay set could in principle
-remove every nearby day; rather than search forever, the engine gives up and drops
-the occurrence. In practice no real market closes for anything close to 14
-consecutive sessions, so the bound never bites.</p>
+<p>The 14-day cap prevents makeup from searching indefinitely when no nearby date
+passes the filters. <code class="docutils literal notranslate"><span class="pre">max_makeup_hops</span></code> can lower it. If the search fails,
+<code class="docutils literal notranslate"><span class="pre">makeup_failure</span></code> determines whether to skip the occurrence, keep its original
+date, or report an error. A selected <code class="docutils literal notranslate"><span class="pre">none</span></code> strategy skips it without applying
+the failure policy.</p>
 <section id="why-makeup-needs-care">
 <h3>Why makeup needs care<a class="headerlink" href="#why-makeup-needs-care" title="Link to this heading">¶</a></h3>
-<p>Makeup can move an occurrence <strong>earlier</strong>, which breaks the naive assumption that
-base occurrences come out already in order — a later base occurrence can make up
-to a date ahead of an earlier one. The engine therefore generates a window of base
-occurrences, transforms them all, and <em>then</em> sorts, rather than emitting them one
-at a time. The output is always ascending regardless of how makeup reshuffled
-things.</p>
-<p>Makeup also raises the possibility of duplicates. Consider a daily schedule that
-excludes a Friday holiday and makes up <em>before</em>: it would land on Thursday — but
-Thursday is already a daily occurrence. Emitting both would double-count the
-cycle. The engine deduplicates by exact UTC instant, so a made-up occurrence that
-collides with an existing one is simply dropped. A weekly-Monday schedule making
-up a Monday holiday to Tuesday keeps it, because Tuesday was not otherwise
-scheduled.</p>
+<p>Makeup can change occurrence order: a later base occurrence can move before an
+earlier one. The engine therefore transforms a window of base occurrences and
+orders the results by UTC instant. <code class="docutils literal notranslate"><span class="pre">until</span></code> and <code class="docutils literal notranslate"><span class="pre">upcoming</span></code> return ascending results;
+<code class="docutils literal notranslate"><span class="pre">since</span></code> reverses them for descending order.</p>
+<p>Makeup can also create duplicates. A daily schedule that excludes a Friday
+holiday and makes it up on Thursday would produce two occurrences at Thursday’s
+scheduled time. The engine keeps one occurrence per exact UTC instant. A weekly
+Monday schedule moved to Tuesday has no such collision if Tuesday was not
+otherwise scheduled.</p>
 </section>
 </section>
 <section id="why-skip-thresholds-and-gap-checks-are-query-rules">
 <h2>Why skip thresholds and gap checks are query rules<a class="headerlink" href="#why-skip-thresholds-and-gap-checks-are-query-rules" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">skip_if_consecutive_excluded</span></code> looks at the base recurrence before makeup. It is
-about the meaning of a cycle: if enough consecutive base cycles are excluded,
-the whole run is intentionally skipped rather than compressed into nearby makeup
-dates. This belongs before makeup because it decides whether the cycle should be
-attempted at all.</p>
-<p><code class="docutils literal notranslate"><span class="pre">max_skip_gap</span></code> is different. It is a monitoring rule over the returned stream:
-after overlays, makeup, deduplication, and bounds, is the resulting series too
-sparse? That is why it raises during queries instead of changing the schedule
-model itself.</p>
+used when a run of excluded cycles should be skipped instead of moved to nearby
+dates. It must run before makeup because it determines which base occurrences
+are eligible for adjustment.</p>
+<p><code class="docutils literal notranslate"><span class="pre">max_skip_gap</span></code> checks gaps after overlays, makeup, deduplication, and bounds. It
+reports a query error when a checked gap exceeds the limit, without moving or
+adding occurrences to fill that gap.</p>
 </section>
 <section id="why-traces-are-separate-from-ordinary-queries">
 <h2>Why traces are separate from ordinary queries<a class="headerlink" href="#why-traces-are-separate-from-ordinary-queries" title="Link to this heading">¶</a></h2>
-<p>Most callers only need instants. Returning metadata every time would make the
-simple path noisier and would force every binding to expose a heavier result
-type. Trace queries preserve the original datetime-returning API while giving
-UIs and audit workflows a richer stream when they need it.</p>
-<p>The trace reason is intentionally compact. It records whether the occurrence was
-base or made up from a local date, plus whether DST shifted the local time. It is
-not a full proof tree of every overlay decision.</p>
+<p>Ordinary queries return instants. Trace queries add context for callers that
+need to explain an occurrence in a UI or audit log, without changing the result
+type of ordinary queries.</p>
+<p>The reason records whether an occurrence stayed on its base date or moved from
+another local date, and whether DST shifted its local time. It does not record
+every overlay decision.</p>
 </section>
 <section id="bounds-and-termination">
 <h2>Bounds and termination<a class="headerlink" href="#bounds-and-termination" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code> clip the series to a half-open interval: no occurrence before
-<code class="docutils literal notranslate"><span class="pre">start</span></code>, none at or after <code class="docutils literal notranslate"><span class="pre">end</span></code>. Because the comparison is on the final,
-post-makeup instant, a made-up occurrence that lands outside the interval is
-dropped just like a base one.</p>
-<p><code class="docutils literal notranslate"><span class="pre">end</span></code> also gives the series a definite tail: once the next occurrence would reach
-it, <code class="docutils literal notranslate"><span class="pre">next</span></code> returns nothing. Binding-level iteration uses that property. A
-<code class="docutils literal notranslate"><span class="pre">for...of</span></code> loop or Python <code class="docutils literal notranslate"><span class="pre">for</span></code> loop must have a finite end, so default iteration
-requires <code class="docutils literal notranslate"><span class="pre">end</span></code>; explicit helpers such as <code class="docutils literal notranslate"><span class="pre">iter_upcoming</span></code> and <code class="docutils literal notranslate"><span class="pre">iterBetween</span></code> carry
-their own count or window.</p>
-<p>For unbounded schedules the engine expands its search window outward until it
-either finds enough occurrences or reaches a large absolute horizon (about 50
-years), after which it reports what it found. This is what guarantees that even a
-schedule which can <em>never</em> fire — say, “only on NYSE trading days” applied to a
-Sunday-only weekly rule — terminates and returns an empty result instead of
-looping.</p>
+<p><code class="docutils literal notranslate"><span class="pre">start</span></code> and <code class="docutils literal notranslate"><span class="pre">end</span></code> limit the series to a half-open interval: no occurrence before
+<code class="docutils literal notranslate"><span class="pre">start</span></code>, none at or after <code class="docutils literal notranslate"><span class="pre">end</span></code>. The engine checks the final instant after
+makeup, so an adjustment outside the interval is dropped.</p>
+<p>Once no occurrence remains before <code class="docutils literal notranslate"><span class="pre">end</span></code>, <code class="docutils literal notranslate"><span class="pre">next</span></code> returns no result. Default
+iteration in Python and JavaScript requires this bound so the loop finishes.
+Explicit helpers such as <code class="docutils literal notranslate"><span class="pre">iter_upcoming</span></code> and <code class="docutils literal notranslate"><span class="pre">iterBetween</span></code> use a count or query
+window instead.</p>
+<p>Queries without an explicit window expand their search until they find enough
+occurrences or reach the schedule bound or absolute horizon, about 50 years
+from the anchor. They then return what they found. The horizon also stops
+searches for schedules that cannot produce an occurrence, such as a Sunday-only
+rule restricted to NYSE trading days with no makeup.</p>
 </section>
 <section id="the-window-in-brief">
 <h2>The window, in brief<a class="headerlink" href="#the-window-in-brief" title="Link to this heading">¶</a></h2>
-<p>For a bounded query the engine widens the requested window by the makeup limit on
-each side, generates every base occurrence whose local date falls in the widened
-range, transforms and sorts them, then keeps those whose final instant lands in
-the original window. Widening by the makeup limit is what makes each window
-<em>complete</em>: any base occurrence whose makeup could reach into the window has
-already been generated, so nothing is missed at the edges. Unbounded queries
-(<code class="docutils literal notranslate"><span class="pre">next</span></code>, <code class="docutils literal notranslate"><span class="pre">previous</span></code>, <code class="docutils literal notranslate"><span class="pre">upcoming</span></code>) apply the same machinery inside an
-expanding window.</p>
+<p>For a bounded query, the engine adds a local-date margin large enough for makeup
+on both sides of the requested window. It generates and transforms base
+occurrences in that wider range, orders them, and keeps only final instants
+inside the original query window and schedule bounds. The margin includes base
+dates outside the query whose makeup could move them into it. <code class="docutils literal notranslate"><span class="pre">next</span></code>,
+<code class="docutils literal notranslate"><span class="pre">previous</span></code>, and <code class="docutils literal notranslate"><span class="pre">upcoming</span></code> use the same process within an expanding window.</p>
 </section>
 <section id="why-calendars-are-pluggable">
 <h2>Why calendars are pluggable<a class="headerlink" href="#why-calendars-are-pluggable" title="Link to this heading">¶</a></h2>
-<p>The engine is generic over a calendar abstraction — “is this date in the set?” —
-rather than hard-coding holiday tables. The built-in US-federal and NYSE calendars
-are one implementation of that abstraction, supplied by the
-<a class="reference external" href="https://crates.io/crates/finance-dates"><code class="docutils literal notranslate"><span class="pre">finance-dates</span></code></a> dataset. Keeping the
-seam there means the scheduling logic is tested against small, hand-built fake
-calendars for determinism, and the real holiday data is swapped in behind the same
-interface — including in the WebAssembly build, where the same dataset compiles
-and ships to the browser.</p>
+<p>The engine asks a calendar provider whether a date belongs to a set. Built-in
+US federal and NYSE calendars use
+<a class="reference external" href="https://crates.io/crates/finance-dates"><code class="docutils literal notranslate"><span class="pre">finance-dates</span></code></a>; inline date sets and
+custom providers use the same filtering rules. Tests can therefore use small,
+fixed calendars without depending on holiday data. The WebAssembly build
+includes the built-in calendars, so browser schedules can use them too.</p>
 </section>
 </section>
 

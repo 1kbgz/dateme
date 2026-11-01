@@ -158,11 +158,11 @@
 <a class="reference external" href="https://codecov.io/gh/1kbgz/dateme"><img alt="codecov" src="https://codecov.io/gh/1kbgz/dateme/branch/main/graph/badge.svg" /></a>
 <a class="reference external" href="https://github.com/1kbgz/dateme"><img alt="License" src="https://img.shields.io/github/license/1kbgz/dateme" /></a>
 <a class="reference external" href="https://pypi.python.org/pypi/dateme"><img alt="PyPI" src="https://img.shields.io/pypi/v/dateme.svg" /></a></p>
-<p><code class="docutils literal notranslate"><span class="pre">dateme</span></code> is a recurrence and scheduling engine. Given a schedule JSON object,
-it computes occurrence instants with timezone handling, calendar overlays,
-makeup rules, bounds, traces, and bindings for Python and JavaScript.</p>
+<p><code class="docutils literal notranslate"><span class="pre">dateme</span></code> computes UTC occurrence instants from recurring schedules. Schedules
+combine a frequency and timezone with optional calendar filters, makeup rules,
+and start/end bounds. Python and JavaScript bindings use the same Rust engine.</p>
 <div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="w">  </span><span class="nt">"freq"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"weekly"</span><span class="p">,</span><span class="w"> </span><span class="nt">"days"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"mon"</span><span class="p">],</span><span class="w"> </span><span class="nt">"time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"17:30"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">"frequency"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"weekly"</span><span class="p">,</span><span class="w"> </span><span class="nt">"days"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"mon"</span><span class="p">],</span><span class="w"> </span><span class="nt">"time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"17:30"</span><span class="w"> </span><span class="p">},</span>
 <span class="w">  </span><span class="nt">"timezone"</span><span class="p">:</span><span class="w"> </span><span class="s2">"America/New_York"</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">"overlays"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nt">"calendar"</span><span class="p">:</span><span class="w"> </span><span class="s2">"nyse_holiday"</span><span class="p">,</span><span class="w"> </span><span class="nt">"rule"</span><span class="p">:</span><span class="w"> </span><span class="s2">"exclude"</span><span class="w"> </span><span class="p">}],</span>
 <span class="w">  </span><span class="nt">"makeup"</span><span class="p">:</span><span class="w"> </span><span class="s2">"after"</span>
@@ -174,7 +174,7 @@ makeup rules, bounds, traces, and bindings for Python and JavaScript.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>dateme
 </pre></div>
 </div>
-<p>For JavaScript development from this repository:</p>
+<p>To build the JavaScript package from this repository:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>js
 pnpm<span class="w"> </span>install
 pnpm<span class="w"> </span>build
@@ -187,7 +187,7 @@ pnpm<span class="w"> </span>build
 <span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span>
 
 <span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"weekly"</span><span class="p">,</span> <span class="s2">"days"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"mon"</span><span class="p">],</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"17:30"</span><span class="p">},</span>
+    <span class="s2">"frequency"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"weekly"</span><span class="p">,</span> <span class="s2">"days"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"mon"</span><span class="p">],</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"17:30"</span><span class="p">},</span>
     <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"America/New_York"</span><span class="p">,</span>
     <span class="s2">"overlays"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"calendar"</span><span class="p">:</span> <span class="s2">"nyse_holiday"</span><span class="p">,</span> <span class="s2">"rule"</span><span class="p">:</span> <span class="s2">"exclude"</span><span class="p">}],</span>
     <span class="s2">"makeup"</span><span class="p">:</span> <span class="s2">"after"</span><span class="p">,</span>
@@ -201,12 +201,12 @@ pnpm<span class="w"> </span>build
 </section>
 <section id="quick-javascript-example">
 <h2>Quick JavaScript Example<a class="headerlink" href="#quick-javascript-example" title="Link to this heading">¶</a></h2>
-<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="nx">init</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Schedule</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"dateme"</span><span class="p">;</span>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">init</span><span class="p">,</span><span class="w"> </span><span class="nx">Schedule</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">"dateme"</span><span class="p">;</span>
 
 <span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">();</span>
 
 <span class="kd">const</span><span class="w"> </span><span class="nx">schedule</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">Schedule</span><span class="p">({</span>
-<span class="w">  </span><span class="nx">freq</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"weekly"</span><span class="p">,</span><span class="w"> </span><span class="nx">days</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"mon"</span><span class="p">],</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">"17:30"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">frequency</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">"weekly"</span><span class="p">,</span><span class="w"> </span><span class="nx">days</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"mon"</span><span class="p">],</span><span class="w"> </span><span class="nx">time</span><span class="o">:</span><span class="w"> </span><span class="s2">"17:30"</span><span class="w"> </span><span class="p">},</span>
 <span class="w">  </span><span class="nx">timezone</span><span class="o">:</span><span class="w"> </span><span class="s2">"America/New_York"</span><span class="p">,</span>
 <span class="w">  </span><span class="nx">overlays</span><span class="o">:</span><span class="w"> </span><span class="p">[{</span><span class="w"> </span><span class="nx">calendar</span><span class="o">:</span><span class="w"> </span><span class="s2">"nyse_holiday"</span><span class="p">,</span><span class="w"> </span><span class="nx">rule</span><span class="o">:</span><span class="w"> </span><span class="s2">"exclude"</span><span class="w"> </span><span class="p">}],</span>
 <span class="w">  </span><span class="nx">makeup</span><span class="o">:</span><span class="w"> </span><span class="s2">"after"</span><span class="p">,</span>

@@ -335,6 +335,9 @@
   <li class="fd-toc-item" data-depth="2">
     <a href="#dateme.model.Schedule">Schedule</a>
   </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#dateme.model.Schedule.frequency">Schedule.frequency</a>
+  </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#dateme.model.Weekday">Weekday</a>
   </li>
@@ -356,7 +359,8 @@
       <div class="fd-prose">
   <section class="tex2jax_ignore mathjax_ignore" id="python-api">
 <h1>Python API<a class="headerlink" href="#python-api" title="Link to this heading">¶</a></h1>
-<p>Reference for the <code class="docutils literal notranslate"><span class="pre">dateme</span></code> Python package.</p>
+<p>Constructors, queries, serialization, and typed builders in the <code class="docutils literal notranslate"><span class="pre">dateme</span></code> Python
+package.</p>
 <section id="exports">
 <h2>Exports<a class="headerlink" href="#exports" title="Link to this heading">¶</a></h2>
 <p>Top-level package exports:</p>
@@ -415,7 +419,7 @@
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">spec</span></code></p></td>
-<td><p>JSON <code class="docutils literal notranslate"><span class="pre">str</span></code>, <code class="docutils literal notranslate"><span class="pre">dict</span></code>, or object <code class="docutils literal notranslate"><span class="pre">to_dict()</span></code></p></td>
+<td><p>JSON <code class="docutils literal notranslate"><span class="pre">str</span></code>, <code class="docutils literal notranslate"><span class="pre">dict</span></code>, or object with <code class="docutils literal notranslate"><span class="pre">to_dict()</span></code></p></td>
 <td><p>Schedule model.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">calendar_provider</span></code></p></td>
@@ -426,11 +430,14 @@
 </table>
 <p>The constructor validates the schedule. Invalid JSON, invalid enum values,
 invalid timezone names, and structural validation failures raise <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>.</p>
+<p>JSON and dictionary specs accept <code class="docutils literal notranslate"><span class="pre">frequency</span></code> (preferred) or the legacy <code class="docutils literal notranslate"><span class="pre">freq</span></code>
+key. Supplying both is an error, even if their values match. Serialization uses
+only <code class="docutils literal notranslate"><span class="pre">frequency</span></code>.</p>
 <p>Examples:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schedule</span>
 
 <span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">({</span>
-    <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"daily"</span><span class="p">,</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"09:00"</span><span class="p">},</span>
+    <span class="s2">"frequency"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"daily"</span><span class="p">,</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"09:00"</span><span class="p">},</span>
     <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"UTC"</span><span class="p">,</span>
 <span class="p">})</span>
 </pre></div>
@@ -439,7 +446,7 @@ invalid timezone names, and structural validation failures raise <code class="do
 <span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">model</span> <span class="k">as</span> <span class="n">m</span>
 
 <span class="n">spec</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">Schedule</span><span class="p">(</span>
-    <span class="n">freq</span><span class="o">=</span><span class="n">Weekly</span><span class="p">([</span><span class="n">Weekday</span><span class="o">.</span><span class="n">MON</span><span class="p">],</span> <span class="s2">"17:30"</span><span class="p">),</span>
+    <span class="n">frequency</span><span class="o">=</span><span class="n">Weekly</span><span class="p">([</span><span class="n">Weekday</span><span class="o">.</span><span class="n">MON</span><span class="p">],</span> <span class="s2">"17:30"</span><span class="p">),</span>
     <span class="n">timezone</span><span class="o">=</span><span class="s2">"America/New_York"</span><span class="p">,</span>
     <span class="n">overlays</span><span class="o">=</span><span class="p">[</span><span class="n">Overlay</span><span class="p">(</span><span class="n">CalendarId</span><span class="o">.</span><span class="n">NYSE_HOLIDAY</span><span class="p">,</span> <span class="n">OverlayRule</span><span class="o">.</span><span class="n">EXCLUDE</span><span class="p">)],</span>
     <span class="n">makeup</span><span class="o">=</span><span class="n">Makeup</span><span class="o">.</span><span class="n">AFTER</span><span class="p">,</span>
@@ -450,12 +457,12 @@ invalid timezone names, and structural validation failures raise <code class="do
 </section>
 <section id="custom-calendar-providers">
 <h3>Custom Calendar Providers<a class="headerlink" href="#custom-calendar-providers" title="Link to this heading">¶</a></h3>
-<p>Custom calendars are referenced in a schedule with <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">&quot;custom&quot;:</span> <span class="pre">&quot;name&quot;</span> <span class="pre">}</span></code>.
-Providers receive <code class="docutils literal notranslate"><span class="pre">(name,</span> <span class="pre">date)</span></code> where <code class="docutils literal notranslate"><span class="pre">date</span></code> is a <code class="docutils literal notranslate"><span class="pre">YYYY-MM-DD</span></code> string.</p>
+<p>Schedules reference custom calendars with <code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">&quot;custom&quot;:</span> <span class="pre">&quot;name&quot;</span> <span class="pre">}</span></code>. Providers
+receive <code class="docutils literal notranslate"><span class="pre">(name,</span> <span class="pre">date)</span></code>, where <code class="docutils literal notranslate"><span class="pre">date</span></code> is a <code class="docutils literal notranslate"><span class="pre">YYYY-MM-DD</span></code> string, and return a bool.</p>
 <p>A callable provider:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span>
     <span class="p">{</span>
-        <span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"daily"</span><span class="p">,</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"09:00"</span><span class="p">},</span>
+        <span class="s2">"frequency"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"daily"</span><span class="p">,</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"09:00"</span><span class="p">},</span>
         <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"UTC"</span><span class="p">,</span>
         <span class="s2">"overlays"</span><span class="p">:</span> <span class="p">[{</span><span class="s2">"calendar"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"custom"</span><span class="p">:</span> <span class="s2">"shutdown"</span><span class="p">},</span> <span class="s2">"rule"</span><span class="p">:</span> <span class="s2">"exclude"</span><span class="p">}],</span>
     <span class="p">},</span>
@@ -472,7 +479,8 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 <span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">Calendars</span><span class="p">())</span>
 </pre></div>
 </div>
-<p>Missing custom calendar values are treated as absent from the set.</p>
+<p>Without a custom provider, custom calendar dates are treated as absent from the
+set.</p>
 </section>
 </section>
 <section id="datetime-handling">
@@ -485,10 +493,10 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 </thead>
 <tbody>
 <tr class="row-even"><td><p>Input datetimes</p></td>
-<td><p>Timezone-aware <code class="docutils literal notranslate"><span class="pre">datetime</span></code> values are expected.</p></td>
+<td><p>Timezone-aware <code class="docutils literal notranslate"><span class="pre">datetime</span></code> values are required.</p></td>
 </tr>
 <tr class="row-odd"><td><p>Naive inputs</p></td>
-<td><p>Interpreted as UTC by PyO3 datetime conversion.</p></td>
+<td><p>Rejected with <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> by PyO3 datetime conversion.</p></td>
 </tr>
 <tr class="row-even"><td><p>Returned values</p></td>
 <td><p>Timezone-aware UTC <code class="docutils literal notranslate"><span class="pre">datetime</span></code> values.</p></td>
@@ -510,7 +518,7 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 </pre></div>
 </div>
 <p>Builds a schedule from a JSON string.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="s1">'{"freq":{"type":"daily","time":"09:00"},"timezone":"UTC"}'</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="s1">'{"frequency":{"type":"daily","time":"09:00"},"timezone":"UTC"}'</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -520,7 +528,7 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 </pre></div>
 </div>
 <p>Builds a schedule from a <code class="docutils literal notranslate"><span class="pre">dict</span></code> or typed builder object.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span><span class="s2">"freq"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"daily"</span><span class="p">,</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"09:00"</span><span class="p">},</span> <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"UTC"</span><span class="p">})</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span><span class="s2">"frequency"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"daily"</span><span class="p">,</span> <span class="s2">"time"</span><span class="p">:</span> <span class="s2">"09:00"</span><span class="p">},</span> <span class="s2">"timezone"</span><span class="p">:</span> <span class="s2">"UTC"</span><span class="p">})</span>
 </pre></div>
 </div>
 </section>
@@ -529,7 +537,7 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span>
 </pre></div>
 </div>
-<p>Returns the JSON representation.</p>
+<p>Returns a JSON string with the canonical <code class="docutils literal notranslate"><span class="pre">frequency</span></code> key, never <code class="docutils literal notranslate"><span class="pre">freq</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">blob</span> <span class="o">=</span> <span class="n">schedule</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
 <span class="n">again</span> <span class="o">=</span> <span class="n">Schedule</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">blob</span><span class="p">)</span>
 </pre></div>
@@ -540,7 +548,7 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span>
 </pre></div>
 </div>
-<p>Returns the schedule model as a Python dictionary.</p>
+<p>Returns a dictionary with the canonical <code class="docutils literal notranslate"><span class="pre">frequency</span></code> key, never <code class="docutils literal notranslate"><span class="pre">freq</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">spec</span> <span class="o">=</span> <span class="n">schedule</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -550,7 +558,7 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </pre></div>
 </div>
-<p>Re-runs structural validation. Raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> on failure.</p>
+<p>Checks the schedule’s structure again. Raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> on failure.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -560,7 +568,8 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">next</span><span class="p">(</span><span class="n">after</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span>
 </pre></div>
 </div>
-<p>Returns the first occurrence strictly after <code class="docutils literal notranslate"><span class="pre">after</span></code>.</p>
+<p>Returns the first occurrence strictly after <code class="docutils literal notranslate"><span class="pre">after</span></code>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if none is found
+within the schedule bounds and search horizon.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timezone</span>
 
 <span class="n">after</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
@@ -573,7 +582,8 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">previous</span><span class="p">(</span><span class="n">before</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span>
 </pre></div>
 </div>
-<p>Returns the last occurrence strictly before <code class="docutils literal notranslate"><span class="pre">before</span></code>.</p>
+<p>Returns the last occurrence strictly before <code class="docutils literal notranslate"><span class="pre">before</span></code>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if none is found
+within the schedule bounds and search horizon.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">before</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
 <span class="n">schedule</span><span class="o">.</span><span class="n">previous</span><span class="p">(</span><span class="n">before</span><span class="p">)</span>
 </pre></div>
@@ -606,7 +616,8 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">upcoming</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">after</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">datetime</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>Returns the next <code class="docutils literal notranslate"><span class="pre">n</span></code> occurrences strictly after <code class="docutils literal notranslate"><span class="pre">after</span></code>, ascending.</p>
+<p>Returns up to <code class="docutils literal notranslate"><span class="pre">n</span></code> occurrences strictly after <code class="docutils literal notranslate"><span class="pre">after</span></code>, ascending. The result can
+be shorter if the schedule ends or the search horizon is reached.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">upcoming</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">after</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -696,8 +707,8 @@ Providers receive <code class="docutils literal notranslate"><span class="pre">(
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span>
 </pre></div>
 </div>
-<p>Returns a human-readable summary of the base recurrence, timezone, overlay
-count, and makeup presence.</p>
+<p>Returns a readable summary of the base recurrence, timezone, overlay count, and
+whether makeup is configured.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">schedule</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
 <span class="c1"># "Every Monday at 17:30 America/New_York, with 1 overlay(s), with makeup"</span>
 </pre></div>
@@ -712,7 +723,8 @@ count, and makeup presence.</p>
 </pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">iter(schedule)</span></code> requires the schedule to have an <code class="docutils literal notranslate"><span class="pre">end</span></code> bound. It starts from
-<code class="docutils literal notranslate"><span class="pre">start</span></code>, or from the current UTC time when <code class="docutils literal notranslate"><span class="pre">start</span></code> is absent.</p>
+<code class="docutils literal notranslate"><span class="pre">start</span></code>, or from the current UTC time when <code class="docutils literal notranslate"><span class="pre">start</span></code> is absent. This anchor is
+exclusive, so an occurrence exactly at <code class="docutils literal notranslate"><span class="pre">start</span></code> is not included in iteration.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">instant</span> <span class="ow">in</span> <span class="n">bounded_schedule</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">instant</span><span class="p">)</span>
 
@@ -725,8 +737,13 @@ count, and makeup presence.</p>
 </section>
 <section id="typed-model">
 <h2>Typed Model<a class="headerlink" href="#typed-model" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">dateme.model</span></code> mirrors the <a class="reference internal" href="schedule-model.html"><span class="std std-doc">Schedule model</span></a> as dataclasses
-and enums. Builders expose <code class="docutils literal notranslate"><span class="pre">to_dict()</span></code> and schedules expose <code class="docutils literal notranslate"><span class="pre">to_json()</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">dateme.model</span></code> provides dataclasses and enums for the
+<a class="reference internal" href="schedule-model.html"><span class="std std-doc">Schedule model</span></a>. Builders expose <code class="docutils literal notranslate"><span class="pre">to_dict()</span></code>; model schedules
+also expose <code class="docutils literal notranslate"><span class="pre">to_json()</span></code>.</p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">model.Schedule(frequency=...,</span> <span class="pre">timezone=...)</span></code> and read the recurrence through
+<code class="docutils literal notranslate"><span class="pre">.frequency</span></code>. The legacy <code class="docutils literal notranslate"><span class="pre">freq=...</span></code> keyword and <code class="docutils literal notranslate"><span class="pre">.freq</span></code> attribute remain
+supported. Pass exactly one keyword; supplying both is an error. Both
+<code class="docutils literal notranslate"><span class="pre">to_dict()</span></code> and <code class="docutils literal notranslate"><span class="pre">to_json()</span></code> output only <code class="docutils literal notranslate"><span class="pre">frequency</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Schedule</span><span class="p">,</span>
     <span class="n">MonthlyByWeekday</span><span class="p">,</span>
@@ -742,7 +759,7 @@ and enums. Builders expose <code class="docutils literal notranslate"><span clas
 <span class="kn">from</span><span class="w"> </span><span class="nn">dateme</span><span class="w"> </span><span class="kn">import</span> <span class="n">model</span> <span class="k">as</span> <span class="n">m</span>
 
 <span class="n">spec</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">Schedule</span><span class="p">(</span>
-    <span class="n">freq</span><span class="o">=</span><span class="n">MonthlyByWeekday</span><span class="p">([</span><span class="n">NthWeekday</span><span class="p">(</span><span class="n">Nth</span><span class="o">.</span><span class="n">THIRD</span><span class="p">,</span> <span class="n">Weekday</span><span class="o">.</span><span class="n">FRI</span><span class="p">)],</span> <span class="s2">"16:00"</span><span class="p">),</span>
+    <span class="n">frequency</span><span class="o">=</span><span class="n">MonthlyByWeekday</span><span class="p">([</span><span class="n">NthWeekday</span><span class="p">(</span><span class="n">Nth</span><span class="o">.</span><span class="n">THIRD</span><span class="p">,</span> <span class="n">Weekday</span><span class="o">.</span><span class="n">FRI</span><span class="p">)],</span> <span class="s2">"16:00"</span><span class="p">),</span>
     <span class="n">timezone</span><span class="o">=</span><span class="s2">"America/New_York"</span><span class="p">,</span>
     <span class="n">overlays</span><span class="o">=</span><span class="p">[</span><span class="n">Overlay</span><span class="p">(</span><span class="n">CalendarId</span><span class="o">.</span><span class="n">NYSE_TRADING_DAY</span><span class="p">,</span> <span class="n">OverlayRule</span><span class="o">.</span><span class="n">ONLY</span><span class="p">)],</span>
     <span class="n">makeup</span><span class="o">=</span><span class="n">Makeup</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -1081,11 +1098,17 @@ structural check remains <a class="reference internal" href="#dateme.Schedule.va
 
 <dl class="py class">
 <dt class="sig sig-object py" id="dateme.model.Schedule">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.model.</span></span><span class="sig-name descname"><span class="pre">Schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq:</span> <span class="pre">~dateme.model.Frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timezone:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlays:</span> <span class="pre">list[~dateme.model.Overlay</span> <span class="pre">|</span> <span class="pre">~dateme.model.AnyOverlay]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">makeup:</span> <span class="pre">~dateme.model.Makeup</span> <span class="pre">|</span> <span class="pre">~dateme.model.WeekdayMakeup</span> <span class="pre">|</span> <span class="pre">list[~dateme.model.Makeup</span> <span class="pre">|</span> <span class="pre">~dateme.model.MakeupStep]</span> <span class="pre">=</span> <span class="pre">Makeup.NONE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_makeup_hops:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">makeup_failure:</span> <span class="pre">~dateme.model.MakeupFailure</span> <span class="pre">=</span> <span class="pre">MakeupFailure.SKIP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">makeup_only_on:</span> <span class="pre">list[~dateme.model.Weekday]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">makeup_within_week:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">makeup_exclude_weekends:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">makeup_before_next:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_if_consecutive_excluded:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_skip_gap:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~datetime.datetime</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~datetime.datetime</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/dateme/model.html#Schedule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dateme.model.Schedule" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dateme.model.</span></span><span class="sig-name descname"><span class="pre">Schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#dateme.model.Frequency" title="dateme.model.Frequency"><span class="pre">Frequency</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timezone</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overlays</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#dateme.model.Overlay" title="dateme.model.Overlay"><span class="pre">Overlay</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#dateme.model.AnyOverlay" title="dateme.model.AnyOverlay"><span class="pre">AnyOverlay</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">makeup</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#dateme.model.Makeup" title="dateme.model.Makeup"><span class="pre">Makeup</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#dateme.model.WeekdayMakeup" title="dateme.model.WeekdayMakeup"><span class="pre">WeekdayMakeup</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#dateme.model.Makeup" title="dateme.model.Makeup"><span class="pre">Makeup</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#dateme.model.MakeupStep" title="dateme.model.MakeupStep"><span class="pre">MakeupStep</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Makeup.NONE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_makeup_hops</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">makeup_failure</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#dateme.model.MakeupFailure" title="dateme.model.MakeupFailure"><span class="pre">MakeupFailure</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">MakeupFailure.SKIP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">makeup_only_on</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#dateme.model.Weekday" title="dateme.model.Weekday"><span class="pre">Weekday</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">makeup_within_week</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">makeup_exclude_weekends</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">makeup_before_next</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_if_consecutive_excluded</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_skip_gap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#dateme.model.Frequency" title="dateme.model.Frequency"><span class="pre">Frequency</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/dateme/model.html#Schedule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dateme.model.Schedule" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A complete schedule spec.</p>
 <p>Pass an instance to <a class="reference internal" href="#dateme.Schedule" title="dateme.Schedule"><code class="xref py py-class docutils literal notranslate"><span class="pre">dateme.Schedule</span></code></a> to compute occurrences, or call
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code> / <code class="xref py py-meth docutils literal notranslate"><span class="pre">to_json()</span></code> for the storable form.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="dateme.model.Schedule.frequency">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frequency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#dateme.model.Frequency" title="dateme.model.Frequency"><span class="pre">Frequency</span></a></em><a class="headerlink" href="#dateme.model.Schedule.frequency" title="Link to this definition">¶</a></dt>
+<dd><p>The recurrence frequency; <code class="docutils literal notranslate"><span class="pre">freq</span></code> remains the dataclass field.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1357,6 +1380,9 @@ structural check remains <a class="reference internal" href="#dateme.Schedule.va
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#dateme.model.Schedule">Schedule</a>
+  </li>
+  <li class="fd-toc-item" data-depth="3">
+    <a href="#dateme.model.Schedule.frequency">Schedule.frequency</a>
   </li>
   <li class="fd-toc-item" data-depth="2">
     <a href="#dateme.model.Weekday">Weekday</a>
