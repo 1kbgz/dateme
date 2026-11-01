@@ -447,7 +447,7 @@ class CustomCron(Frequency):
         return {"type": "custom_cron", "expr": self.expr}
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, init=False)
 class Schedule:
     """A complete schedule spec.
 
@@ -470,6 +470,53 @@ class Schedule:
     start: str | datetime | None = None
     end: str | datetime | None = None
 
+    def __init__(
+        self,
+        frequency: Frequency | None = None,
+        timezone: str | None = None,
+        overlays: list[Overlay | AnyOverlay] | None = None,
+        makeup: Makeup | WeekdayMakeup | list[Makeup | MakeupStep] = Makeup.NONE,
+        max_makeup_hops: int | None = None,
+        makeup_failure: MakeupFailure = MakeupFailure.SKIP,
+        makeup_only_on: list[Weekday] | None = None,
+        makeup_within_week: bool = False,
+        makeup_exclude_weekends: bool = False,
+        makeup_before_next: bool = False,
+        skip_if_consecutive_excluded: int | None = None,
+        max_skip_gap: int | None = None,
+        start: str | datetime | None = None,
+        end: str | datetime | None = None,
+        *,
+        freq: Frequency | None = None,
+    ) -> None:
+        if frequency is not None and freq is not None:
+            raise TypeError("pass either frequency or freq, not both")
+        frequency = frequency if frequency is not None else freq
+        if frequency is None:
+            raise TypeError("missing required argument: frequency")
+        if timezone is None:
+            raise TypeError("missing required argument: timezone")
+        object.__setattr__(self, "freq", frequency)
+        object.__setattr__(self, "timezone", timezone)
+        object.__setattr__(self, "overlays", [] if overlays is None else overlays)
+        object.__setattr__(self, "makeup", makeup)
+        object.__setattr__(self, "max_makeup_hops", max_makeup_hops)
+        object.__setattr__(self, "makeup_failure", makeup_failure)
+        object.__setattr__(self, "makeup_only_on", makeup_only_on)
+        object.__setattr__(self, "makeup_within_week", makeup_within_week)
+        object.__setattr__(self, "makeup_exclude_weekends", makeup_exclude_weekends)
+        object.__setattr__(self, "makeup_before_next", makeup_before_next)
+        object.__setattr__(self, "skip_if_consecutive_excluded", skip_if_consecutive_excluded)
+        object.__setattr__(self, "max_skip_gap", max_skip_gap)
+        object.__setattr__(self, "start", start)
+        object.__setattr__(self, "end", end)
+        self.__post_init__()
+
+    @property
+    def frequency(self) -> Frequency:
+        """The recurrence frequency; ``freq`` remains the dataclass field."""
+        return self.freq
+
     def __post_init__(self) -> None:
         if self.skip_if_consecutive_excluded is not None and self.skip_if_consecutive_excluded < 1:
             raise ValueError("skip_if_consecutive_excluded must be at least 1")
@@ -478,7 +525,7 @@ class Schedule:
 
     def to_dict(self) -> dict:
         return {
-            "freq": self.freq.to_dict(),
+            "frequency": self.frequency.to_dict(),
             "timezone": self.timezone,
             "overlays": [o.to_dict() for o in self.overlays],
             "makeup": _makeup_to_json(self.makeup),

@@ -1,25 +1,24 @@
 # Schedule model
 
-The complete JSON representation of a schedule. This is the storage and
-construction format accepted by every binding. All times are wall-clock in the
-schedule's `timezone` unless stated otherwise; seconds and nanoseconds are always
-zero.
+Schedules use the same JSON format for storage and construction in every
+binding. Recurrence times are local wall-clock times in the schedule's
+`timezone`, with seconds and nanoseconds set to zero. `start` and `end` are UTC
+instants.
 
-The same model is also available as typed builders — `dateme.model` dataclasses
-in [Python](api-python.md) and `ScheduleSpec` types in
-[JavaScript/TypeScript](api-javascript.md) — so you can construct a schedule from
-native objects instead of hand-writing JSON.
+Typed alternatives to JSON are `dateme.model` dataclasses in
+[Python](api-python.md) and the `ScheduleSpec` type in
+[JavaScript/TypeScript](api-javascript.md).
 
 ## Schedule object
 
 | Field                          | Type                              | Required | Default  | Description                                                       |
 | ------------------------------ | --------------------------------- | -------- | -------- | ----------------------------------------------------------------- |
-| `freq`                         | [Frequency](#frequency)           | yes      | —        | The base recurrence.                                              |
+| `frequency`                    | [Frequency](#frequency)           | yes      | —        | The base recurrence; `freq` is a legacy input alias.              |
 | `timezone`                     | string (IANA name)                | yes      | —        | Timezone occurrences are generated in, e.g. `"America/New_York"`. |
 | `overlays`                     | array of [Overlay](#overlays)     | no       | `[]`     | Calendar filters, ANDed. Empty means no filtering.                |
 | `makeup`                       | [Makeup](#makeup)                 | no       | `"none"` | What to do when an overlay drops an occurrence.                   |
 | `max_makeup_hops`              | integer or null                   | no       | `null`   | Maximum days to scan for makeup; `null` uses the built-in limit.  |
-| `makeup_failure`               | [Makeup failure](#makeup-failure) | no       | `"skip"` | What to do when makeup cannot find a surviving date.              |
+| `makeup_failure`               | [Makeup failure](#makeup-failure) | no       | `"skip"` | What to do when makeup cannot find an allowed destination.        |
 | `makeup_only_on`               | array of weekdays or null         | no       | `null`   | Allowed makeup destination weekdays.                              |
 | `makeup_within_week`           | boolean                           | no       | `false`  | Keep makeup within the original ISO week.                         |
 | `makeup_exclude_weekends`      | boolean                           | no       | `false`  | Reject Saturday/Sunday makeup destinations.                       |
@@ -29,15 +28,27 @@ native objects instead of hand-writing JSON.
 | `start`                        | RFC 3339 datetime or null         | no       | `null`   | No occurrence before this instant.                                |
 | `end`                          | RFC 3339 datetime or null         | no       | `null`   | No occurrence at or after this instant.                           |
 
-`start` and `end` are UTC instants (e.g. `"2026-06-01T00:00:00Z"`). Comparison is
-against the final occurrence instant, after any makeup.
+`start` and `end` use RFC 3339 timestamps such as `"2026-06-01T00:00:00Z"`. Bounds
+apply to the final occurrence instant, after makeup.
+
+### Frequency key compatibility
+
+JSON/native schedule constructors accept `frequency` (preferred) or `freq`
+(legacy), but reject both together, even if the values match. Serialization
+outputs only `frequency`.
+
+- Python model schedules prefer `model.Schedule(frequency=..., timezone=...)`
+  and `.frequency`. The `freq=...` keyword and `.freq` attribute remain supported.
+- TypeScript `ScheduleSpec` accepts exactly one of `frequency` or `freq`.
+- Rust's public struct field remains `Schedule::freq` for source compatibility;
+  its JSON representation uses `frequency`.
 
 (frequency)=
 
 ## Frequency
 
-A tagged object; the `type` field selects the variant. Each variant sets its own
-fields.
+A tagged object whose `type` field selects the recurrence variant. The remaining
+fields depend on that variant.
 
 ### `hourly`
 
@@ -89,8 +100,8 @@ One occurrence at `time` for each listed [MonthDay](#monthday) in each month.
 | `days` | array of [MonthDay](#monthday) | Non-empty. Deduped. |
 | `time` | string `"HH:MM"`               | Time of day.        |
 
-A fixed day that does not exist in a given month (e.g. day 31 in February) is
-**skipped** for that month — it is never clamped to an earlier day.
+A fixed day that does not exist in a month, such as February 31, is skipped for
+that month. It is not clamped to an earlier day.
 
 ```json
 { "type": "monthly_by_day", "days": [ { "type": "day", "value": 1 }, { "type": "last" } ], "time": "12:00" }
@@ -106,8 +117,8 @@ One occurrence at `time` for each listed [NthWeekday](#nthweekday) in each month
 | `weekdays` | array of [NthWeekday](#nthweekday) | Non-empty. Deduped. |
 | `time`     | string `"HH:MM"`                   | Time of day.        |
 
-An nth-weekday that does not exist in a given month (e.g. a 5th Friday in a
-4-Friday month) is **skipped** for that month.
+An nth weekday that does not exist in a month, such as a fifth Friday in a month
+with four Fridays, is skipped for that month.
 
 ```json
 { "type": "monthly_by_weekday", "weekdays": [ { "nth": "first", "weekday": "tue" } ], "time": "09:00" }
@@ -190,7 +201,7 @@ One occurrence for every local minute matching a five-field cron expression:
 | `expr` | string          | Five cron fields. |
 
 Fields support `*`, comma lists, ranges, and step syntax such as `*/15` or
-`1-5/2`. Day-of-week accepts `0`-`6`, where `0` is Sunday. When both
+`1-5/2`. Day-of-week accepts `0`–`7`, where `0` and `7` both mean Sunday. When both
 day-of-month and day-of-week are constrained, both must match.
 
 ```json
@@ -201,7 +212,7 @@ day-of-month and day-of-week are constrained, both must match.
 
 ## MonthDay
 
-A day within a month. A tagged object.
+A tagged object identifying a day within a month.
 
 | Form                            | Meaning                             |
 | ------------------------------- | ----------------------------------- |
@@ -229,10 +240,10 @@ One of: `"first"`, `"second"`, `"third"`, `"fourth"`, `"fifth"`, `"last"`.
 
 ## Overlays
 
-An overlay filters occurrences against a named calendar or a group of overlays.
-An occurrence's **local date** (in the schedule's timezone) is tested — not its
-UTC date. Top-level overlays are **ANDed**: an occurrence survives only if it
-passes every overlay.
+An overlay filters occurrences against a calendar or a group of overlays. It
+tests the occurrence's local date in the schedule's timezone, not its UTC date.
+Top-level overlays are ANDed: an occurrence is kept only if it passes every
+overlay.
 
 Calendar overlay fields:
 
@@ -247,7 +258,7 @@ Calendar overlay fields:
 | `exclude` | Drop the occurrence if its local date **is** in the calendar.     |
 | `only`    | Drop the occurrence if its local date is **not** in the calendar. |
 
-For example `{"calendar": "nyse_holiday", "rule": "exclude"}` skips NYSE holidays;
+For example, `{"calendar": "nyse_holiday", "rule": "exclude"}` skips NYSE holidays;
 `{"calendar": "nyse_trading_day", "rule": "only"}` keeps only NYSE session days
 (also removing weekends).
 
@@ -263,10 +274,10 @@ Use `any` to create an OR group. The group passes when any child overlay passes.
 }
 ```
 
-When a date is dropped, the first failing top-level overlay supplies its
-`makeup` override. If an `any` group fails, the group's `makeup` wins; otherwise
-the first failing child makeup is used. If no failing overlay supplies makeup,
-the schedule-level `makeup` field is used.
+When a date is dropped, the engine uses the first failing top-level overlay's
+`makeup` override, falling back to the schedule-level `makeup` if that overlay
+has none. For a failing `any` group, the group's override takes precedence over
+the first child override present.
 
 (calendars)=
 
@@ -297,8 +308,8 @@ Calendar set algebra:
 ```
 
 `union` contains dates present in any child calendar. `diff` contains dates in
-the first child calendar, minus dates present in every following child calendar.
-Children can be built-ins or nested calendar specs.
+the first child calendar, excluding dates present in any of the remaining
+calendars. Children can be built-ins or nested calendar specs.
 
 Custom provider calendars:
 
@@ -314,8 +325,8 @@ the set.
 
 ## Makeup
 
-What to do when an overlay drops a base occurrence. Use a single direction for
-every excluded date:
+Makeup determines what happens when an overlay drops a base occurrence. A single
+direction applies to every excluded date:
 
 | Value       | Effect                                                                            |
 | ----------- | --------------------------------------------------------------------------------- |
@@ -324,7 +335,7 @@ every excluded date:
 | `"after"`   | Move to the nearest **later** day that passes all overlays, at the same time.     |
 | `"nearest"` | Move to the nearest day that passes all overlays, preferring later dates on ties. |
 
-Or select a direction by the excluded date's weekday:
+A weekday map selects a direction by the excluded date's weekday:
 
 ```json
 {
@@ -337,7 +348,7 @@ Or select a direction by the excluded date's weekday:
 Weekday keys are optional. If an excluded date's weekday is not present, the
 engine uses `default`; if `default` is absent, the occurrence is skipped.
 
-Or provide a cascade of fallback strategies:
+A cascade specifies fallback strategies:
 
 ```json
 [
@@ -347,14 +358,16 @@ Or provide a cascade of fallback strategies:
 ]
 ```
 
-Each step is tried in order. A step can be a direction string or an object with
-`direction` and optional `max_hops`.
+Steps are tried in order until one finds a destination or disables makeup. A
+step can be a direction string or an object with `direction` and optional
+`max_hops`.
 
-The makeup search scans at most 14 days by default; set `max_makeup_hops` to
-cap that search. `null` or an absent field uses the default limit, `0` disables
-makeup for dropped occurrences, and a positive integer scans up to that many
-days, capped at 14. Cascade steps without `max_hops` use this schedule-level
-limit.
+The makeup search scans at most 14 days in each permitted direction.
+`max_makeup_hops` can lower that limit: `null` or an absent field uses 14 days,
+`0` prevents any search, and a positive integer is capped at 14. A zero limit
+with an enabled direction triggers `makeup_failure` for excluded occurrences.
+Cascade steps use the schedule-level limit unless their `max_hops` sets a lower
+one.
 
 Set `makeup_only_on` to restrict makeup destination dates to specific weekdays:
 
@@ -370,16 +383,16 @@ Additional target constraints:
 | `makeup_exclude_weekends` | Reject Saturday and Sunday makeup destinations.               |
 | `makeup_before_next`      | Reject makeup that lands on or crosses an adjacent base date. |
 
-A made-up occurrence that coincides with another occurrence already produced by
-the schedule is dropped rather than duplicated. See
+Occurrences with the same final UTC instant are deduplicated. See
 [How the engine works](explanation.md).
 
 (makeup-failure)=
 
 ## Makeup Failure
 
-What to do when `makeup` is `"before"` or `"after"` but no surviving destination
-is found within `max_makeup_hops`. One of:
+The failure policy applies when an enabled makeup strategy cannot find an
+allowed destination within its search limit. It includes `"before"`, `"after"`,
+`"nearest"`, weekday-selected directions, and exhausted cascades. One of:
 
 | Value             | Effect                                                   |
 | ----------------- | -------------------------------------------------------- |
@@ -387,7 +400,8 @@ is found within `max_makeup_hops`. One of:
 | `"keep_original"` | Emit the occurrence on its original excluded day.        |
 | `"error"`         | Raise/throw from fallible queries and Python/JS methods. |
 
-When `makeup` is `"none"`, the cycle is skipped and `makeup_failure` is ignored.
+When the selected direction is `"none"`, including a cascade step, the cycle is
+skipped and `makeup_failure` is ignored.
 
 (threshold-skip)=
 
@@ -418,6 +432,7 @@ not treat the open search horizon after the last returned occurrence as a gap.
 
 ## Serialization notes
 
+- The recurrence key is always `frequency`, even when input used `freq`.
 - `timezone` is the IANA name string (`"UTC"`, `"America/New_York"`, …).
 - `time` is `"HH:MM"` (24-hour). Seconds are always zero.
 - Weekdays are the lowercase three-letter strings `"mon"`…`"sun"`.

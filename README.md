@@ -7,13 +7,13 @@ Dates and intervals.
 [![License](https://img.shields.io/github/license/1kbgz/dateme)](https://github.com/1kbgz/dateme)
 [![PyPI](https://img.shields.io/pypi/v/dateme.svg)](https://pypi.python.org/pypi/dateme)
 
-`dateme` is a recurrence and scheduling engine. Given a schedule JSON object,
-it computes occurrence instants with timezone handling, calendar overlays,
-makeup rules, bounds, traces, and bindings for Python and JavaScript.
+`dateme` computes UTC occurrence instants from recurring schedules. Schedules
+combine a frequency and timezone with optional calendar filters, makeup rules,
+and start/end bounds. Python and JavaScript bindings use the same Rust engine.
 
 ```json
 {
-  "freq": { "type": "weekly", "days": ["mon"], "time": "17:30" },
+  "frequency": { "type": "weekly", "days": ["mon"], "time": "17:30" },
   "timezone": "America/New_York",
   "overlays": [{ "calendar": "nyse_holiday", "rule": "exclude" }],
   "makeup": "after"
@@ -26,7 +26,7 @@ makeup rules, bounds, traces, and bindings for Python and JavaScript.
 pip install dateme
 ```
 
-For JavaScript development from this repository:
+To build the JavaScript package from this repository:
 
 ```bash
 cd js
@@ -41,7 +41,7 @@ from datetime import datetime, timezone
 from dateme import Schedule
 
 schedule = Schedule({
-    "freq": {"type": "weekly", "days": ["mon"], "time": "17:30"},
+    "frequency": {"type": "weekly", "days": ["mon"], "time": "17:30"},
     "timezone": "America/New_York",
     "overlays": [{"calendar": "nyse_holiday", "rule": "exclude"}],
     "makeup": "after",
@@ -55,12 +55,12 @@ schedule.next(after)
 ## Quick JavaScript Example
 
 ```js
-import init, { Schedule } from "dateme";
+import { init, Schedule } from "dateme";
 
 await init();
 
 const schedule = new Schedule({
-  freq: { type: "weekly", days: ["mon"], time: "17:30" },
+  frequency: { type: "weekly", days: ["mon"], time: "17:30" },
   timezone: "America/New_York",
   overlays: [{ calendar: "nyse_holiday", rule: "exclude" }],
   makeup: "after",

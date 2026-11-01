@@ -1560,6 +1560,39 @@ fn overlay_removes_everything_terminates() {
 // ---- serde ----
 
 #[test]
+fn serde_frequency_accepts_both_names_and_serializes_canonical_name() {
+    for key in ["frequency", "freq"] {
+        let json = serde_json::json!({
+            (key): { "type": "daily", "time": "12:00" },
+            "timezone": "UTC"
+        });
+        let s: Schedule = serde_json::from_value(json).unwrap();
+        assert_eq!(
+            s.next(utc("2026-01-01T00:00:00Z"), &NoCalendars),
+            Some(utc("2026-01-01T12:00:00Z"))
+        );
+        let out = serde_json::to_value(&s).unwrap();
+        assert_eq!(
+            out["frequency"],
+            serde_json::json!({ "type": "daily", "time": "12:00" })
+        );
+        assert!(out.get("freq").is_none());
+        let roundtrip: Schedule = serde_json::from_value(out).unwrap();
+        assert_eq!(roundtrip, s);
+    }
+}
+
+#[test]
+fn serde_frequency_rejects_both_names() {
+    let json = r#"{
+        "frequency": { "type": "daily", "time": "12:00" },
+        "freq": { "type": "daily", "time": "09:00" },
+        "timezone": "UTC"
+    }"#;
+    assert!(serde_json::from_str::<Schedule>(json).is_err());
+}
+
+#[test]
 fn serde_roundtrip_nyse_monday() {
     let json = r#"{
         "freq": { "type": "weekly", "days": ["mon"], "time": "17:30" },

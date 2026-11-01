@@ -1,5 +1,5 @@
 import { Schedule as WasmSchedule } from "../../dist/pkg/dateme";
-import type { ScheduleSpec } from "./model";
+import type { CanonicalScheduleSpec, ScheduleSpec } from "./model";
 
 export { default as init } from "../../dist/pkg/dateme";
 export * as wasm from "../../dist/pkg/dateme";
@@ -56,12 +56,12 @@ export class Schedule {
   }
 
   /** The schedule as a plain spec object (round-trips the JSON form). */
-  toObject(): ScheduleSpec {
+  toObject(): CanonicalScheduleSpec {
     return JSON.parse(this.inner.toJSON());
   }
 
   /** The schedule as a plain object; enables `JSON.stringify(schedule)`. */
-  toJSON(): ScheduleSpec {
+  toJSON(): CanonicalScheduleSpec {
     return this.toObject();
   }
 
